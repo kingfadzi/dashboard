@@ -20,4 +20,5 @@ def viz_language_contributors_heatmap(filtered_df):
         title={"x": 0.5},
         template="plotly_white",
         dragmode=False,
+        xaxis_title=None,
     )

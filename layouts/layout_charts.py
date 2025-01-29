@@ -65,7 +65,7 @@ def chart_layout():
             dbc.Card(
                 [
                     dbc.CardHeader(
-                        html.B("Repositories Count by Main Language", className="text-center"),
+                        html.B("Primary Language in Multilingual Repos", className="text-center"),
                         className="bg-light",
                     ),
                     dcc.Graph(
@@ -122,7 +122,7 @@ def chart_layout():
             dbc.Card(
                 [
                     dbc.CardHeader(
-                        html.B("Total Lines of Code per Languagee", className="text-center"),
+                        html.B("Total Lines of Code", className="text-center"),
                         className="bg-light",
                     ),
                     dcc.Graph(

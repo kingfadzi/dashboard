@@ -14,6 +14,6 @@ def viz_main_language(filtered_df):
         },
     ).update_layout(
         dragmode=False,
-        xaxis_title="Language",
+        xaxis_title="",
         yaxis_title="Repository Count",
     )

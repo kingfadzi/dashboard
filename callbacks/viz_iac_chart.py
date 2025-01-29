@@ -12,6 +12,7 @@ def viz_iac_chart(filtered_df):
         xaxis=dict(categoryorder="total descending"),  # Sort by repo_count
         template="plotly_white",
         title={"x": 0.5},
+        xaxis_title=None,
         dragmode=False,
         showlegend=False
     )

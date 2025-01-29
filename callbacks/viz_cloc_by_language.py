@@ -2,9 +2,6 @@ import plotly.express as px
 
 def viz_cloc_by_language(filtered_df):
 
-    print("DataFrame Columns:", filtered_df.columns.tolist())
-    print(filtered_df.head())
-
     melted_df = filtered_df.melt(
         id_vars="main_language",
         value_vars=["blank_lines", "comment_lines", "total_lines_of_code", "source_code_file_count"],
@@ -25,9 +22,10 @@ def viz_cloc_by_language(filtered_df):
         barmode="stack",
     ).update_layout(
         template="plotly_white",
-        xaxis=dict(categoryorder="total descending"),
+        xaxis=dict(categoryorder="total descending", title=None),
+        legend_title=None,  # Remove the legend title
         dragmode=False,
-        yaxis=dict(tickformat=",")  # Ensure y-axis values use commas, not compact formats
+        yaxis=dict(tickformat=",")
     )
 
     fig.update_traces(
