@@ -31,6 +31,7 @@ def viz_contributors_commits_size(filtered_df):
         size_max=60,
         color="repo_size",
         labels={
+            "main_language": "Main Language",
             "repo_size_human": "Size",
             "repo_age_human": "Age",
             "contributors": "Number of Contributors",
@@ -41,6 +42,7 @@ def viz_contributors_commits_size(filtered_df):
             "file_count": "File Count",
         },
         hover_data={
+            "main_language": True,
             "repo_size_human": True,
             "repo_size": False,
             "web_url": True,

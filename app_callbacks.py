@@ -98,7 +98,7 @@ def register_callbacks(app):
             "host_name": selected_hosts,
             "activity_status": selected_statuses,
             "tc": selected_tcs,
-            "all_languages": selected_languages,
+            "main_language": selected_languages,
             "classification_label": selected_classifications,
             "app_id": app_ids,
         }

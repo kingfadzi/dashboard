@@ -38,6 +38,7 @@ def fetch_contributors_commits_size(filters=None):
                 web_url,
                 tc,
                 component_id,
+                main_language,
                 all_languages,
                 repo_age_days,
                 file_count,
