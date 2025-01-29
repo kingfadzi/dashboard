@@ -25,7 +25,7 @@ def fetch_kpi_data(filters=None):
         AVG(total_commits) AS avg_commits,
         AVG(number_of_contributors) AS avg_contributors,
         AVG(total_lines_of_code) AS avg_loc,
-        AVG(total_cyclomatic_complexity) AS avg_ccn,
+        AVG(avg_cyclomatic_complexity) AS avg_ccn,
         AVG(repo_size_bytes) AS avg_repo_size
     FROM combined_repo_metrics_api
     """
@@ -46,7 +46,7 @@ def fetch_kpi_data(filters=None):
     avg_commits = f"{(row['avg_commits'] or 0):,.0f}"
     avg_contributors = f"{(row['avg_contributors'] or 0):,.0f}"
     avg_loc = f"{(row['avg_loc'] or 0):,.0f}"
-    avg_ccn = f"{(row['avg_ccn'] or 0):,.0f}"
+    avg_ccn = f"{(row['avg_ccn'] or 0):,.1f}"
     avg_repo_size_str = human_readable_size(row['avg_repo_size'])
     return {
         "total_repos": total_repos,
