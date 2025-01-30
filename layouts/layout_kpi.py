@@ -68,7 +68,16 @@ def kpi_layout():
                             className="text-center bg-light",
                             style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}
                         ),
-                        dbc.CardBody(html.H4("0", id="kpi-avg-ccn", className="text-center")),
+                        dbc.CardBody(
+                            [
+                                html.H4("0", id="kpi-avg-ccn", className="text-center mb-1"),
+                                html.Small(
+                                    "Total CCN=0 | Fn=0 | Tokens=0",
+                                    id="kpi-ccn-subtext",
+                                    className="text-center text-muted d-block"
+                                ),
+                            ]
+                        ),
                     ],
                     className="mb-4",
                 ),
