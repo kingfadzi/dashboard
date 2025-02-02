@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 def chart_layout():
     return dbc.Col(
         [
+            # Dummy Table at the top
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -19,7 +20,7 @@ def chart_layout():
                             {"name": "Contributors", "id": "contributors"},
                             {"name": "Last Commit", "id": "last_commit"},
                         ],
-                        data=[],
+                        data=[],  # Data will be populated dynamically
                         page_size=10,
                         style_table={"overflowX": "auto"},
                     ),
@@ -27,6 +28,7 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Row: Activity Status & Repository Classification
             dbc.Row(
                 [
                     dbc.Col(
@@ -67,6 +69,7 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Contributors vs Commits Scatter Plot
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -82,6 +85,7 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Repositories by Main Language
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -97,13 +101,14 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Row: Language Usage Buckets & Repository Activity by Last Commit Date
             dbc.Row(
                 [
                     dbc.Col(
                         dbc.Card(
                             [
                                 dbc.CardHeader(
-                                    html.B("Num of Languages Used per Repo", className="text-center"),
+                                    html.B("Num of Languages Use per repod", className="text-center"),
                                     className="bg-light",
                                 ),
                                 dcc.Graph(
@@ -137,6 +142,7 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # CLOC Metrics by Language
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -152,10 +158,11 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Repositories by IaC Type
             dbc.Card(
                 [
                     dbc.CardHeader(
-                        html.B("Infrastructure as Code Usage", className="text-center"),
+                        html.B("infrastructure as Code Usage", className="text-center"),
                         className="bg-light",
                     ),
                     dcc.Graph(
@@ -167,6 +174,7 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Programming Languages vs Contributor Buckets Heatmap
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -182,13 +190,14 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Row: Vulnerabilities by Severity & Standards Issues
             dbc.Row(
                 [
                     dbc.Col(
                         dbc.Card(
                             [
                                 dbc.CardHeader(
-                                    html.B("Vulnerabilities by Severity (Shallow Scan)", className="text-center"),
+                                    html.B("Vulnerabilities by Severity (Shallow scan)", className="text-center"),
                                     className="bg-light",
                                 ),
                                 dcc.Graph(
@@ -222,6 +231,7 @@ def chart_layout():
                 className="mb-4",
             ),
 
+            # Row 1: Java Versions & Build Tools
             dbc.Row([
                 dbc.Col(
                     dbc.Card([
@@ -245,6 +255,102 @@ def chart_layout():
                         ),
                         dcc.Graph(
                             id="label-tech-bar-chart-build-tool",
+                            config={"displayModeBar": False},
+                            style={"height": 300},
+                        ),
+                    ], className="mb-4"),
+                    width=6
+                ),
+            ], className="mb-4"),
+
+            # Row 2: Application Servers & Databases
+            dbc.Row([
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.B("Application Servers", className="text-center"),
+                            className="bg-light",
+                        ),
+                        dcc.Graph(
+                            id="label-tech-bar-chart-appserver",
+                            config={"displayModeBar": False},
+                            style={"height": 300},
+                        ),
+                    ], className="mb-4"),
+                    width=6
+                ),
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.B("Databases", className="text-center"),
+                            className="bg-light",
+                        ),
+                        dcc.Graph(
+                            id="label-tech-bar-chart-database",
+                            config={"displayModeBar": False},
+                            style={"height": 300},
+                        ),
+                    ], className="mb-4"),
+                    width=6
+                ),
+            ], className="mb-4"),
+
+            # Row 3: Spring Framework & Spring Boot
+            dbc.Row([
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.B("Spring Framework", className="text-center"),
+                            className="bg-light",
+                        ),
+                        dcc.Graph(
+                            id="label-tech-bar-chart-spring-framework-version",
+                            config={"displayModeBar": False},
+                            style={"height": 300},
+                        ),
+                    ], className="mb-4"),
+                    width=6
+                ),
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.B("Spring Boot", className="text-center"),
+                            className="bg-light",
+                        ),
+                        dcc.Graph(
+                            id="label-tech-bar-chart-spring-boot-version",
+                            config={"displayModeBar": False},
+                            style={"height": 300},
+                        ),
+                    ], className="mb-4"),
+                    width=6
+                ),
+            ], className="mb-4"),
+
+            # Row 4: Middleware & Logging
+            dbc.Row([
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.B("Middleware", className="text-center"),
+                            className="bg-light",
+                        ),
+                        dcc.Graph(
+                            id="label-tech-bar-chart-middleware",
+                            config={"displayModeBar": False},
+                            style={"height": 300},
+                        ),
+                    ], className="mb-4"),
+                    width=6
+                ),
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.B("Logging", className="text-center"),
+                            className="bg-light",
+                        ),
+                        dcc.Graph(
+                            id="label-tech-bar-chart-logging",
                             config={"displayModeBar": False},
                             style={"height": 300},
                         ),
