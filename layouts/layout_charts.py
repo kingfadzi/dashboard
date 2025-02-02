@@ -5,28 +5,48 @@ def chart_layout():
     return dbc.Col(
         [
             # Dummy Table at the top
-            dbc.Card(
-                [
-                    dbc.CardHeader(
-                        html.B("Repository Data Table", className="text-center"),
-                        className="bg-light",
-                    ),
-                    dash_table.DataTable(
-                        id="temp-table",
-                        columns=[
-                            {"name": "Repo Name", "id": "repo_name"},
-                            {"name": "Language", "id": "language"},
-                            {"name": "Commits", "id": "commits"},
-                            {"name": "Contributors", "id": "contributors"},
-                            {"name": "Last Commit", "id": "last_commit"},
-                        ],
-                        data=[],  # Data will be populated dynamically
-                        page_size=10,
-                        style_table={"overflowX": "auto"},
-                    ),
-                ],
-                className="mb-4",
-            ),
+              dbc.Card(
+                  [
+                      dbc.CardHeader(
+                          html.B("Repository Data Table", className="text-center"),
+                          className="bg-light",
+                      ),
+                      dash_table.DataTable(
+                          id="temp-table",
+                          columns=[
+                              {
+                                  "name": "Repo Name",
+                                  "id": "repo_id",
+                                  "type": "text",
+                                  "presentation": "markdown",
+                              },
+                              {"name": "Language", "id": "language"},
+                              {
+                                  "name": "Commits",
+                                  "id": "commits",
+                                  "type": "numeric",
+                                  "format": {"specifier": ",d"},
+                              },
+                              {
+                                  "name": "Contributors",
+                                  "id": "contributors",
+                                  "type": "numeric",
+                                  "format": {"specifier": ",d"},
+                              },
+                              {
+                                  "name": "Last Commit",
+                                  "id": "last_commit",
+                                  "type": "datetime",
+                              },
+                          ],
+                          data=[],  # Data will be populated dynamically
+                          page_size=10,
+                          style_table={"overflowX": "auto"},
+                          style_cell={"textAlign": "left"},  # Align all text to the left
+                      ),
+                  ],
+                  className="mb-4",
+              ),
 
             # Row: Activity Status & Repository Classification
             dbc.Row(
