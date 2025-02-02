@@ -4,11 +4,10 @@ import dash_bootstrap_components as dbc
 def chart_layout():
     return dbc.Col(
         [
-            # Dummy Table at the top
             dbc.Card(
                 [
                     dbc.CardHeader(
-                        html.B("Temporary Data Table", className="text-center"),
+                        html.B("Repository Data Table", className="text-center"),
                         className="bg-light",
                     ),
                     dash_table.DataTable(
@@ -20,30 +19,8 @@ def chart_layout():
                             {"name": "Contributors", "id": "contributors"},
                             {"name": "Last Commit", "id": "last_commit"},
                         ],
-                        data=[
-                            {
-                                "repo_name": "Repo A",
-                                "language": "Python",
-                                "commits": 120,
-                                "contributors": 5,
-                                "last_commit": "2024-01-20"
-                            },
-                            {
-                                "repo_name": "Repo B",
-                                "language": "Java",
-                                "commits": 300,
-                                "contributors": 10,
-                                "last_commit": "2024-02-01"
-                            },
-                            {
-                                "repo_name": "Repo C",
-                                "language": "Go",
-                                "commits": 75,
-                                "contributors": 3,
-                                "last_commit": "2024-01-15"
-                            }
-                        ],
-                        page_size=5,
+                        data=[],  # Data will be populated dynamically
+                        page_size=10,
                         style_table={"overflowX": "auto"},
                     ),
                 ],
@@ -130,7 +107,7 @@ def chart_layout():
                         dbc.Card(
                             [
                                 dbc.CardHeader(
-                                    html.B("Num of Languages Use per repod", className="text-center"),
+                                    html.B("Num of Languages Used per Repo", className="text-center"),
                                     className="bg-light",
                                 ),
                                 dcc.Graph(
@@ -184,7 +161,7 @@ def chart_layout():
             dbc.Card(
                 [
                     dbc.CardHeader(
-                        html.B("infrastructure as Code Usage", className="text-center"),
+                        html.B("Infrastructure as Code Usage", className="text-center"),
                         className="bg-light",
                     ),
                     dcc.Graph(
@@ -219,13 +196,13 @@ def chart_layout():
                         dbc.Card(
                             [
                                 dbc.CardHeader(
-                                    html.B("Vulnerabilities by Severity (Shallow scan)", className="text-center"),
+                                    html.B("Vulnerabilities by Severity (Shallow Scan)", className="text-center"),
                                     className="bg-light",
                                 ),
                                 dcc.Graph(
                                     id="trivy-vulnerabilities-bar-chart",
                                     config={"displayModeBar": False},
-                                    style={"height": 300},
+                                    style={"height": 300"},
                                 ),
                             ],
                             className="mb-4",
@@ -242,7 +219,7 @@ def chart_layout():
                                 dcc.Graph(
                                     id="semgrep-findings-bar-chart",
                                     config={"displayModeBar": False},
-                                    style={"height": 300},
+                                    style={"height": 300"},
                                 ),
                             ],
                             className="mb-4",
@@ -263,7 +240,7 @@ def chart_layout():
                         ),
                         dcc.Graph(
                             id="label-tech-bar-chart-java-version",
-                            config={"displayModeBar": False},
+                            config={"displayModeBar": False"},
                             style={"height": 300},
                         ),
                     ], className="mb-4"),
@@ -277,103 +254,7 @@ def chart_layout():
                         ),
                         dcc.Graph(
                             id="label-tech-bar-chart-build-tool",
-                            config={"displayModeBar": False},
-                            style={"height": 300},
-                        ),
-                    ], className="mb-4"),
-                    width=6
-                ),
-            ], className="mb-4"),
-
-            # Row 2: Application Servers & Databases
-            dbc.Row([
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.B("Application Servers", className="text-center"),
-                            className="bg-light",
-                        ),
-                        dcc.Graph(
-                            id="label-tech-bar-chart-appserver",
-                            config={"displayModeBar": False},
-                            style={"height": 300},
-                        ),
-                    ], className="mb-4"),
-                    width=6
-                ),
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.B("Databases", className="text-center"),
-                            className="bg-light",
-                        ),
-                        dcc.Graph(
-                            id="label-tech-bar-chart-database",
-                            config={"displayModeBar": False},
-                            style={"height": 300},
-                        ),
-                    ], className="mb-4"),
-                    width=6
-                ),
-            ], className="mb-4"),
-
-            # Row 3: Spring Framework & Spring Boot
-            dbc.Row([
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.B("Spring Framework", className="text-center"),
-                            className="bg-light",
-                        ),
-                        dcc.Graph(
-                            id="label-tech-bar-chart-spring-framework-version",
-                            config={"displayModeBar": False},
-                            style={"height": 300},
-                        ),
-                    ], className="mb-4"),
-                    width=6
-                ),
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.B("Spring Boot", className="text-center"),
-                            className="bg-light",
-                        ),
-                        dcc.Graph(
-                            id="label-tech-bar-chart-spring-boot-version",
-                            config={"displayModeBar": False},
-                            style={"height": 300},
-                        ),
-                    ], className="mb-4"),
-                    width=6
-                ),
-            ], className="mb-4"),
-
-            # Row 4: Middleware & Logging
-            dbc.Row([
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.B("Middleware", className="text-center"),
-                            className="bg-light",
-                        ),
-                        dcc.Graph(
-                            id="label-tech-bar-chart-middleware",
-                            config={"displayModeBar": False},
-                            style={"height": 300},
-                        ),
-                    ], className="mb-4"),
-                    width=6
-                ),
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.B("Logging", className="text-center"),
-                            className="bg-light",
-                        ),
-                        dcc.Graph(
-                            id="label-tech-bar-chart-logging",
-                            config={"displayModeBar": False},
+                            config={"displayModeBar": False"},
                             style={"height": 300},
                         ),
                     ], className="mb-4"),

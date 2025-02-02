@@ -27,6 +27,9 @@ from data.fetch_label_tech_data import fetch_label_tech_data
 from callbacks.viz_label_tech import viz_label_tech
 from data.fetch_kpi_data import fetch_kpi_data
 
+from data.fetch_table_data import fetch_table_data
+from callbacks.viz_table_data import viz_table_data
+
 def register_dropdown_callbacks(app):
     @app.callback(
         [
@@ -78,6 +81,8 @@ def register_callbacks(app):
             Output("kpi-avg-loc", "children"),
             Output("kpi-avg-ccn", "children"),
             Output("kpi-avg-repo-size", "children"),
+            
+            Output("temp-table", "data"),  # NEW: Table Output
 
         ],
         [
@@ -158,6 +163,9 @@ def register_callbacks(app):
         avg_loc = kpi_data["avg_loc"]
         avg_ccn = kpi_data["avg_ccn"]
         avg_repo_size = kpi_data["avg_repo_size"]
+        
+        table_data = fetch_table_data(filters)
+        table_data = viz_table_data(table_data)  # Apply any necessary transformations
 
         return (
             active_inactive_fig,
@@ -185,5 +193,6 @@ def register_callbacks(app):
             avg_contributors,
             avg_loc,
             avg_ccn,
-            avg_repo_size
+            avg_repo_size,
+            table_data
         )
