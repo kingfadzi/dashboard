@@ -7,7 +7,7 @@ from data.fetch_iac_data import fetch_iac_data
 from data.fetch_active_inactive_data import fetch_active_inactive_data
 from data.fetch_classification_data import fetch_classification_data
 from data.fetch_language_data import fetch_language_data
-from data.fetch_heatmap_data import fetch_heatmap_data
+from data.fetch_heatmap_data import fetch_language_contributors_heatmap
 from callbacks.viz_contributors_commits_size import viz_contributors_commits_size
 from callbacks.viz_iac_chart import viz_iac_chart
 from callbacks.viz_active_inactive import viz_active_inactive
@@ -57,7 +57,7 @@ def register_dropdown_callbacks(app):
         )
 
 
-### **Graphs & KPI Callback (Only for `/`)**
+### **Graphs & KPI Callback (Now Includes All Tech Label Charts)**
 def register_callbacks(app):
     @app.callback(
         [
@@ -132,25 +132,13 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # **Table Callback (Fixes Argument Mismatch, Includes Tech Labels)**
+    # **Sidebar Toggle Callback (Fixes Hamburger Toggle)**
     @app.callback(
-        Output("temp-table", "data"),
-        [
-            Input("host-name-filter", "value"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-        ],
+        Output("filter-panel", "is_open"),
+        Input("filter-toggle-btn", "n_clicks"),
+        State("filter-panel", "is_open"),
+        prevent_initial_call=True,
     )
-    def update_table(*args):
-        """Fetch table data including Tech Labels."""
-        filter_keys = [
-            "host_name", "activity_status", "tc", "main_language",
-            "classification_label", "app_id"
-        ]
-        filters = {key: (arg if arg else []) for key, arg in zip(filter_keys, args)}
-
-        table_raw_df = fetch_table_data(filters)
-        return viz_table_data(table_raw_df)
+    def toggle_filters(n_clicks, is_open):
+        """Toggles the filter sidebar sliding in and out."""
+        return not is_open
