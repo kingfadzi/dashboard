@@ -1,5 +1,8 @@
+# app.py
+
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
+import plotly.io as pio
 from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
 from layouts.layout_filters import filter_layout
@@ -7,6 +10,9 @@ import dash
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
+
+# Force all graphs to use a white background globally
+pio.templates.default = "plotly_white"
 
 server.config["CACHE_TYPE"] = "simple"
 server.config["CACHE_DEFAULT_TIMEOUT"] = 3600
