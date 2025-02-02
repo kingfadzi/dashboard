@@ -30,6 +30,7 @@ from data.fetch_kpi_data import fetch_kpi_data
 
 from data.fetch_table_data import fetch_table_data
 from callbacks.viz_table_data import viz_table_data
+import requests
 
 
 ### **Dropdown Filters Callback (Triggers on Page Load)**
