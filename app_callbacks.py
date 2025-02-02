@@ -160,8 +160,8 @@ def register_callbacks(app):
             kpi_data["avg_repo_size"],
         )
 
-    # Callback for table data (only updates on "/table" page)
-    @app.callback(
+        # Callback for table data (only updates on "/table" page)
+       @app.callback(
         Output("temp-table", "data"),
         [
             Input("host-name-filter", "value"),
@@ -172,5 +172,21 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_table(filters):
-        return viz_table_data(fetch_table_data(filters))
+    def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+        """Fetch table data whenever filters change."""
+        if app_id_input:
+            app_ids = [id.strip() for id in app_id_input.split(",")]
+        else:
+            app_ids = None
+    
+        filters = {
+            "host_name": selected_hosts,
+            "activity_status": selected_statuses,
+            "tc": selected_tcs,
+            "main_language": selected_languages,
+            "classification_label": selected_classifications,
+            "app_id": app_ids,
+        }
+        table_raw_df = fetch_table_data(filters)
+        table_data = viz_table_data(table_raw_df)
+        return table_data
