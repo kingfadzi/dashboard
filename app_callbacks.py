@@ -39,7 +39,7 @@ def register_dropdown_callbacks(app):
             Output("language-filter", "options"),
             Output("classification-filter", "options"),
         ],
-        [Input("app-layout", "children")]
+        []
     )
     def populate_dropdown_options(_):
         options = fetch_dropdown_options()
