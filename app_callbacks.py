@@ -32,6 +32,8 @@ from data.fetch_kpi_data import fetch_kpi_data
 from data.fetch_table_data import fetch_table_data
 from callbacks.viz_table_data import viz_table_data
 
+
+### **Dropdown Filters Callback (Triggers on Page Load)**
 def register_dropdown_callbacks(app):
     @app.callback(
         [
@@ -41,7 +43,7 @@ def register_dropdown_callbacks(app):
             Output("language-filter", "options"),
             Output("classification-filter", "options"),
         ],
-        [Input("url", "pathname")]  # Fire once on page load, or when URL changes
+        [Input("url", "pathname")]  # Fire once on page load or URL change
     )
     def populate_dropdown_options(_):
         """Populates dropdown filter options when the app loads or URL changes."""
@@ -54,8 +56,9 @@ def register_dropdown_callbacks(app):
             [{"label": label, "value": label} for label in options["classification_labels"]],
         )
 
+
+### **Graphs & KPI Callback (Only for `/`)**
 def register_callbacks(app):
-    # Callback for charts & KPIs (does NOT include the table)
     @app.callback(
         [
             Output("active-inactive-bar", "figure"),
@@ -160,7 +163,7 @@ def register_callbacks(app):
             kpi_data["avg_repo_size"],
         )
 
-        # Callback for table data (only updates on "/table" page)
+    # Table Callback (Only for `/table`)
     @app.callback(
         Output("temp-table", "data"),
         [
@@ -172,21 +175,7 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-  def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+    def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
         """Fetch table data whenever filters change."""
-        if app_id_input:
-            app_ids = [id.strip() for id in app_id_input.split(",")]
-        else:
-            app_ids = None
-    
-        filters = {
-            "host_name": selected_hosts,
-            "activity_status": selected_statuses,
-            "tc": selected_tcs,
-            "main_language": selected_languages,
-            "classification_label": selected_classifications,
-            "app_id": app_ids,
-        }
-        table_raw_df = fetch_table_data(filters)
-        table_data = viz_table_data(table_raw_df)
-        return table_data
+        filters = { ... }
+        return viz_table_data(fetch_table_data(filters))
