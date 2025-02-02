@@ -1,6 +1,11 @@
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
-import dash.pages  # 
+#import dash.pages  # 
+
+import dash
+from dash_labs.plugins.pages import register_pages, show_page
+register_pages()
+
 import plotly.io as pio
 from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
