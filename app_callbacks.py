@@ -159,3 +159,13 @@ def register_callbacks(app):
         }
 
         return viz_table_data(fetch_table_data(filters))
+
+    # Collapsible Filter Panel Callback
+    @app.callback(
+        Output("filter-panel", "is_open"),
+        Input("filter-toggle-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def toggle_filters(n_clicks):
+        """Toggles the filter panel visibility."""
+        return n_clicks % 2 == 1
