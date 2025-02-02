@@ -4,6 +4,7 @@ from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
 from layouts.layout_filters import filter_layout
 import dash
+
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
@@ -26,8 +27,8 @@ app.layout = dbc.Container(
         navbar,
         dbc.Row(
             [
-                dbc.Col(filter_layout(), md=3),       # <-- Filters on the left
-                dbc.Col(dash.page_container, md=9),   # <-- Page content on the right
+                dbc.Col(filter_layout(), md=3),      # Filters on the left column
+                dbc.Col(dash.page_container, md=9),  # Page content on the right
             ],
             className="mt-3",
         ),
@@ -39,4 +40,4 @@ register_callbacks(app)
 register_dropdown_callbacks(app)
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, host="0.0.0.0")
