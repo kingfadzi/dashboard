@@ -153,3 +153,15 @@ def register_callbacks(app):
 
         table_raw_df = fetch_table_data(filters)
         return viz_table_data(table_raw_df)
+        
+        
+        # **Sidebar Toggle Callback (Fixes Hamburger Toggle)**
+    @app.callback(
+        Output("filter-panel", "is_open"),
+        Input("filter-toggle-btn", "n_clicks"),
+        State("filter-panel", "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_filters(n_clicks, is_open):
+        """Toggles the filter sidebar sliding in and out."""
+        return not is_open
