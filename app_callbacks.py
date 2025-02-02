@@ -7,7 +7,7 @@ from data.fetch_iac_data import fetch_iac_data
 from data.fetch_active_inactive_data import fetch_active_inactive_data
 from data.fetch_classification_data import fetch_classification_data
 from data.fetch_language_data import fetch_language_data
-from data.fetch_heatmap_data import fetch_language_contributors_heatmap
+from data.fetch_language_contributors_heatmap import fetch_language_contributors_heatmap  # ✅ Fixed import
 from callbacks.viz_contributors_commits_size import viz_contributors_commits_size
 from callbacks.viz_iac_chart import viz_iac_chart
 from callbacks.viz_active_inactive import viz_active_inactive
@@ -15,7 +15,6 @@ from callbacks.viz_classification import viz_classification
 from callbacks.viz_main_language import viz_main_language
 from data.fetch_cloc_by_language import fetch_cloc_by_language
 from callbacks.viz_cloc_by_language import viz_cloc_by_language
-from data.fetch_language_contributors_heatmap import fetch_language_contributors_heatmap
 from callbacks.viz_language_contributors_heatmap import viz_language_contributors_heatmap
 from data.fetch_trivy_vulnerabilities import fetch_trivy_vulnerabilities
 from callbacks.viz_trivy_vulnerabilities import viz_trivy_vulnerabilities
