@@ -24,7 +24,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dcc.Link("Table", href="/table", className="nav-link")),
         html.Span("☰", id="filter-toggle-btn", style={"cursor": "pointer", "fontSize": "24px", "marginLeft": "10px"}),
     ],
-    brand="Dashboard",
+    brand=dcc.Link("Dashboard", href="/", className="navbar-brand"),  # ✅ Clickable Dashboard Title
     color="primary",
     dark=True,
 )
