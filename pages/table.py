@@ -4,7 +4,6 @@ import dash
 from dash import html, dash_table
 import dash_bootstrap_components as dbc
 
-# Register this page at "/table"
 dash.register_page(__name__, path="/table")
 
 layout = dbc.Container(
@@ -14,7 +13,12 @@ layout = dbc.Container(
                 dash_table.DataTable(
                     id="temp-table",
                     columns=[
-                        {"name": "Repo Name", "id": "repo_id", "type": "text", "presentation": "markdown"},
+                        {
+                            "name": "Repo Name",
+                            "id": "repo_id",
+                            "type": "text",
+                            "presentation": "markdown",  # ✅ Enables clickable links
+                        },
                         {"name": "Language", "id": "language", "type": "text"},
                         {"name": "Commits", "id": "commits", "type": "numeric", "format": {"specifier": ",d"}},
                         {"name": "Contributors", "id": "contributors", "type": "numeric", "format": {"specifier": ",d"}},
@@ -24,7 +28,7 @@ layout = dbc.Container(
                     page_size=10,
                     style_table={"overflowX": "auto"},
                     style_header={
-                        "backgroundColor": "#f8f9fa",  # Light grey background
+                        "backgroundColor": "#f8f9fa",
                         "fontWeight": "bold",
                         "borderBottom": "2px solid #dee2e6",
                         "textAlign": "left",
@@ -35,21 +39,21 @@ layout = dbc.Container(
                         "borderBottom": "1px solid #dee2e6",
                     },
                     style_data_conditional=[
-                        {"if": {"row_index": "odd"}, "backgroundColor": "#f9f9f9"},  # Zebra striping
+                        {"if": {"row_index": "odd"}, "backgroundColor": "#f9f9f9"},
                         {"if": {"row_index": "even"}, "backgroundColor": "#ffffff"},
                         {
-                            "if": {"state": "active"},  # Highlight on selection
+                            "if": {"state": "active"},
                             "backgroundColor": "#e9ecef",
                             "border": "1px solid #adb5bd",
                         },
                     ],
-                    sort_action="native",  # Enables sorting on all columns
-                    filter_action="native",  # Enables search filtering
+                    sort_action="native",
+                    filter_action="native",
                     filter_options={"case": "insensitive"},
-                    column_selectable="single",  # Allows selecting a column for filtering
+                    column_selectable="single",
                 ),
             ],
-            className="shadow-sm rounded",  # Matches filter styling
+            className="shadow-sm rounded",
             style={"border": "1px solid #dee2e6", "overflow": "hidden"},
         ),
     ],
