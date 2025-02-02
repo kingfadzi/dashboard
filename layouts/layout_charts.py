@@ -6,47 +6,49 @@ def chart_layout():
         [
             # Dummy Table at the top
             dbc.Card(
-                  [
-                      dbc.CardHeader(
-                          html.B("Repository Data Table", className="text-center"),
-                          className="bg-light",
-                      ),
-                      dash_table.DataTable(
-                          id="temp-table",
-                          columns=[
-                              {
-                                  "name": "Repo Name",
-                                  "id": "repo_id",
-                                  "type": "text",
-                                  "presentation": "markdown",
-                              },
-                              {"name": "Language", "id": "language"},
-                              {
-                                  "name": "Commits",
-                                  "id": "commits",
-                                  "type": "numeric",
-                                  "format": {"specifier": ",d"},
-                              },
-                              {
-                                  "name": "Contributors",
-                                  "id": "contributors",
-                                  "type": "numeric",
-                                  "format": {"specifier": ",d"},
-                              },
-                              {
-                                  "name": "Last Commit",
-                                  "id": "last_commit",
-                                  "type": "text",
-                              },
-                          ],
-                          data=[],
-                          page_size=10,
-                          style_table={"overflowX": "auto"},
-                          style_cell={"textAlign": "left"},
-                      ),
-                  ],
-                  className="mb-4",
-              ),
+                [
+                    dbc.CardHeader(
+                        html.B("Repository Data Table", className="text-center"),
+                        className="bg-light",
+                    ),
+                    dash_table.DataTable(
+                        id="temp-table",
+                        columns=[
+                            {
+                                "name": "Repo Name",
+                                "id": "repo_id",
+                                "type": "text",
+                                "presentation": "markdown",
+                            },
+                            {"name": "Language", "id": "language", "type": "text"},
+                            {
+                                "name": "Commits",
+                                "id": "commits",
+                                "type": "numeric",
+                                "format": {"specifier": ",d"},
+                            },
+                            {
+                                "name": "Contributors",
+                                "id": "contributors",
+                                "type": "numeric",
+                                "format": {"specifier": ",d"},
+                            },
+                            {
+                                "name": "Last Commit",
+                                "id": "last_commit",
+                                "type": "text",
+                            },
+                        ],
+                        data=[],
+                        page_size=10,
+                        style_table={"overflowX": "auto"},
+                        style_cell={"textAlign": "left"},
+                        sort_action="native",  # Enables sorting
+                        filter_action="native",  # Enables filtering/searching
+                    ),
+                ],
+                className="mb-4",
+            ),
 
             # Row: Activity Status & Repository Classification
             dbc.Row(
