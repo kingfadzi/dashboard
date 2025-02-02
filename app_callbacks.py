@@ -28,11 +28,6 @@ from data.fetch_label_tech_data import fetch_label_tech_data
 from callbacks.viz_label_tech import viz_label_tech
 from data.fetch_kpi_data import fetch_kpi_data
 
-from data.fetch_table_data import fetch_table_data
-from callbacks.viz_table_data import viz_table_data
-import requests
-
-
 ### **Dropdown Filters Callback (Triggers on Page Load)**
 def register_dropdown_callbacks(app):
     @app.callback(
@@ -98,10 +93,7 @@ def register_callbacks(app):
     )
     def update_charts(*args):
         """Fetches all chart data & KPIs when filter values change (no table data here)."""
-        filter_keys = [
-            "host_name", "activity_status", "tc", "main_language",
-            "classification_label", "app_id"
-        ]
+        filter_keys = ["host_name", "activity_status", "tc", "main_language", "classification_label", "app_id"]
         filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
 
         return (
@@ -132,31 +124,7 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # **Table Callback (Uses Only `fetch_table_data()`, No Tech Labels)**
-    @app.callback(
-        Output("temp-table", "data"),
-        [
-            Input("host-name-filter", "value"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-        ],
-    )
-    def update_table(*args):
-        """Fetches table data using `fetch_table_data()` with correct filters."""
-        filter_keys = [
-            "host_name", "activity_status", "tc", "main_language",
-            "classification_label", "app_id"
-        ]
-        filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
-
-        table_raw_df = fetch_table_data(filters)
-        return viz_table_data(table_raw_df)
-        
-        
-        # **Sidebar Toggle Callback (Fixes Hamburger Toggle)**
+    # **Sidebar Toggle Callback (Fixes Hamburger Toggle)**
     @app.callback(
         Output("filter-panel", "is_open"),
         Input("filter-toggle-btn", "n_clicks"),
@@ -166,5 +134,3 @@ def register_callbacks(app):
     def toggle_filters(n_clicks, is_open):
         """Toggles the filter sidebar sliding in and out."""
         return not is_open
-        
-    
