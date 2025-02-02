@@ -1,5 +1,3 @@
-# data/fetch_table_data.py
-
 import logging
 import pandas as pd
 from sqlalchemy import text
@@ -38,11 +36,13 @@ def fetch_table_data(filters=None):
 
         df["web_url"] = df["web_url"].fillna("#")
 
-        df["commits"] = df["commits"].astype(int)
-        df["contributors"] = df["contributors"].astype(int)
+        # Handle NaN values before converting to int
+        for col in ["commits", "contributors"]:
+            if col in df.columns:
+                df[col] = df[col].fillna(0).astype(int)
 
         if "last_commit" in df.columns:
-            df["last_commit"] = pd.to_datetime(df["last_commit"]).dt.strftime("%Y-%m-%d")
+            df["last_commit"] = pd.to_datetime(df["last_commit"], errors="coerce").dt.strftime("%Y-%m-%d")
 
         return df
 
