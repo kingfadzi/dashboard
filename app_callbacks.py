@@ -55,6 +55,7 @@ def register_dropdown_callbacks(app):
         )
 
 def register_callbacks(app):
+    # Callback for charts & KPIs (does NOT include the table)
     @app.callback(
         [
             Output("active-inactive-bar", "figure"),
@@ -82,7 +83,6 @@ def register_callbacks(app):
             Output("kpi-avg-loc", "children"),
             Output("kpi-avg-ccn", "children"),
             Output("kpi-avg-repo-size", "children"),
-            Output("temp-table", "data"),  # Table Data
         ],
         [
             Input("host-name-filter", "value"),
@@ -94,7 +94,7 @@ def register_callbacks(app):
         ],
     )
     def update_charts(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
-        """Fetches all chart data & table data whenever filter values change."""
+        """Fetches all chart data & KPIs when filter values change (no table data here)."""
         if app_id_input:
             app_ids = [id.strip() for id in app_id_input.split(",")]
         else:
@@ -108,63 +108,30 @@ def register_callbacks(app):
             "classification_label": selected_classifications,
             "app_id": app_ids,
         }
-        
-        # 1) Fetch data from DB
-        active_inactive_data = fetch_active_inactive_data(filters)
-        contributors_commits_size_data = fetch_contributors_commits_size(filters)
-        iac_data = fetch_iac_data(filters)
-        classification_data = fetch_classification_data(filters)
-        language_data = fetch_language_data(filters)
-        cloc_data = fetch_cloc_by_language(filters)
-        heatmap_data = fetch_language_contributors_heatmap(filters)
-        trivy_data = fetch_trivy_vulnerabilities(filters)
-        semgrep_data = fetch_semgrep_findings(filters)
-        multi_lang_usage_data = fetch_multi_language_usage(filters)
-        last_commit_buckets_data = fetch_last_commit_buckets(filters)
 
-        # 2) Convert raw data -> figures
-        scatter_fig = viz_contributors_commits_size(contributors_commits_size_data)
-        iac_chart_fig = viz_iac_chart(iac_data)
-        active_inactive_fig = viz_active_inactive(active_inactive_data)
-        classification_fig = viz_classification(classification_data)
-        language_chart_fig = viz_main_language(language_data)
-        cloc_chart_fig = viz_cloc_by_language(cloc_data)
-        heatmap_fig = viz_language_contributors_heatmap(heatmap_data)
-        trivy_chart_fig = viz_trivy_vulnerabilities(trivy_data)
-        semgrep_chart_fig = viz_semgrep_findings(semgrep_data)
-        multi_lang_usage_fig = viz_multi_language_usage(multi_lang_usage_data)
-        last_commit_buckets_fig = viz_last_commit_buckets(last_commit_buckets_data)
+        # Fetch all chart-related data
+        active_inactive_fig = viz_active_inactive(fetch_active_inactive_data(filters))
+        classification_fig = viz_classification(fetch_classification_data(filters))
+        scatter_fig = viz_contributors_commits_size(fetch_contributors_commits_size(filters))
+        language_chart_fig = viz_main_language(fetch_language_data(filters))
+        cloc_chart_fig = viz_cloc_by_language(fetch_cloc_by_language(filters))
+        iac_chart_fig = viz_iac_chart(fetch_iac_data(filters))
+        heatmap_fig = viz_language_contributors_heatmap(fetch_language_contributors_heatmap(filters))
+        trivy_chart_fig = viz_trivy_vulnerabilities(fetch_trivy_vulnerabilities(filters))
+        semgrep_chart_fig = viz_semgrep_findings(fetch_semgrep_findings(filters))
+        multi_lang_usage_fig = viz_multi_language_usage(fetch_multi_language_usage(filters))
+        last_commit_buckets_fig = viz_last_commit_buckets(fetch_last_commit_buckets(filters))
 
-        java_data = fetch_label_tech_data(filters, "cto.io/java-version")
-        java_fig = viz_label_tech(java_data)
-        buildtool_data = fetch_label_tech_data(filters, "cto.io/build-tool")
-        buildtool_fig = viz_label_tech(buildtool_data)
-        appserver_data = fetch_label_tech_data(filters, "cto.io/appserver")
-        appserver_fig = viz_label_tech(appserver_data)
-        db_data = fetch_label_tech_data(filters, "cto.io/database")
-        db_fig = viz_label_tech(db_data)
-        sf_data = fetch_label_tech_data(filters, "cto.io/spring-framework-version")
-        sf_fig = viz_label_tech(sf_data)
-        sb_data = fetch_label_tech_data(filters, "cto.io/spring-boot-version")
-        sb_fig = viz_label_tech(sb_data)
-        mw_data = fetch_label_tech_data(filters, "cto.io/middleware")
-        mw_fig = viz_label_tech(mw_data)
-        logging_data = fetch_label_tech_data(filters, "cto.io/logging")
-        logging_fig = viz_label_tech(logging_data)
+        java_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/java-version"))
+        buildtool_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/build-tool"))
+        appserver_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/appserver"))
+        db_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/database"))
+        sf_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/spring-framework-version"))
+        sb_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/spring-boot-version"))
+        mw_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/middleware"))
+        logging_fig = viz_label_tech(fetch_label_tech_data(filters, "cto.io/logging"))
 
-        # 3) KPIs
         kpi_data = fetch_kpi_data(filters)
-        total_repos = kpi_data["total_repos"]
-        avg_commits = kpi_data["avg_commits"]
-        avg_contributors = kpi_data["avg_contributors"]
-        avg_loc = kpi_data["avg_loc"]
-        avg_ccn = kpi_data["avg_ccn"]
-        avg_repo_size = kpi_data["avg_repo_size"]
-
-        # 4) Table Data
-        table_raw_df = fetch_table_data(filters)
-        table_data = viz_table_data(table_raw_df)
-
         return (
             active_inactive_fig,
             classification_fig,
@@ -185,11 +152,25 @@ def register_callbacks(app):
             sb_fig,
             mw_fig,
             logging_fig,
-            total_repos,
-            avg_commits,
-            avg_contributors,
-            avg_loc,
-            avg_ccn,
-            avg_repo_size,
-            table_data
+            kpi_data["total_repos"],
+            kpi_data["avg_commits"],
+            kpi_data["avg_contributors"],
+            kpi_data["avg_loc"],
+            kpi_data["avg_ccn"],
+            kpi_data["avg_repo_size"],
         )
+
+    # Callback for table data (only updates on "/table" page)
+    @app.callback(
+        Output("temp-table", "data"),
+        [
+            Input("host-name-filter", "value"),
+            Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
+        ],
+    )
+    def update_table(filters):
+        return viz_table_data(fetch_table_data(filters))
