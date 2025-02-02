@@ -1,6 +1,6 @@
 # app_callbacks.py
 
-from dash import Input, Output
+from dash import Input, Output, State
 from data.fetch_dropdown_options import fetch_dropdown_options
 from data.fetch_contributors_commits_size import fetch_contributors_commits_size
 from data.fetch_iac_data import fetch_iac_data
@@ -135,7 +135,7 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # Table Callback (Only for `/table`)
+    # **Table Callback (Only for `/table`, Includes Tech Labels)**
     @app.callback(
         Output("temp-table", "data"),
         [
@@ -148,7 +148,7 @@ def register_callbacks(app):
         ],
     )
     def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
-        """Fetch table data whenever filters change."""
+        """Fetch table data, including Tech Labels."""
         filters = {
             "host_name": selected_hosts or [],
             "activity_status": selected_statuses or [],
