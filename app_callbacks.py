@@ -169,7 +169,7 @@ def register_callbacks(app):
     
     
     
-      @app.callback(
+    @app.callback(
         Output("rescan-status", "children"),
         Input("rescan-button", "n_clicks"),
         State("temp-table", "selected_rows"),
