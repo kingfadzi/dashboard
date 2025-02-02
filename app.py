@@ -1,6 +1,5 @@
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
-import dash.pages  # Enables automatic multi-page routing
 import plotly.io as pio
 from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
