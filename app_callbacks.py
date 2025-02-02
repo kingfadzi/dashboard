@@ -119,6 +119,14 @@ def register_callbacks(app):
             viz_semgrep_findings(fetch_semgrep_findings(filters)),
             viz_multi_language_usage(fetch_multi_language_usage(filters)),
             viz_last_commit_buckets(fetch_last_commit_buckets(filters)),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/java-version")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/build-tool")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/appserver")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/database")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/spring-framework-version")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/spring-boot-version")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/middleware")),
+            viz_label_tech(fetch_label_tech_data(filters, "cto.io/logging")),
             fetch_kpi_data(filters)["total_repos"],
             fetch_kpi_data(filters)["avg_commits"],
             fetch_kpi_data(filters)["avg_contributors"],
@@ -151,22 +159,3 @@ def register_callbacks(app):
         }
 
         return viz_table_data(fetch_table_data(filters))
-
-    # **Sidebar Toggle Callback (Collapses Left)**
-    @app.callback(
-        [
-            Output("filter-panel", "is_open"),
-            Output("filter-toggle-btn", "children"),
-            Output("filter-col", "md"),
-            Output("content-col", "md"),
-        ],
-        Input("filter-toggle-btn", "n_clicks"),
-        prevent_initial_call=True,
-    )
-    def toggle_filters(n_clicks):
-        """Toggles the sidebar and expands main content when collapsed."""
-        is_open = n_clicks % 2 == 1
-        toggle_icon = "▶" if is_open else "◀"
-        filter_col_size = 3 if is_open else 0  # Hide sidebar
-        content_col_size = 9 if is_open else 12  # Expand content when sidebar is collapsed
-        return is_open, toggle_icon, filter_col_size, content_col_size
