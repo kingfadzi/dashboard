@@ -11,10 +11,6 @@ layout = dbc.Container(
     [
         dbc.Card(
             [
-                dbc.CardHeader(
-                    html.B("Repository Data Table", className="text-center"),
-                    className="bg-light text-dark rounded-top",
-                ),
                 dash_table.DataTable(
                     id="temp-table",
                     columns=[
@@ -47,6 +43,10 @@ layout = dbc.Container(
                             "border": "1px solid #adb5bd",
                         },
                     ],
+                    sort_action="native",  # Enables sorting on all columns
+                    filter_action="native",  # Enables search filtering
+                    filter_options={"case": "insensitive"},
+                    column_selectable="single",  # Allows selecting a column for filtering
                 ),
             ],
             className="shadow-sm rounded",  # Matches filter styling
