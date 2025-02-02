@@ -7,7 +7,7 @@ from data.fetch_iac_data import fetch_iac_data
 from data.fetch_active_inactive_data import fetch_active_inactive_data
 from data.fetch_classification_data import fetch_classification_data
 from data.fetch_language_data import fetch_language_data
-from data.fetch_language_contributors_heatmap import fetch_language_contributors_heatmap  # ✅ Fixed import
+from data.fetch_language_contributors_heatmap import fetch_language_contributors_heatmap
 from callbacks.viz_contributors_commits_size import viz_contributors_commits_size
 from callbacks.viz_iac_chart import viz_iac_chart
 from callbacks.viz_active_inactive import viz_active_inactive
@@ -56,7 +56,7 @@ def register_dropdown_callbacks(app):
         )
 
 
-### **Graphs & KPI Callback (Now Includes All Tech Label Charts)**
+### **Graphs & KPI Callback (Includes All Tech Label Charts)**
 def register_callbacks(app):
     @app.callback(
         [
@@ -101,7 +101,7 @@ def register_callbacks(app):
             "host_name", "activity_status", "tc", "main_language",
             "classification_label", "app_id"
         ]
-        filters = {key: (arg if arg else []) for key, arg in zip(filter_keys, args)}
+        filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
 
         return (
             viz_active_inactive(fetch_active_inactive_data(filters)),
@@ -131,13 +131,25 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # **Sidebar Toggle Callback (Fixes Hamburger Toggle)**
+    # **Table Callback (Uses Only `fetch_table_data()`, No Tech Labels)**
     @app.callback(
-        Output("filter-panel", "is_open"),
-        Input("filter-toggle-btn", "n_clicks"),
-        State("filter-panel", "is_open"),
-        prevent_initial_call=True,
+        Output("temp-table", "data"),
+        [
+            Input("host-name-filter", "value"),
+            Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
+        ],
     )
-    def toggle_filters(n_clicks, is_open):
-        """Toggles the filter sidebar sliding in and out."""
-        return not is_open
+    def update_table(*args):
+        """Fetches table data using `fetch_table_data()` with correct filters."""
+        filter_keys = [
+            "host_name", "activity_status", "tc", "main_language",
+            "classification_label", "app_id"
+        ]
+        filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
+
+        table_raw_df = fetch_table_data(filters)
+        return viz_table_data(table_raw_df)
