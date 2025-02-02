@@ -135,7 +135,7 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # **Table Callback (Only for `/table`, Includes Tech Labels)**
+    # **Table Callback (Includes Tech Labels)**
     @app.callback(
         Output("temp-table", "data"),
         [
@@ -147,18 +147,9 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_table(filters):
-        """Fetch table data, including Tech Labels."""
+    def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+        """Fetches table data and includes Tech Labels."""
+        filters = { ... }
         table_raw_df = fetch_table_data(filters)
-        return viz_table_data(table_raw_df)
-
-    # **Sidebar Toggle Callback (Slides Over Content)**
-    @app.callback(
-        Output("filter-panel", "is_open"),
-        Input("filter-toggle-btn", "n_clicks"),
-        State("filter-panel", "is_open"),
-        prevent_initial_call=True,
-    )
-    def toggle_filters(n_clicks, is_open):
-        """Toggles the filter panel sliding in and out."""
-        return not is_open
+        table_data = viz_table_data(table_raw_df)
+        return table_data
