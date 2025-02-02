@@ -5,7 +5,7 @@ def chart_layout():
     return dbc.Col(
         [
             # Dummy Table at the top
-              dbc.Card(
+            dbc.Card(
                   [
                       dbc.CardHeader(
                           html.B("Repository Data Table", className="text-center"),
@@ -25,24 +25,22 @@ def chart_layout():
                                   "name": "Commits",
                                   "id": "commits",
                                   "type": "numeric",
-                                  "format": {"specifier": ",d"},
                               },
                               {
                                   "name": "Contributors",
                                   "id": "contributors",
                                   "type": "numeric",
-                                  "format": {"specifier": ",d"},
                               },
                               {
                                   "name": "Last Commit",
                                   "id": "last_commit",
-                                  "type": "datetime",
+                                  "type": "text",
                               },
                           ],
-                          data=[],  # Data will be populated dynamically
+                          data=[],
                           page_size=10,
                           style_table={"overflowX": "auto"},
-                          style_cell={"textAlign": "left"},  # Align all text to the left
+                          style_cell={"textAlign": "left"},
                       ),
                   ],
                   className="mb-4",

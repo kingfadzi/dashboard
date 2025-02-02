@@ -14,7 +14,8 @@ def fetch_table_data(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT
-                clone_url_ssh AS repo_name,
+                repo_id,
+                clone_url_http AS repo_url,
                 main_language AS language,
                 total_commits AS commits,
                 number_of_contributors AS contributors,
@@ -32,12 +33,17 @@ def fetch_table_data(filters=None):
         stmt = text(base_query)
         df = pd.read_sql(stmt, engine, params=param_dict)
 
-        # Example: Convert last_commit to string (or format as needed)
+        if df.empty:
+            return df
+
+        df["repo_id"] = df.apply(lambda row: f"[{row['repo_id']}]({row['repo_url']})", axis=1)
+        df["commits"] = df["commits"].astype(int)
+        df["contributors"] = df["contributors"].astype(int)
+
         if "last_commit" in df.columns:
-            df["last_commit"] = df["last_commit"].astype(str)
+            df["last_commit"] = pd.to_datetime(df["last_commit"]).dt.strftime("%Y-%m-%d")
 
         return df
 
-    # Build the WHERE clause + params based on your filters
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
