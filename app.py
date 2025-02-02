@@ -3,8 +3,7 @@ import dash_bootstrap_components as dbc
 #import dash.pages  # 
 
 import dash
-from dash_labs.plugins.pages import register_pages, show_page
-register_pages()
+from dash_labs.plugins.pages 
 
 import plotly.io as pio
 from data.cache_instance import cache
