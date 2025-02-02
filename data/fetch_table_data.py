@@ -15,7 +15,7 @@ def fetch_table_data(filters=None):
         base_query = """
             SELECT
                 repo_id,
-                clone_url_http AS repo_url,
+                web_url,
                 main_language AS language,
                 total_commits AS commits,
                 number_of_contributors AS contributors,
@@ -36,7 +36,8 @@ def fetch_table_data(filters=None):
         if df.empty:
             return df
 
-        df["repo_id"] = df.apply(lambda row: f"[{row['repo_id']}]({row['repo_url']})", axis=1)
+        df["web_url"] = df["web_url"].fillna("#")
+
         df["commits"] = df["commits"].astype(int)
         df["contributors"] = df["contributors"].astype(int)
 

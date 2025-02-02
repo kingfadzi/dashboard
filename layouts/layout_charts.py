@@ -25,11 +25,13 @@ def chart_layout():
                                   "name": "Commits",
                                   "id": "commits",
                                   "type": "numeric",
+                                  "format": {"specifier": ",d"},
                               },
                               {
                                   "name": "Contributors",
                                   "id": "contributors",
                                   "type": "numeric",
+                                  "format": {"specifier": ",d"},
                               },
                               {
                                   "name": "Last Commit",

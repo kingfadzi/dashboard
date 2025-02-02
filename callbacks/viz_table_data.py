@@ -8,8 +8,8 @@ def viz_table_data(df):
 
     df = df.sort_values(by="commits", ascending=False)
 
-    if "repo_id" in df.columns and "repo_url" in df.columns:
-        df["repo_id"] = df.apply(lambda row: f"[{row['repo_id']}]({row['repo_url']})", axis=1)
+    if "repo_id" in df.columns and "web_url" in df.columns:
+        df["repo_id"] = df.apply(lambda row: f"[{row['repo_id']}]({row['web_url']})" if row["web_url"] and row["web_url"] != "#" else row["repo_id"], axis=1)
 
     if "last_commit" in df.columns and pd.api.types.is_datetime64_any_dtype(df["last_commit"]):
         df["last_commit"] = df["last_commit"].dt.strftime("%Y-%m-%d")
