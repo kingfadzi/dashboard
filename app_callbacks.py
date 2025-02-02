@@ -161,7 +161,7 @@ def register_callbacks(app):
         )
 
         # Callback for table data (only updates on "/table" page)
-       @app.callback(
+    @app.callback(
         Output("temp-table", "data"),
         [
             Input("host-name-filter", "value"),
@@ -172,7 +172,7 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+  def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
         """Fetch table data whenever filters change."""
         if app_id_input:
             app_ids = [id.strip() for id in app_id_input.split(",")]
