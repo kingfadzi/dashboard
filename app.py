@@ -1,6 +1,5 @@
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
-import dash.pages
 from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
 from layouts.layout_filters import filter_layout
