@@ -147,15 +147,18 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+    def update_table(filters):
         """Fetch table data, including Tech Labels."""
-        filters = {
-            "host_name": selected_hosts or [],
-            "activity_status": selected_statuses or [],
-            "tc": selected_tcs or [],
-            "main_language": selected_languages or [],
-            "classification_label": selected_classifications or [],
-            "app_id": [x.strip() for x in app_id_input.split(",")] if app_id_input else [],
-        }
+        table_raw_df = fetch_table_data(filters)
+        return viz_table_data(table_raw_df)
 
-        return viz_table_data(fetch_table_data(filters))
+    # **Sidebar Toggle Callback (Slides Over Content)**
+    @app.callback(
+        Output("filter-panel", "is_open"),
+        Input("filter-toggle-btn", "n_clicks"),
+        State("filter-panel", "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_filters(n_clicks, is_open):
+        """Toggles the filter panel sliding in and out."""
+        return not is_open
