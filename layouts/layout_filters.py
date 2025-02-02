@@ -5,6 +5,21 @@ def filter_layout():
     return dbc.Card(
         dbc.CardBody(
             [
+                # Toggle switch for view mode selection
+                html.Div(
+                    [
+                        dbc.Label("View Mode:"),
+                        dbc.Switch(
+                            id="view-mode-toggle",
+                            label="Graphical View",
+                            value=True,  # Default to graphical view
+                            className="ms-2",
+                        ),
+                    ],
+                    className="d-flex align-items-center mb-4",
+                ),
+                
+                # Filters
                 html.Div(
                     [
                         dbc.Label("Filter by Host Name", html_for="host-name-filter"),
@@ -77,7 +92,7 @@ def filter_layout():
                                 html.Span(
                                     " ?",
                                     id="classification-help-text",
-                                    style={"color": "blue", "cursor": "pointer", "fontSize": "12px"},
+                                    style={"color": "blue", "cursor": "pointer", "fontSize": "12px", "marginLeft": "5px"},
                                 ),
                             ],
                             html_for="classification-filter",
@@ -89,15 +104,15 @@ def filter_layout():
                             - Small: < 10MB.
                             - Medium: < 100MB.
                             - Large: < 1GB.
-                            - Massive: ≥ 1GB.                            - 
+                            - Massive: ≥ 1GB.
                             - Unclassified: Doesn't fit any above criteria.
                             """,
                             target="classification-help-text",
-                            placement="left",
+                            placement="left",  # Align tooltip to the left
                             style={
                                 "whiteSpace": "pre-wrap",
-                                "maxWidth": "600px",
-                                "width": "600px",
+                                "maxWidth": "400px",
+                                "width": "400px",
                                 "fontSize": "12px"
                             },
                         ),
