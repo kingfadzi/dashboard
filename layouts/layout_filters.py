@@ -8,21 +8,19 @@ def filter_layout():
                 # Toggle switch for view mode selection
                 html.Div(
                     [
-                        dbc.Label("View Mode:"),
                         dbc.Switch(
                             id="view-mode-toggle",
                             label="Graphical View",
                             value=True,  # Default to graphical view
-                            className="ms-2",
                         ),
                     ],
-                    className="d-flex align-items-center mb-4",
+                    className="mb-4",
                 ),
                 
                 # Filters
                 html.Div(
                     [
-                        dbc.Label("Filter by Host Name", html_for="host-name-filter"),
+                        dbc.Label("Host Name"),
                         dcc.Dropdown(
                             id="host-name-filter",
                             options=[],  # Options will be populated dynamically
@@ -38,7 +36,7 @@ def filter_layout():
                 ),
                 html.Div(
                     [
-                        dbc.Label("Filter by Activity Status", html_for="activity-status-filter"),
+                        dbc.Label("Activity Status"),
                         dcc.Dropdown(
                             id="activity-status-filter",
                             options=[],  # Options will be populated dynamically
@@ -54,7 +52,7 @@ def filter_layout():
                 ),
                 html.Div(
                     [
-                        dbc.Label("Filter by TC", html_for="tc-filter"),
+                        dbc.Label("TC"),
                         dcc.Dropdown(
                             id="tc-filter",
                             options=[],  # Options will be populated dynamically
@@ -70,7 +68,7 @@ def filter_layout():
                 ),
                 html.Div(
                     [
-                        dbc.Label("Filter by Repo Main Language", html_for="language-filter"),
+                        dbc.Label("Repo Main Language"),
                         dcc.Dropdown(
                             id="language-filter",
                             options=[],  # Options will be populated dynamically
@@ -88,14 +86,13 @@ def filter_layout():
                     [
                         dbc.Label(
                             [
-                                "Filter by Classification",
+                                "Classification",
                                 html.Span(
                                     " ?",
                                     id="classification-help-text",
                                     style={"color": "blue", "cursor": "pointer", "fontSize": "12px", "marginLeft": "5px"},
                                 ),
-                            ],
-                            html_for="classification-filter",
+                            ]
                         ),
                         dbc.Tooltip(
                             r"""
@@ -108,7 +105,7 @@ def filter_layout():
                             - Unclassified: Doesn't fit any above criteria.
                             """,
                             target="classification-help-text",
-                            placement="left",  # Align tooltip to the left
+                            placement="left",
                             style={
                                 "whiteSpace": "pre-wrap",
                                 "maxWidth": "400px",
@@ -131,7 +128,7 @@ def filter_layout():
                 ),
                 html.Div(
                     [
-                        dbc.Label("Filter by App ID", html_for="app-id-filter"),
+                        dbc.Label("App ID"),
                         dcc.Input(
                             id="app-id-filter",
                             type="text",
