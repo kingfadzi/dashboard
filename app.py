@@ -1,23 +1,40 @@
-from dash import Dash
-from layouts.layout_main import main_layout
-from app_callbacks import register_callbacks, register_dropdown_callbacks
+from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
+import dash.pages  # Enables automatic multi-page routing
 import plotly.io as pio
-from data.cache_instance import cache  # Import the cache instance
+from data.cache_instance import cache
+from app_callbacks import register_callbacks, register_dropdown_callbacks
 
-# Initialize Dash app
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+# Initialize Dash app with multi-page support
+app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server  # Flask server
 
 # Configure Flask-Caching
-server.config["CACHE_TYPE"] = "simple"  # Use 'redis' for production
-server.config["CACHE_DEFAULT_TIMEOUT"] = 3600  # Cache timeout in seconds
-cache.init_app(server)  # Initialize the cache with the Flask server
+server.config["CACHE_TYPE"] = "simple"
+server.config["CACHE_DEFAULT_TIMEOUT"] = 3600
+cache.init_app(server)
 
 pio.templates.default = "plotly_white"
 
-# Set layout
-app.layout = main_layout()
+# Define the navigation bar
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dcc.Link("Graphs", href="/", className="nav-link")),
+        dbc.NavItem(dcc.Link("Table", href="/table", className="nav-link")),
+    ],
+    brand="Dashboard",
+    color="primary",
+    dark=True,
+)
+
+# Define the app layout
+app.layout = dbc.Container(
+    [
+        navbar,
+        dash.page_container,  # Renders the correct page dynamically
+    ],
+    fluid=True,
+)
 
 # Register callbacks
 register_callbacks(app)
