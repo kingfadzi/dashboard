@@ -1,7 +1,7 @@
 # pages/table.py
 
 import dash
-from dash import html, dash_table
+from dash import html, dash_table, dcc
 import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path="/table")
@@ -26,6 +26,8 @@ layout = dbc.Container(
                     ],
                     data=[],  # Will be populated by callback
                     page_size=10,
+                    row_selectable="multi",  # ✅ Enables row selection
+                    selected_rows=[],  # Stores selected row indices
                     style_table={"overflowX": "auto"},
                     style_header={
                         "backgroundColor": "#f8f9fa",
@@ -42,7 +44,7 @@ layout = dbc.Container(
                         {"if": {"row_index": "odd"}, "backgroundColor": "#f9f9f9"},
                         {"if": {"row_index": "even"}, "backgroundColor": "#ffffff"},
                         {
-                            "if": {"state": "active"},
+                            "if": {"state": "selected"},
                             "backgroundColor": "#e9ecef",
                             "border": "1px solid #adb5bd",
                         },
@@ -55,6 +57,24 @@ layout = dbc.Container(
             ],
             className="shadow-sm rounded",
             style={"border": "1px solid #dee2e6", "overflow": "hidden"},
+        ),
+
+        # Dummy Re-Scan Button
+        html.Div(
+            [
+                dbc.Button(
+                    "Re-Scan Selected Repositories",
+                    id="rescan-button",
+                    color="primary",
+                    className="mt-3",
+                ),
+                dcc.Loading(
+                    id="loading-rescan",
+                    type="circle",
+                    children=html.Div(id="rescan-status", className="mt-2 text-success"),
+                ),
+            ],
+            className="text-center",
         ),
     ],
     fluid=True,

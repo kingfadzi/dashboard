@@ -165,3 +165,25 @@ def register_callbacks(app):
     def toggle_filters(n_clicks, is_open):
         """Toggles the filter sidebar sliding in and out."""
         return not is_open
+        
+    
+    
+    
+      @app.callback(
+        Output("rescan-status", "children"),
+        Input("rescan-button", "n_clicks"),
+        State("temp-table", "selected_rows"),
+        State("temp-table", "data"),
+        prevent_initial_call=True,
+    )
+    def trigger_rescan(n_clicks, selected_rows, table_data):
+        """Dummy function for triggering a repo re-scan based on selected rows."""
+    
+        if not selected_rows:
+            return "No repositories selected for re-scan."
+    
+        # Extract repo IDs of selected rows
+        selected_repos = [table_data[i]["repo_id"] for i in selected_rows]
+    
+        # Show confirmation message
+        return f"Re-Scan triggered for {len(selected_repos)} repositories!"
