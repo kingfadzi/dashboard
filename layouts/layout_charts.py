@@ -19,7 +19,7 @@ def chart_layout():
                             {"name": "Contributors", "id": "contributors"},
                             {"name": "Last Commit", "id": "last_commit"},
                         ],
-                        data=[],  # Data will be populated dynamically
+                        data=[],
                         page_size=10,
                         style_table={"overflowX": "auto"},
                     ),
@@ -27,7 +27,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Row: Activity Status & Repository Classification
             dbc.Row(
                 [
                     dbc.Col(
@@ -68,7 +67,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Contributors vs Commits Scatter Plot
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -84,7 +82,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Repositories by Main Language
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -100,7 +97,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Row: Language Usage Buckets & Repository Activity by Last Commit Date
             dbc.Row(
                 [
                     dbc.Col(
@@ -141,7 +137,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # CLOC Metrics by Language
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -157,7 +152,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Repositories by IaC Type
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -173,7 +167,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Programming Languages vs Contributor Buckets Heatmap
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -189,7 +182,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Row: Vulnerabilities by Severity & Standards Issues
             dbc.Row(
                 [
                     dbc.Col(
@@ -202,7 +194,7 @@ def chart_layout():
                                 dcc.Graph(
                                     id="trivy-vulnerabilities-bar-chart",
                                     config={"displayModeBar": False},
-                                    style={"height": 300"},
+                                    style={"height": 300},
                                 ),
                             ],
                             className="mb-4",
@@ -219,7 +211,7 @@ def chart_layout():
                                 dcc.Graph(
                                     id="semgrep-findings-bar-chart",
                                     config={"displayModeBar": False},
-                                    style={"height": 300"},
+                                    style={"height": 300},
                                 ),
                             ],
                             className="mb-4",
@@ -230,7 +222,6 @@ def chart_layout():
                 className="mb-4",
             ),
 
-            # Row 1: Java Versions & Build Tools
             dbc.Row([
                 dbc.Col(
                     dbc.Card([
@@ -240,7 +231,7 @@ def chart_layout():
                         ),
                         dcc.Graph(
                             id="label-tech-bar-chart-java-version",
-                            config={"displayModeBar": False"},
+                            config={"displayModeBar": False},
                             style={"height": 300},
                         ),
                     ], className="mb-4"),
@@ -254,7 +245,7 @@ def chart_layout():
                         ),
                         dcc.Graph(
                             id="label-tech-bar-chart-build-tool",
-                            config={"displayModeBar": False"},
+                            config={"displayModeBar": False},
                             style={"height": 300},
                         ),
                     ], className="mb-4"),
