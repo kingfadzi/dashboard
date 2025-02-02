@@ -7,6 +7,7 @@ from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
 from layouts.layout_filters import filter_layout
 import dash
+from callbacks.table_callbacks import register_table_callbacks
 
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
@@ -52,6 +53,7 @@ app.layout = dbc.Container(
 
 register_callbacks(app)
 register_dropdown_callbacks(app)
+register_table_callbacks(app) 
 
 if __name__ == "__main__":
     app.run_server(debug=True, host="0.0.0.0")
