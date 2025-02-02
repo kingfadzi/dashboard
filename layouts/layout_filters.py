@@ -5,16 +5,15 @@ def filter_layout():
     return dbc.Card(
         dbc.CardBody(
             [
-                # Toggle switch for view mode selection
+                # Toggle switch for view mode selection, left-aligned
                 html.Div(
-                    [
-                        dbc.Switch(
-                            id="view-mode-toggle",
-                            label="Graphical View",
-                            value=True,  # Default to graphical view
-                        ),
-                    ],
-                    className="mb-4",
+                    dbc.Switch(
+                        id="view-mode-toggle",
+                        label="Graphical View",
+                        value=True,  # Default to graphical view
+                        className="me-2",
+                    ),
+                    className="d-flex align-items-center mb-4",
                 ),
                 
                 # Filters
