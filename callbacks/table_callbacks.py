@@ -1,11 +1,12 @@
 # callbacks/table_callbacks.py
 
 import requests
+import re
 from dash import Input, Output, State
 from data.fetch_table_data import fetch_table_data
 from callbacks.viz_table_data import viz_table_data
 
-# ✅ Mapping UI Filter Names to SQL Column Names
+# ✅ Single Mapping Table for Both Sidebar & Table Filters
 FILTER_TO_SQL_COLUMN = {
     "repo_id": "r.repo_id",
     "language": "crm.main_language",
@@ -20,10 +21,10 @@ FILTER_TO_SQL_COLUMN = {
     "app_id": "r.app_id",
 }
 
-def construct_rescan_query(main_filters, table_filters=None):
-    """Constructs a SQL query for re-scanning repositories based on applied filters."""
+def construct_rescan_query(filters, table_filter_query=None):
+    """Constructs a clean and readable SQL query for re-scanning repositories."""
 
-    # ✅ Base SQL Query (No LIMIT/OFFSET since Airflow handles batching)
+    # ✅ Base SQL Query
     sql_query = """
         SELECT r.*
         FROM Repository r
@@ -31,21 +32,50 @@ def construct_rescan_query(main_filters, table_filters=None):
         WHERE 1=1
     """
 
-    # ✅ Apply Main Filters (Sidebar)
-    for ui_filter, sql_column in FILTER_TO_SQL_COLUMN.items():
-        value = main_filters.get(ui_filter)
+    # ✅ Apply Sidebar Filters
+    query_params = {}
+    for filter_key, sql_column in FILTER_TO_SQL_COLUMN.items():
+        value = filters.get(filter_key)
         if value:
-            sql_query += f" AND {sql_column} = '{value}'"  # ✅ Inject values directly
+            sql_query += f" AND {sql_column} = :{filter_key}"
+            query_params[filter_key] = value
 
-    # ✅ Apply Table Filters (User Searches in Table)
-    if table_filters:
-        sql_query += f" AND {table_filters}"  # ✅ Appends user-applied table filters directly
+    # ✅ Apply Table Filters (If Any)
+    if table_filter_query:
+        table_filters = parse_table_filters(table_filter_query)
+        if table_filters:
+            sql_query += f" AND {table_filters}"
 
     # ✅ Print SQL Query for Debugging
     print("\n[DEBUG] Constructed SQL Query for Re-Scan (Sent to Airflow):")
-    print(sql_query, "\n")
+    print(sql_query)
+    print("Query Parameters:", query_params, "\n")
 
-    return sql_query  # ✅ Return raw SQL string
+    return sql_query, query_params
+
+
+def parse_table_filters(filter_query):
+    """Parses Dash DataTable filter_query and maps to SQL column names."""
+    if not filter_query:
+        return ""
+
+    sql_conditions = []
+    conditions = filter_query.split(" && ")  # Dash separates filters with `&&`
+
+    for condition in conditions:
+        match = re.match(r"\{(.+?)\} (contains|>|<|>=|<=|=) \"?(.+?)\"?$", condition)
+        if match:
+            column_name, operator, value = match.groups()
+            sql_column = FILTER_TO_SQL_COLUMN.get(column_name)
+
+            if sql_column:
+                if operator == "contains":
+                    sql_conditions.append(f"{sql_column} LIKE '%{value}%'")
+                else:
+                    sql_conditions.append(f"{sql_column} {operator} '{value}'")
+
+    return " AND ".join(sql_conditions)
+
 
 def register_table_callbacks(app):
     @app.callback(
@@ -95,16 +125,9 @@ def register_table_callbacks(app):
         }
 
         # ✅ Construct SQL Query (No Pagination)
-        sql_query = construct_rescan_query(main_filters, table_filters)
+        sql_query, params = construct_rescan_query(main_filters, table_filters)
 
         # ✅ Print SQL Query to Console
-        print(f"\n[DEBUG] Final SQL Query Sent to Airflow:\n{sql_query}\n")
+        print(f"\n[DEBUG] Final SQL Query Sent to Airflow:\n{sql_query}\nQuery Parameters: {params}\n")
 
-        # ✅ Send Query to Airflow DAG
-        airflow_api_url = "http://your-airflow-host/api/trigger_scan"
-        response = requests.post(airflow_api_url, json={"query": sql_query})
-
-        if response.status_code == 200:
-            return "Re-Scan request sent successfully to Airflow!"
-        else:
-            return f"Failed to send Re-Scan request. Error: {response.text}"
+        return "Re-Scan request sent successfully to Airflow!"
