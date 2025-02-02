@@ -96,16 +96,13 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_charts(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+    def update_charts(*args):
         """Fetches all chart data & KPIs when filter values change (no table data here)."""
-        filters = {
-            "host_name": selected_hosts or [],
-            "activity_status": selected_statuses or [],
-            "tc": selected_tcs or [],
-            "main_language": selected_languages or [],
-            "classification_label": selected_classifications or [],
-            "app_id": [x.strip() for x in app_id_input.split(",")] if app_id_input else [],
-        }
+        filter_keys = [
+            "host_name", "activity_status", "tc", "main_language",
+            "classification_label", "app_id"
+        ]
+        filters = {key: (arg if arg else []) for key, arg in zip(filter_keys, args)}
 
         return (
             viz_active_inactive(fetch_active_inactive_data(filters)),
@@ -135,7 +132,7 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # **Table Callback (Includes Tech Labels)**
+    # **Table Callback (Fixes Argument Mismatch, Includes Tech Labels)**
     @app.callback(
         Output("temp-table", "data"),
         [
@@ -147,9 +144,13 @@ def register_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_table(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
-        """Fetches table data and includes Tech Labels."""
-        filters = { ... }
+    def update_table(*args):
+        """Fetch table data including Tech Labels."""
+        filter_keys = [
+            "host_name", "activity_status", "tc", "main_language",
+            "classification_label", "app_id"
+        ]
+        filters = {key: (arg if arg else []) for key, arg in zip(filter_keys, args)}
+
         table_raw_df = fetch_table_data(filters)
-        table_data = viz_table_data(table_raw_df)
-        return table_data
+        return viz_table_data(table_raw_df)
