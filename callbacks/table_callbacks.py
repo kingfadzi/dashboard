@@ -1,3 +1,5 @@
+# callbacks/table_callbacks.py
+
 import requests
 from dash import Input, Output, State
 from data.fetch_table_data import fetch_table_data
@@ -18,10 +20,10 @@ FILTER_TO_SQL_COLUMN = {
     "app_id": "r.app_id",
 }
 
-def construct_rescan_query(main_filters, table_filters=None, batch_size=100, offset=0):
-    """Constructs a SQL query for re-scanning repositories based on main & table filters."""
+def construct_rescan_query(main_filters, table_filters=None):
+    """Constructs a SQL query for re-scanning repositories based on applied filters."""
 
-    # ✅ Base SQL Query
+    # ✅ Base SQL Query (No LIMIT/OFFSET since Airflow handles batching)
     sql_query = """
         SELECT r.*
         FROM Repository r
@@ -29,31 +31,21 @@ def construct_rescan_query(main_filters, table_filters=None, batch_size=100, off
         WHERE 1=1
     """
 
-    # ✅ Initialize Query Parameters
-    query_params = {}
-
     # ✅ Apply Main Filters (Sidebar)
     for ui_filter, sql_column in FILTER_TO_SQL_COLUMN.items():
         value = main_filters.get(ui_filter)
         if value:
-            sql_query += f" AND {sql_column} = :{ui_filter}"
-            query_params[ui_filter] = value
+            sql_query += f" AND {sql_column} = '{value}'"  # ✅ Inject values directly
 
-    # ✅ Apply In-Table Filters (User Searches in Table)
+    # ✅ Apply Table Filters (User Searches in Table)
     if table_filters:
         sql_query += f" AND {table_filters}"  # ✅ Appends user-applied table filters directly
 
-    # ✅ Add Pagination
-    sql_query += " LIMIT :batch_size OFFSET :offset"
-    query_params["batch_size"] = batch_size
-    query_params["offset"] = offset
-
     # ✅ Print SQL Query for Debugging
-    print("\n[DEBUG] Constructed SQL Query for Re-Scan:")
-    print(sql_query)
-    print("Query Parameters:", query_params, "\n")
+    print("\n[DEBUG] Constructed SQL Query for Re-Scan (Sent to Airflow):")
+    print(sql_query, "\n")
 
-    return sql_query, query_params
+    return sql_query  # ✅ Return raw SQL string
 
 def register_table_callbacks(app):
     @app.callback(
@@ -90,7 +82,7 @@ def register_table_callbacks(app):
         prevent_initial_call=True,
     )
     def trigger_rescan(n_clicks, selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input, table_filters):
-        """Constructs SQL query from main & table filters, prints it to the console, and sends it to Airflow for repo re-scan."""
+        """Constructs SQL query from main & table filters, prints it, and sends it to Airflow for repo re-scan."""
 
         # ✅ Format Main Filters (Sidebar)
         main_filters = {
@@ -102,17 +94,17 @@ def register_table_callbacks(app):
             "app_id": [x.strip() for x in app_id_input.split(",")] if isinstance(app_id_input, str) else None,
         }
 
-        # ✅ Construct SQL Query using both Sidebar & Table Filters
-        sql_query, params = construct_rescan_query(main_filters, table_filters)
+        # ✅ Construct SQL Query (No Pagination)
+        sql_query = construct_rescan_query(main_filters, table_filters)
 
         # ✅ Print SQL Query to Console
-        print(f"\n[DEBUG] Constructed SQL Query for Re-Scan:\n{sql_query}\nQuery Parameters: {params}\n")
+        print(f"\n[DEBUG] Final SQL Query Sent to Airflow:\n{sql_query}\n")
 
-        # Send Query to Airflow (Can be integrated later)
+        # ✅ Send Query to Airflow DAG
         airflow_api_url = "http://your-airflow-host/api/trigger_scan"
         response = requests.post(airflow_api_url, json={"query": sql_query})
 
         if response.status_code == 200:
-            return "Re-Scan request sent successfully!"
+            return "Re-Scan request sent successfully to Airflow!"
         else:
             return f"Failed to send Re-Scan request. Error: {response.text}"
