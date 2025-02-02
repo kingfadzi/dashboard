@@ -12,6 +12,14 @@ server.config["CACHE_TYPE"] = "simple"
 server.config["CACHE_DEFAULT_TIMEOUT"] = 3600
 cache.init_app(server)
 
+# Sidebar toggle (takes minimal space)
+filter_toggle = html.Div(
+    [
+        html.Span("◀", id="filter-toggle-btn", style={"cursor": "pointer", "padding": "5px", "fontSize": "20px"}),
+    ],
+    style={"position": "absolute", "left": "5px", "top": "10px", "zIndex": "1000"},
+)
+
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dcc.Link("Graphs", href="/", className="nav-link")),
@@ -25,31 +33,30 @@ navbar = dbc.NavbarSimple(
 app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
-
         navbar,
 
+        # Sidebar & Main Content Row
         dbc.Row(
             [
-                # Left: Filter with Collapsible Functionality
+                # Collapsible Left Sidebar (Filters)
                 dbc.Col(
-                    [
-                        dbc.Button(
-                            "Toggle Filters",
-                            id="filter-toggle-btn",
-                            color="primary",
-                            className="mb-2",
-                        ),
-                        dbc.Collapse(
-                            filter_layout(),  # Existing filter layout
-                            id="filter-panel",
-                            is_open=True,  # Default: Expanded
-                        ),
-                    ],
+                    dbc.Offcanvas(
+                        filter_layout(),
+                        id="filter-panel",
+                        title="Filters",
+                        is_open=True,  # Default: Expanded
+                        placement="start",  # Collapse to the left
+                        backdrop=False,  # Keep it functional while collapsed
+                    ),
+                    id="filter-col",
                     md=3,
                 ),
 
-                # Right: Page Content
-                dbc.Col(dash.page_container, md=9),
+                # Sidebar Toggle (Minimal Space)
+                filter_toggle,
+
+                # Main Content Expands When Filters Collapse
+                dbc.Col(dash.page_container, id="content-col", md=9),
             ],
             className="mt-3",
         ),
