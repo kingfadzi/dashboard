@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from data.cache_instance import cache
 from app_callbacks import register_callbacks, register_dropdown_callbacks
 from layouts.layout_filters import filter_layout
-
+import dash
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
