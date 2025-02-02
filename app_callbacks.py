@@ -1,3 +1,5 @@
+# app_callbacks.py
+
 from dash import Input, Output
 from data.fetch_dropdown_options import fetch_dropdown_options
 from data.fetch_contributors_commits_size import fetch_contributors_commits_size
@@ -39,9 +41,10 @@ def register_dropdown_callbacks(app):
             Output("language-filter", "options"),
             Output("classification-filter", "options"),
         ],
-        []
+        [Input("url", "pathname")]  # Fire once on page load, or when URL changes
     )
     def populate_dropdown_options(_):
+        """Populates dropdown filter options when the app loads or URL changes."""
         options = fetch_dropdown_options()
         return (
             [{"label": name, "value": name} for name in options["host_names"]],
@@ -65,7 +68,6 @@ def register_callbacks(app):
             Output("semgrep-findings-bar-chart", "figure"),
             Output("language-usage-buckets-bar", "figure"),
             Output("last-commit-buckets-bar", "figure"),
-
             Output("label-tech-bar-chart-java-version", "figure"),
             Output("label-tech-bar-chart-build-tool", "figure"),
             Output("label-tech-bar-chart-appserver", "figure"),
@@ -74,16 +76,13 @@ def register_callbacks(app):
             Output("label-tech-bar-chart-spring-boot-version", "figure"),
             Output("label-tech-bar-chart-middleware", "figure"),
             Output("label-tech-bar-chart-logging", "figure"),
-
             Output("kpi-total-repos", "children"),
             Output("kpi-avg-commits", "children"),
             Output("kpi-avg-contributors", "children"),
             Output("kpi-avg-loc", "children"),
             Output("kpi-avg-ccn", "children"),
             Output("kpi-avg-repo-size", "children"),
-            
-            Output("temp-table", "data"),  # NEW: Table Output
-
+            Output("temp-table", "data"),  # Table Data
         ],
         [
             Input("host-name-filter", "value"),
@@ -95,10 +94,12 @@ def register_callbacks(app):
         ],
     )
     def update_charts(selected_hosts, selected_statuses, selected_tcs, selected_languages, selected_classifications, app_id_input):
+        """Fetches all chart data & table data whenever filter values change."""
         if app_id_input:
             app_ids = [id.strip() for id in app_id_input.split(",")]
         else:
             app_ids = None
+
         filters = {
             "host_name": selected_hosts,
             "activity_status": selected_statuses,
@@ -107,6 +108,8 @@ def register_callbacks(app):
             "classification_label": selected_classifications,
             "app_id": app_ids,
         }
+        
+        # 1) Fetch data from DB
         active_inactive_data = fetch_active_inactive_data(filters)
         contributors_commits_size_data = fetch_contributors_commits_size(filters)
         iac_data = fetch_iac_data(filters)
@@ -118,6 +121,8 @@ def register_callbacks(app):
         semgrep_data = fetch_semgrep_findings(filters)
         multi_lang_usage_data = fetch_multi_language_usage(filters)
         last_commit_buckets_data = fetch_last_commit_buckets(filters)
+
+        # 2) Convert raw data -> figures
         scatter_fig = viz_contributors_commits_size(contributors_commits_size_data)
         iac_chart_fig = viz_iac_chart(iac_data)
         active_inactive_fig = viz_active_inactive(active_inactive_data)
@@ -132,30 +137,22 @@ def register_callbacks(app):
 
         java_data = fetch_label_tech_data(filters, "cto.io/java-version")
         java_fig = viz_label_tech(java_data)
-
         buildtool_data = fetch_label_tech_data(filters, "cto.io/build-tool")
         buildtool_fig = viz_label_tech(buildtool_data)
-
         appserver_data = fetch_label_tech_data(filters, "cto.io/appserver")
         appserver_fig = viz_label_tech(appserver_data)
-
         db_data = fetch_label_tech_data(filters, "cto.io/database")
         db_fig = viz_label_tech(db_data)
-
         sf_data = fetch_label_tech_data(filters, "cto.io/spring-framework-version")
         sf_fig = viz_label_tech(sf_data)
-
         sb_data = fetch_label_tech_data(filters, "cto.io/spring-boot-version")
         sb_fig = viz_label_tech(sb_data)
-
         mw_data = fetch_label_tech_data(filters, "cto.io/middleware")
         mw_fig = viz_label_tech(mw_data)
-
         logging_data = fetch_label_tech_data(filters, "cto.io/logging")
         logging_fig = viz_label_tech(logging_data)
 
-        kpi_data = fetch_kpi_data(filters)
-
+        # 3) KPIs
         kpi_data = fetch_kpi_data(filters)
         total_repos = kpi_data["total_repos"]
         avg_commits = kpi_data["avg_commits"]
@@ -163,9 +160,10 @@ def register_callbacks(app):
         avg_loc = kpi_data["avg_loc"]
         avg_ccn = kpi_data["avg_ccn"]
         avg_repo_size = kpi_data["avg_repo_size"]
-        
-        table_data = fetch_table_data(filters)
-        table_data = viz_table_data(table_data)  # Apply any necessary transformations
+
+        # 4) Table Data
+        table_raw_df = fetch_table_data(filters)
+        table_data = viz_table_data(table_raw_df)
 
         return (
             active_inactive_fig,
@@ -187,7 +185,6 @@ def register_callbacks(app):
             sb_fig,
             mw_fig,
             logging_fig,
-
             total_repos,
             avg_commits,
             avg_contributors,

@@ -4,6 +4,7 @@ import dash
 from dash import html, dash_table
 import dash_bootstrap_components as dbc
 
+# Register this page at "/table"
 dash.register_page(__name__, path="/table")
 
 layout = dbc.Container(
@@ -46,7 +47,7 @@ layout = dbc.Container(
                             "type": "text",
                         },
                     ],
-                    data=[],  # Dynamically updated by callbacks
+                    data=[],  # Will be populated by callback
                     page_size=10,
                     style_table={"overflowX": "auto"},
                     style_cell={"textAlign": "left"},
