@@ -6,50 +6,62 @@ from dash import Input, Output, State
 from data.fetch_table_data import fetch_table_data
 from callbacks.viz_table_data import viz_table_data
 
-# ✅ Single Mapping Table for Both Sidebar & Table Filters
+# ✅ Unified Mapping for Sidebar Filters & Table Filters
 FILTER_TO_SQL_COLUMN = {
-    "repo_id": "r.repo_id",
-    "language": "crm.main_language",
-    "commits": "crm.number_of_commits",
-    "contributors": "crm.number_of_contributors",
-    "last_commit": "crm.last_commit_date",
+    # ✅ Sidebar Filters (Main Filters)
     "host_name": "crm.host_name",
     "activity_status": "crm.activity_status",
     "tc": "crm.tc",
+    "main_language": "crm.main_language",
     "classification_label": "crm.classification_label",
-    "status": "r.status",
     "app_id": "r.app_id",
+
+    # ✅ Table View Columns (Mapped to SQL)
+    "repo_id": "repo_id",
+    "web_url": "web_url",
+    "language": "main_language",  # ✅ Matches table alias
+    "commits": "total_commits",
+    "contributors": "number_of_contributors",
+    "last_commit": "last_commit_date",
 }
 
-def construct_rescan_query(filters, table_filter_query=None):
-    """Constructs a clean and readable SQL query for re-scanning repositories."""
+def construct_rescan_query(filters, table_filters=None):
+    """Constructs a SQL query for re-scanning repositories based on applied filters."""
+
+    # ✅ Print Filters Before Mapping
+    print("\n[DEBUG] Filters BEFORE Mapping:")
+    for key, value in filters.items():
+        print(f"  {key}: {value}")
 
     # ✅ Base SQL Query
     sql_query = """
-        SELECT r.*
-        FROM Repository r
-        JOIN CombinedRepoMetrics crm ON crm.repo_id = r.repo_id
+        SELECT repo_id, web_url, main_language AS language, total_commits AS commits,
+               number_of_contributors AS contributors, last_commit_date AS last_commit
+        FROM combined_repo_metrics
         WHERE 1=1
     """
 
-    # ✅ Apply Sidebar Filters
+    # ✅ Apply Sidebar Filters (Main Filters)
     query_params = {}
-    for filter_key, sql_column in FILTER_TO_SQL_COLUMN.items():
-        value = filters.get(filter_key)
+    for ui_filter, sql_column in FILTER_TO_SQL_COLUMN.items():
+        value = filters.get(ui_filter)
         if value:
-            sql_query += f" AND {sql_column} = :{filter_key}"
-            query_params[filter_key] = value
+            sql_query += f" AND {sql_column} = '{value}'"
+            query_params[ui_filter] = value
 
-    # ✅ Apply Table Filters (If Any)
-    if table_filter_query:
-        table_filters = parse_table_filters(table_filter_query)
-        if table_filters:
-            sql_query += f" AND {table_filters}"
+    # ✅ Apply Table Filters (Mapped Correctly)
+    table_filter_sql = parse_table_filters(table_filters)
+    if table_filter_sql:
+        sql_query += f" AND {table_filter_sql}"
+
+    # ✅ Print Filters After Mapping
+    print("\n[DEBUG] Filters AFTER Mapping (SQL Column Names):")
+    for key, value in query_params.items():
+        print(f"  {FILTER_TO_SQL_COLUMN.get(key, key)}: {value}")
 
     # ✅ Print SQL Query for Debugging
     print("\n[DEBUG] Constructed SQL Query for Re-Scan (Sent to Airflow):")
-    print(sql_query)
-    print("Query Parameters:", query_params, "\n")
+    print(sql_query, "\n")
 
     return sql_query, query_params
 
