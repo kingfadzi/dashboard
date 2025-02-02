@@ -1,14 +1,19 @@
+# pages/table.py
+
 import dash
-from dash import html, dcc, dash_table
+from dash import html, dash_table
 import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path="/table")
 
 layout = dbc.Container(
     [
-        html.H1("Repository Data Table", className="text-center mb-4"),
         dbc.Card(
             [
+                dbc.CardHeader(
+                    html.B("Repository Data Table", className="text-center"),
+                    className="bg-light",
+                ),
                 dash_table.DataTable(
                     id="temp-table",
                     columns=[
@@ -18,7 +23,11 @@ layout = dbc.Container(
                             "type": "text",
                             "presentation": "markdown",
                         },
-                        {"name": "Language", "id": "language", "type": "text"},
+                        {
+                            "name": "Language",
+                            "id": "language",
+                            "type": "text",
+                        },
                         {
                             "name": "Commits",
                             "id": "commits",
@@ -37,7 +46,7 @@ layout = dbc.Container(
                             "type": "text",
                         },
                     ],
-                    data=[],
+                    data=[],  # Dynamically updated by callbacks
                     page_size=10,
                     style_table={"overflowX": "auto"},
                     style_cell={"textAlign": "left"},

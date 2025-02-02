@@ -3,11 +3,16 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+from layouts.layout_kpi import kpi_layout  # <-- Import your KPI layout function
 
+# Register this as the home page
 dash.register_page(__name__, path="/")
 
 layout = dbc.Container(
     [
+        # KPI row at the top
+        kpi_layout(),
+
         # Row: Activity Status & Repository Classification
         dbc.Row(
             [
