@@ -4,7 +4,6 @@ import dash_bootstrap_components as dbc
 def chart_layout():
     return dbc.Col(
         [
-            # Dummy Table at the top
             dbc.Card(
                 [
                     dbc.CardHeader(
@@ -43,8 +42,8 @@ def chart_layout():
                         page_size=10,
                         style_table={"overflowX": "auto"},
                         style_cell={"textAlign": "left"},
-                        sort_action="native",  # Enables sorting
-                        filter_action="native",  # Enables filtering/searching
+                        sort_action="native",
+                        filter_action="native",
                     ),
                 ],
                 className="mb-4",

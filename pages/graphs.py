@@ -12,10 +12,8 @@ dash.register_page(__name__, path="/")
 
 layout = dbc.Container(
     [
-        # KPI row at the top
         kpi_layout(),
 
-        # Row: Activity Status & Repository Classification
         dbc.Row(
             [
                 dbc.Col(
@@ -56,7 +54,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Contributors vs Commits Scatter Plot
         dbc.Card(
             [
                 dbc.CardHeader(
@@ -72,7 +69,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Repositories by Main Language
         dbc.Card(
             [
                 dbc.CardHeader(
@@ -88,7 +84,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row: Language Usage Buckets & Repository Activity by Last Commit Date
         dbc.Row(
             [
                 dbc.Col(
@@ -129,7 +124,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # CLOC Metrics by Language
         dbc.Card(
             [
                 dbc.CardHeader(
@@ -145,7 +139,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Repositories by IaC Type
         dbc.Card(
             [
                 dbc.CardHeader(
@@ -161,7 +154,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Programming Languages vs Contributor Buckets Heatmap
         dbc.Card(
             [
                 dbc.CardHeader(
@@ -177,7 +169,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row: Vulnerabilities by Severity & Standards Issues
         dbc.Row(
             [
                 dbc.Col(
@@ -218,7 +209,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 1: Java Versions & Build Tools
         dbc.Row([
             dbc.Col(
                 dbc.Card([
@@ -250,7 +240,6 @@ layout = dbc.Container(
             ),
         ], className="mb-4"),
 
-        # Row 2: Application Servers & Databases
         dbc.Row([
             dbc.Col(
                 dbc.Card([
@@ -282,7 +271,6 @@ layout = dbc.Container(
             ),
         ], className="mb-4"),
 
-        # Row 3: Spring Framework & Spring Boot
         dbc.Row([
             dbc.Col(
                 dbc.Card([
@@ -314,7 +302,6 @@ layout = dbc.Container(
             ),
         ], className="mb-4"),
 
-        # Row 4: Middleware & Logging
         dbc.Row([
             dbc.Col(
                 dbc.Card([

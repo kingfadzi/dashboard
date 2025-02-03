@@ -12,7 +12,6 @@ from callbacks.table_callbacks import register_table_callbacks
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-# Force all graphs to use a white background globally
 pio.templates.default = "plotly_white"
 
 server.config["CACHE_TYPE"] = "simple"
@@ -25,7 +24,7 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dcc.Link("Table", href="/table", className="nav-link")),
         html.Span("☰", id="filter-toggle-btn", style={"cursor": "pointer", "fontSize": "24px", "marginLeft": "10px"}),
     ],
-    brand=dcc.Link("Dashboard", href="/", className="navbar-brand"),  # ✅ Clickable Dashboard Title
+    brand=dcc.Link("Dashboard", href="/", className="navbar-brand"),
     color="primary",
     dark=True,
 )
@@ -35,17 +34,15 @@ app.layout = dbc.Container(
         dcc.Location(id="url", refresh=False),
         navbar,
 
-        # Offcanvas Filter Panel (Slides Over Content)
-        dbc.Offcanvas(
+           dbc.Offcanvas(
             filter_layout(),
             id="filter-panel",
             title="Filters",
-            is_open=False,  # Default is closed
-            placement="start",  # Slides in from the left
-            backdrop=True,  # Click outside to close
+            is_open=False,
+            placement="start",
+            backdrop=True,
         ),
 
-        # Main Content Always Uses Full Width
         dash.page_container,
     ],
     fluid=True,
@@ -53,7 +50,7 @@ app.layout = dbc.Container(
 
 register_callbacks(app)
 register_dropdown_callbacks(app)
-register_table_callbacks(app) 
+register_table_callbacks(app)
 
 if __name__ == "__main__":
     app.run_server(debug=True, host="0.0.0.0")

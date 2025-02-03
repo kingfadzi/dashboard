@@ -10,7 +10,6 @@ def main_layout():
             html.Div(id="app-layout", style={"display": "none"}),
             html.H1("Custom Dashboard", className="bg-secondary text-white p-2 mb-4 text-center"),
 
-            # KPI row with placeholder stats
             kpi_layout(),
 
             dbc.Row(

@@ -28,7 +28,6 @@ from data.fetch_label_tech_data import fetch_label_tech_data
 from callbacks.viz_label_tech import viz_label_tech
 from data.fetch_kpi_data import fetch_kpi_data
 
-### **Dropdown Filters Callback (Triggers on Page Load)**
 def register_dropdown_callbacks(app):
     @app.callback(
         [
@@ -38,10 +37,9 @@ def register_dropdown_callbacks(app):
             Output("language-filter", "options"),
             Output("classification-filter", "options"),
         ],
-        [Input("url", "pathname")]  # Fire once on page load or URL change
+        [Input("url", "pathname")]
     )
     def populate_dropdown_options(_):
-        """Populates dropdown filter options when the app loads or URL changes."""
         options = fetch_dropdown_options()
         return (
             [{"label": name, "value": name} for name in options["host_names"]],
@@ -52,7 +50,6 @@ def register_dropdown_callbacks(app):
         )
 
 
-### **Graphs & KPI Callback (Includes All Tech Label Charts)**
 def register_callbacks(app):
     @app.callback(
         [
@@ -92,7 +89,6 @@ def register_callbacks(app):
         ],
     )
     def update_charts(*args):
-        """Fetches all chart data & KPIs when filter values change (no table data here)."""
         filter_keys = ["host_name", "activity_status", "tc", "main_language", "classification_label", "app_id"]
         filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
 
@@ -124,7 +120,6 @@ def register_callbacks(app):
             fetch_kpi_data(filters)["avg_repo_size"],
         )
 
-    # **Sidebar Toggle Callback (Fixes Hamburger Toggle)**
     @app.callback(
         Output("filter-panel", "is_open"),
         Input("filter-toggle-btn", "n_clicks"),
@@ -132,5 +127,4 @@ def register_callbacks(app):
         prevent_initial_call=True,
     )
     def toggle_filters(n_clicks, is_open):
-        """Toggles the filter sidebar sliding in and out."""
         return not is_open
