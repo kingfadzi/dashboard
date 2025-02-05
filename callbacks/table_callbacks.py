@@ -1,5 +1,3 @@
-# callbacks/table_callbacks.py
-
 import requests
 import re
 from dash import Input, Output, State
@@ -78,7 +76,8 @@ def register_table_callbacks(app):
             "tc": selected_tcs or [],
             "main_language": selected_languages or [],
             "classification_label": selected_classifications or [],
-            "app_id": [x.strip() for x in app_id_input.split(",")] if isinstance(app_id_input, str) else [],
+            # Filter out any blank entries from the app id input
+            "app_id": [x.strip() for x in app_id_input.split(",") if x.strip()] if isinstance(app_id_input, str) else [],
         }
 
         print("\nSidebar Filters Before Payload Processing:")
