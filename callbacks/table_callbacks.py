@@ -6,7 +6,7 @@ from dash import Input, Output, State
 from data.fetch_table_data import fetch_table_data
 from callbacks.viz_table_data import viz_table_data
 
-AIRFLOW_URL = "http://192.168.1.188:8088/api/v1/dags/dynamic_repository_processing/dagRuns"
+AIRFLOW_URL = "http://192.168.1.188:8088/api/v1/dags/fundamental_metrics/dagRuns"
 AIRFLOW_AUTH = ("admin", "password")
 
 def prepare_filter_payload(filters, table_filters=None):
