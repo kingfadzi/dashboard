@@ -11,6 +11,8 @@ def fetch_table_data(filters=None):
             SELECT
                 repo_id,
                 web_url,
+                tc,
+                app_id,
                 main_language,
                 total_commits,
                 number_of_contributors,
