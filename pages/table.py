@@ -20,9 +20,27 @@ layout = dbc.Container(
                             "presentation": "markdown",
                         },
                         {"name": "Language", "id": "main_language", "type": "text"},
-                        {"name": "Commits", "id": "total_commits", "type": "numeric", "format": {"specifier": ",d"}},
-                        {"name": "Contributors", "id": "number_of_contributors", "type": "numeric", "format": {"specifier": ",d"}},
+                        {
+                            "name": "Commits",
+                            "id": "total_commits",
+                            "type": "numeric",
+                            "format": {"specifier": ",d"},
+                        },
+                        {
+                            "name": "Contributors",
+                            "id": "number_of_contributors",
+                            "type": "numeric",
+                            "format": {"specifier": ",d"},
+                        },
                         {"name": "Last Commit", "id": "last_commit_date", "type": "text"},
+                        # New columns added here:
+                        {
+                            "name": "TC",
+                            "id": "tc",
+                            "type": "numeric",
+                            "format": {"specifier": ",d"},
+                        },
+                        {"name": "App ID", "id": "app_id", "type": "text"},
                     ],
                     data=[],  # Will be populated by callback
                     page_size=10,
