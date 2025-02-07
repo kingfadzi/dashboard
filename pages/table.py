@@ -1,5 +1,3 @@
-# pages/table.py
-
 import dash
 from dash import html, dash_table, dcc
 import dash_bootstrap_components as dbc
@@ -66,11 +64,15 @@ layout = dbc.Container(
                         "textAlign": "left",
                         "padding": "10px",
                         "borderBottom": "1px solid #dee2e6",
-                        "maxWidth": "150px",         # Limits the width so long values get truncated
+                        "maxWidth": "150px",         # Prevents long values from breaking the table
                         "overflow": "hidden",         # Hides overflow text
-                        "textOverflow": "ellipsis",   # Shows an ellipsis
-                        "whiteSpace": "nowrap",       # Prevents wrapping
+                        "textOverflow": "ellipsis",   # Shows an ellipsis when text is too long
+                        "whiteSpace": "nowrap",       # Prevents text wrapping
                     },
+                    tooltip_duration=None,  # Tooltips stay as long as user hovers
+                    tooltip_delay=0,  # Removes delay before showing tooltips
+                    tooltip_delay_hide=200,  # Hides tooltips quickly after cursor leaves
+                    tooltip_data=[],  # Will be populated by callback
                     style_data_conditional=[
                         {"if": {"row_index": "odd"}, "backgroundColor": "#f9f9f9"},
                         {"if": {"row_index": "even"}, "backgroundColor": "#ffffff"},
@@ -80,9 +82,6 @@ layout = dbc.Container(
                     filter_action="native",
                     filter_options={"case": "insensitive"},
                     column_selectable="single",
-                    # These two properties enable tooltips:
-                    tooltip_duration=None,  # Tooltip stays as long as the user hovers
-                    tooltip_data=[],        # This will be populated by your callback
                 ),
             ],
             className="shadow-sm rounded",

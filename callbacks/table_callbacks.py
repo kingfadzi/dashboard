@@ -36,7 +36,7 @@ def prepare_filter_payload(filters, table_filters=None):
 def register_table_callbacks(app):
     @app.callback(
         [Output("temp-table", "data"),
-         Output("temp-table", "tooltip_data")],  # NEW: Adding tooltip data output
+         Output("temp-table", "tooltip_data")],  # Adding tooltip_data output
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
@@ -55,8 +55,8 @@ def register_table_callbacks(app):
 
         table_raw_df = fetch_table_data(filters)
         table_data = viz_table_data(table_raw_df)
-        
-        # NEW: Generate tooltip data for TC and App ID fields only
+
+        # Generate tooltip_data ONLY for TC and App ID fields
         tooltip_data = []
         for row in table_data:
             row_tooltip = {}
@@ -64,10 +64,10 @@ def register_table_callbacks(app):
                 if key in ["tc", "app_id"]:
                     row_tooltip[key] = {"value": str(value), "type": "text"}
                 else:
-                    row_tooltip[key] = {"value": "", "type": "text"}  # No tooltip for other columns
+                    row_tooltip[key] = {"value": "", "type": "text"}  # Empty tooltip for other columns
             tooltip_data.append(row_tooltip)
 
-        return table_data, tooltip_data  # Returning data and tooltips
+        return table_data, tooltip_data
 
     @app.callback(
         Output("rescan-status", "children"),
