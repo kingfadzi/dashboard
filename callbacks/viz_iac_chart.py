@@ -9,7 +9,7 @@ def viz_iac_chart(filtered_df):
         labels={"iac_type": "IaC Type", "repo_count": "Repository Count"},
         color="iac_type",
     ).update_layout(
-        xaxis=dict(categoryorder="total descending"),  # Sort by repo_count
+        xaxis=dict(categoryorder="total descending"),
         template="plotly_white",
         title={"x": 0.5},
         xaxis_title=None,

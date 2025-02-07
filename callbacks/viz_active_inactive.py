@@ -13,9 +13,9 @@ def viz_active_inactive(filtered_df):
         aggregated_df,
         x="activity_status",
         y="repo_count",
-        color="host_name",  # Use host_name as the color dimension
-        barmode="stack",  # Stacked bar chart
-        color_discrete_sequence=px.colors.qualitative.Plotly,  # Default color palette for host_name
+        color="host_name",
+        barmode="stack",
+        color_discrete_sequence=px.colors.qualitative.Plotly,
     )
 
     for trace in fig.data:
