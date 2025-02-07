@@ -28,16 +28,15 @@ def register_kpi_callbacks(app):
         ],
     )
     def update_kpi_values(*args):
-        filter_keys = [
-            "host_name",
-            "activity_status",
-            "tc",
-            "main_language",
-            "classification_label",
-            "app_id",
-        ]
+        # Build the filters dictionary from inputs.
+        filter_keys = ["host_name", "activity_status", "tc", "main_language", "classification_label", "app_id"]
         filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
         
+        # Fetch the KPI data. The fetch function formats the numbers:
+        # - total_repos and dockerfiles as integers (with commas).
+        # - avg_commits, avg_contributors, avg_loc as integers.
+        # - avg_ccn as a decimal with one digit.
+        # - avg_repo_size as a human readable string.
         kpi_data = fetch_kpi_data(filters)
         
         total_repos = kpi_data.get("total_repos", "0")
