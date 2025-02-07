@@ -7,11 +7,36 @@ from layouts.layout_kpi import kpi_layout
 def main_layout():
     return dbc.Container(
         [
+            # Hidden div for potential layout information.
             html.Div(id="app-layout", style={"display": "none"}),
-            html.H1("Custom Dashboard", className="bg-secondary text-white p-2 mb-4 text-center"),
 
+            # Main title.
+            html.H1(
+                "Custom Dashboard", 
+                className="bg-secondary text-white p-2 mb-4 text-center"
+            ),
+
+            # Filter criteria display (now above the KPI layout).
+            dbc.Row(
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody(
+                            html.Div(
+                                "No filters applied", 
+                                id="current-filters", 
+                                style={"fontSize": "0.9rem"}
+                            )
+                        ),
+                        className="mb-4"
+                    ),
+                    width=12
+                )
+            ),
+
+            # KPI Cards layout.
             kpi_layout(),
 
+            # Row containing the filters on the left and the charts on the right.
             dbc.Row(
                 [
                     dbc.Col(filter_layout(), md=3),
