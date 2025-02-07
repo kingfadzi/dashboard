@@ -12,6 +12,24 @@ dash.register_page(__name__, path="/")
 
 layout = dbc.Container(
     [
+        # Row for the filter criteria display at the top
+        dbc.Row(
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        html.Div(
+                            "No filters applied", 
+                            id="current-filters", 
+                            style={"fontSize": "0.9rem"}
+                        )
+                    ),
+                    className="mb-4"
+                ),
+                width=12
+            )
+        ),
+
+        # KPI Cards layout
         kpi_layout(),
 
         dbc.Row(
@@ -209,129 +227,165 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        dbc.Row([
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Java Versions", className="text-center"),
-                        className="bg-light",
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Java Versions", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-java-version",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-java-version",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
+                    width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Build Tools", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-build-tool",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                ], className="mb-4"),
-                width=6
-            ),
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Build Tools", className="text-center"),
-                        className="bg-light",
-                    ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-build-tool",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
-                    ),
-                ], className="mb-4"),
-                width=6
-            ),
-        ], className="mb-4"),
+                    width=6,
+                ),
+            ],
+            className="mb-4",
+        ),
 
-        dbc.Row([
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Application Servers", className="text-center"),
-                        className="bg-light",
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Application Servers", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-appserver",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-appserver",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
+                    width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Databases", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-database",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                ], className="mb-4"),
-                width=6
-            ),
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Databases", className="text-center"),
-                        className="bg-light",
-                    ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-database",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
-                    ),
-                ], className="mb-4"),
-                width=6
-            ),
-        ], className="mb-4"),
+                    width=6,
+                ),
+            ],
+            className="mb-4",
+        ),
 
-        dbc.Row([
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Spring Framework", className="text-center"),
-                        className="bg-light",
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Spring Framework", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-spring-framework-version",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-spring-framework-version",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
+                    width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Spring Boot", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-spring-boot-version",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                ], className="mb-4"),
-                width=6
-            ),
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Spring Boot", className="text-center"),
-                        className="bg-light",
-                    ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-spring-boot-version",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
-                    ),
-                ], className="mb-4"),
-                width=6
-            ),
-        ], className="mb-4"),
+                    width=6,
+                ),
+            ],
+            className="mb-4",
+        ),
 
-        dbc.Row([
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Middleware", className="text-center"),
-                        className="bg-light",
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Middleware", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-middleware",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-middleware",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
+                    width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Logging", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="label-tech-bar-chart-logging",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
                     ),
-                ], className="mb-4"),
-                width=6
-            ),
-            dbc.Col(
-                dbc.Card([
-                    dbc.CardHeader(
-                        html.B("Logging", className="text-center"),
-                        className="bg-light",
-                    ),
-                    dcc.Graph(
-                        id="label-tech-bar-chart-logging",
-                        config={"displayModeBar": False},
-                        style={"height": 300},
-                    ),
-                ], className="mb-4"),
-                width=6
-            ),
-        ], className="mb-4"),
+                    width=6,
+                ),
+            ],
+            className="mb-4",
+        ),
     ],
     fluid=True,
 )
