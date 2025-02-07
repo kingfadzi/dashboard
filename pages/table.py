@@ -66,20 +66,23 @@ layout = dbc.Container(
                         "textAlign": "left",
                         "padding": "10px",
                         "borderBottom": "1px solid #dee2e6",
+                        "maxWidth": "150px",         # Limits the width so long values get truncated
+                        "overflow": "hidden",         # Hides overflow text
+                        "textOverflow": "ellipsis",   # Shows an ellipsis
+                        "whiteSpace": "nowrap",       # Prevents wrapping
                     },
                     style_data_conditional=[
                         {"if": {"row_index": "odd"}, "backgroundColor": "#f9f9f9"},
                         {"if": {"row_index": "even"}, "backgroundColor": "#ffffff"},
-                        {
-                            "if": {"state": "active"},
-                            "backgroundColor": "#e9ecef",
-                            "border": "1px solid #adb5bd",
-                        },
+                        {"if": {"state": "active"}, "backgroundColor": "#e9ecef", "border": "1px solid #adb5bd"},
                     ],
                     sort_action="native",
                     filter_action="native",
                     filter_options={"case": "insensitive"},
                     column_selectable="single",
+                    # These two properties enable tooltips:
+                    tooltip_duration=None,  # Tooltip stays as long as the user hovers
+                    tooltip_data=[],        # This will be populated by your callback
                 ),
             ],
             className="shadow-sm rounded",
