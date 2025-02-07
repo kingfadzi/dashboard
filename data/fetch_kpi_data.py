@@ -16,10 +16,33 @@ def human_readable_size(size_in_bytes):
     else:
         return f"{(size_in_bytes / (1024**3)):.2f} GB"
 
+def short_format(num):
+    """
+    Convert a number into short form with one decimal place:
+    K for thousands, M for millions, B for billions.
+    Numbers below 1000 are shown as an integer.
+    """
+    if not num:
+        return "0"
+    if isinstance(num, str):
+        try:
+            num = float(num.replace(",", ""))
+        except Exception:
+            return str(num)
+    val = float(num)
+    if val >= 1_000_000_000:
+        return f"{val / 1_000_000_000:.1f}B"
+    elif val >= 1_000_000:
+        return f"{val / 1_000_000:.1f}M"
+    elif val >= 1_000:
+        return f"{val / 1_000:.1f}K"
+    else:
+        return f"{val:.0f}"
+
 @cache.memoize()
 def fetch_kpi_data(filters=None):
     condition_string, param_dict = build_filter_conditions(filters)
-    
+
     sql = """
     SELECT
         COUNT(*)::bigint AS total_repos,
@@ -49,12 +72,12 @@ def fetch_kpi_data(filters=None):
         SUM(total_cyclomatic_complexity) AS total_cyclomatic_complexity
     FROM combined_repo_metrics_api
     """
-    
+
     if condition_string:
         sql += f" WHERE {condition_string}"
-    
+
     df = pd.read_sql(text(sql), engine, params=param_dict)
-    
+
     if df.empty:
         return {
             "total_repos": "0",
@@ -63,42 +86,36 @@ def fetch_kpi_data(filters=None):
             "avg_loc": {"value": "0", "min": "0", "max": "0"},
             "avg_ccn": {
                 "value": "0",
-                "total_token_count": "0",
                 "function_count": "0",
                 "total_cyclomatic_complexity": "0",
             },
             "avg_repo_size": {"value": "0.00 B", "min": "0.00 B", "max": "0.00 B"},
             "dockerfiles": "0"
         }
-    
+
     row = df.iloc[0]
-    
+
     total_repos = f"{(row['total_repos'] or 0):,.0f}"
-    
     avg_commits = f"{(row['avg_commits'] or 0):,.0f}"
-    min_commits = f"{(row['min_commits'] or 0):,.0f}"
-    max_commits = f"{(row['max_commits'] or 0):,.0f}"
-    
     avg_contributors = f"{(row['avg_contributors'] or 0):,.0f}"
-    min_contributors = f"{(row['min_contributors'] or 0):,.0f}"
-    max_contributors = f"{(row['max_contributors'] or 0):,.0f}"
-    
     avg_loc = f"{(row['avg_loc'] or 0):,.0f}"
-    min_loc = f"{(row['min_loc'] or 0):,.0f}"
-    max_loc = f"{(row['max_loc'] or 0):,.0f}"
-    
     avg_ccn = f"{(row['avg_ccn'] or 0):,.1f}"
-    
+    dockerfiles = f"{(row['dockerfiles'] or 0):,.0f}"
+
     avg_repo_size_str = human_readable_size(row['avg_repo_size'])
     min_repo_size_str = human_readable_size(row['min_repo_size'])
     max_repo_size_str = human_readable_size(row['max_repo_size'])
-    
-    dockerfiles = f"{(row['dockerfiles'] or 0):,.0f}"
-    
-    total_token_count = f"{(row['total_token_count'] or 0):,.0f}"
-    function_count = f"{(row['function_count'] or 0):,.0f}"
-    total_cyclomatic_complexity = f"{(row['total_cyclomatic_complexity'] or 0):,.0f}"
-    
+
+    min_commits = short_format(row['min_commits'] or 0)
+    max_commits = short_format(row['max_commits'] or 0)
+    min_contributors = short_format(row['min_contributors'] or 0)
+    max_contributors = short_format(row['max_contributors'] or 0)
+    min_loc = short_format(row['min_loc'] or 0)
+    max_loc = short_format(row['max_loc'] or 0)
+
+    formatted_function_count = short_format(row['function_count'] or 0)
+    formatted_total_ccn = short_format(row['total_cyclomatic_complexity'] or 0)
+
     return {
         "total_repos": total_repos,
         "avg_commits": {
@@ -118,9 +135,8 @@ def fetch_kpi_data(filters=None):
         },
         "avg_ccn": {
             "value": avg_ccn,
-            "total_token_count": total_token_count,
-            "function_count": function_count,
-            "total_cyclomatic_complexity": total_cyclomatic_complexity,
+            "function_count": formatted_function_count,
+            "total_cyclomatic_complexity": formatted_total_ccn,
         },
         "avg_repo_size": {
             "value": avg_repo_size_str,
