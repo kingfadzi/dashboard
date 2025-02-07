@@ -73,18 +73,19 @@ def fetch_kpi_data(filters=None):
     
     row = df.iloc[0]
     
-    total_repos = f"{(row['total_repos'] or 0):,}"
-    avg_commits = f"{(row['avg_commits'] or 0):,}"
-    min_commits = f"{(row['min_commits'] or 0):,}"
-    max_commits = f"{(row['max_commits'] or 0):,}"
+    total_repos = f"{(row['total_repos'] or 0):,.0f}"
     
-    avg_contributors = f"{(row['avg_contributors'] or 0):,}"
-    min_contributors = f"{(row['min_contributors'] or 0):,}"
-    max_contributors = f"{(row['max_contributors'] or 0):,}"
+    avg_commits = f"{(row['avg_commits'] or 0):,.0f}"
+    min_commits = f"{(row['min_commits'] or 0):,.0f}"
+    max_commits = f"{(row['max_commits'] or 0):,.0f}"
     
-    avg_loc = f"{(row['avg_loc'] or 0):,}"
-    min_loc = f"{(row['min_loc'] or 0):,}"
-    max_loc = f"{(row['max_loc'] or 0):,}"
+    avg_contributors = f"{(row['avg_contributors'] or 0):,.0f}"
+    min_contributors = f"{(row['min_contributors'] or 0):,.0f}"
+    max_contributors = f"{(row['max_contributors'] or 0):,.0f}"
+    
+    avg_loc = f"{(row['avg_loc'] or 0):,.0f}"
+    min_loc = f"{(row['min_loc'] or 0):,.0f}"
+    max_loc = f"{(row['max_loc'] or 0):,.0f}"
     
     avg_ccn = f"{(row['avg_ccn'] or 0):,.1f}"
     
@@ -92,11 +93,11 @@ def fetch_kpi_data(filters=None):
     min_repo_size_str = human_readable_size(row['min_repo_size'])
     max_repo_size_str = human_readable_size(row['max_repo_size'])
     
-    dockerfiles = f"{(row['dockerfiles'] or 0):,}"
+    dockerfiles = f"{(row['dockerfiles'] or 0):,.0f}"
     
-    total_token_count = f"{(row['total_token_count'] or 0):,}"
-    function_count = f"{(row['function_count'] or 0):,}"
-    total_cyclomatic_complexity = f"{(row['total_cyclomatic_complexity'] or 0):,}"
+    total_token_count = f"{(row['total_token_count'] or 0):,.0f}"
+    function_count = f"{(row['function_count'] or 0):,.0f}"
+    total_cyclomatic_complexity = f"{(row['total_cyclomatic_complexity'] or 0):,.0f}"
     
     return {
         "total_repos": total_repos,
