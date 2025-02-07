@@ -15,6 +15,8 @@ def register_kpi_callbacks(app):
             Output("kpi-ccn-subtext", "children"),
             Output("kpi-avg-repo-size", "children"),
             Output("kpi-avg-repo-size-subtext", "children"),
+            Output("kpi-dockerfiles", "children"),
+            Output("kpi-dockerfiles-subtext", "children"),
         ],
         [
             Input("host-name-filter", "value"),
@@ -26,7 +28,14 @@ def register_kpi_callbacks(app):
         ],
     )
     def update_kpi_values(*args):
-        filter_keys = ["host_name", "activity_status", "tc", "main_language", "classification_label", "app_id"]
+        filter_keys = [
+            "host_name",
+            "activity_status",
+            "tc",
+            "main_language",
+            "classification_label",
+            "app_id",
+        ]
         filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
         
         kpi_data = fetch_kpi_data(filters)
@@ -57,6 +66,9 @@ def register_kpi_callbacks(app):
         avg_repo_size = avg_repo_size_data.get("value", "0")
         avg_repo_size_subtext = f"Min={avg_repo_size_data.get('min', '0')} | Max={avg_repo_size_data.get('max', '0')}"
         
+        dockerfiles = kpi_data.get("dockerfiles", "0")
+        dockerfiles_subtext = f"Total={dockerfiles}"
+        
         return (
             total_repos,
             avg_commits,
@@ -69,4 +81,6 @@ def register_kpi_callbacks(app):
             avg_ccn_subtext,
             avg_repo_size,
             avg_repo_size_subtext,
+            dockerfiles,
+            dockerfiles_subtext,
         )
