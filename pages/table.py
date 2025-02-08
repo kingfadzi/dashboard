@@ -6,6 +6,8 @@ dash.register_page(__name__, path="/table")
 
 layout = dbc.Container(
     [
+        filter_layout(),
+        
         dbc.Card(
             [
                 dash_table.DataTable(
