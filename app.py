@@ -1,21 +1,23 @@
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
 import plotly.io as pio
-from data.cache_instance import cache
+from data.cache_instance import cache  # No need for CACHE_AVAILABLE
 from layouts.layout_filters import filter_layout
 import dash
-from callbacks.register_all_callbacks import register_all_callbacks  # Imported from the callbacks package
+from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
 
+# Initialize Dash app
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
+# Set Plotly theme
 pio.templates.default = "plotly_white"
 
-server.config["CACHE_TYPE"] = "simple"
-server.config["CACHE_DEFAULT_TIMEOUT"] = 3600
+# Initialize caching (handled inside cache_instance.py)
 cache.init_app(server)
 
+# Navbar setup
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dcc.Link("Graphs", href="/", className="nav-link")),
@@ -31,6 +33,7 @@ navbar = dbc.NavbarSimple(
     dark=True,
 )
 
+# Define app layout
 app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
@@ -48,10 +51,10 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
-# Register all callbacks from the callbacks package
+# Register all callbacks
 register_all_callbacks(app)
-# Register table callbacks as before
 register_table_callbacks(app)
 
+# Run server
 if __name__ == "__main__":
     app.run_server(debug=True, host="0.0.0.0")
