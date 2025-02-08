@@ -143,19 +143,19 @@ layout = dbc.Container(
 
         dbc.Card(
             [
-                dbc.CardHeader(
-                    html.B("infrastructure as Code Usage", className="text-center"),
-                    className="bg-light",
-                ),
-                dcc.Graph(
-                    id="iac-bar-chart",
-                    config={"displayModeBar": False},
-                    style={"height": 300},
-                ),
-            ],
-            className="mb-4",
-        ),
-
+               dbc.CardHeader(
+                     html.B("infrastructure as Code Usage", className="text-center"),
+                     className="bg-light",
+                      ),
+                      dcc.Graph(
+                          id="iac-bar-chart",
+                          config={"displayModeBar": False},
+                          style={"height": 300},
+                      ),
+                  ],
+                  className="mb-4",
+                  id="iac-card"   # added ID for conditional styling
+              ),
         dbc.Card(
             [
                 dbc.CardHeader(
