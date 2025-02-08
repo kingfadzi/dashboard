@@ -1,6 +1,7 @@
 import dash
 from dash import html, dash_table, dcc
 import dash_bootstrap_components as dbc
+from layouts.layout_filters import filter_layout
 
 dash.register_page(__name__, path="/table")
 
