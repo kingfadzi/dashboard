@@ -1,7 +1,7 @@
 # cloc_callbacks.py
 from dash import Input, Output
 from data.fetch_cloc_by_language import fetch_cloc_by_language
-from callbacks.viz_cloc_by_language import viz_cloc_by_language
+from viz.viz_cloc_by_language import viz_cloc_by_language
 
 def register_cloc_callbacks(app):
     @app.callback(

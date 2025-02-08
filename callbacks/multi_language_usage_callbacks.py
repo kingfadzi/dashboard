@@ -1,7 +1,7 @@
 # multi_language_usage_callbacks.py
 from dash import Input, Output
 from data.fetch_multi_language_usage import fetch_multi_language_usage
-from callbacks.viz_multi_language_usage import viz_multi_language_usage
+from viz.viz_multi_language_usage import viz_multi_language_usage
 
 def register_multi_language_usage_callbacks(app):
     @app.callback(

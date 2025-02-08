@@ -1,7 +1,7 @@
 # language_callbacks.py
 from dash import Input, Output
 from data.fetch_language_data import fetch_language_data
-from callbacks.viz_main_language import viz_main_language
+from viz.viz_main_language import viz_main_language
 
 def register_language_callbacks(app):
     @app.callback(

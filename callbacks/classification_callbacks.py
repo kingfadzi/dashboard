@@ -1,7 +1,7 @@
 # classification_callbacks.py
 from dash import Input, Output
 from data.fetch_classification_data import fetch_classification_data
-from callbacks.viz_classification import viz_classification
+from viz.viz_classification import viz_classification
 
 def register_classification_callbacks(app):
     @app.callback(

@@ -1,7 +1,7 @@
 # iac_callbacks.py
 from dash import Input, Output
 from data.fetch_iac_data import fetch_iac_data
-from callbacks.viz_iac_chart import viz_iac_chart
+from viz.viz_iac_chart import viz_iac_chart
 
 def register_iac_callbacks(app):
     @app.callback(

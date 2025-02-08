@@ -1,7 +1,7 @@
 # active_inactive_callbacks.py
 from dash import Input, Output
 from data.fetch_active_inactive_data import fetch_active_inactive_data
-from callbacks.viz_active_inactive import viz_active_inactive
+from viz.viz_active_inactive import viz_active_inactive
 
 def register_active_inactive_callbacks(app):
     @app.callback(

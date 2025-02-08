@@ -1,7 +1,7 @@
 # language_contributors_callbacks.py
 from dash import Input, Output
 from data.fetch_language_contributors_heatmap import fetch_language_contributors_heatmap
-from callbacks.viz_language_contributors_heatmap import viz_language_contributors_heatmap
+from viz.viz_language_contributors_heatmap import viz_language_contributors_heatmap
 
 def register_language_contributors_callbacks(app):
     @app.callback(

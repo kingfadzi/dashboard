@@ -1,7 +1,7 @@
 # contributors_callbacks.py
 from dash import Input, Output
 from data.fetch_contributors_commits_size import fetch_contributors_commits_size
-from callbacks.viz_contributors_commits_size import viz_contributors_commits_size
+from viz.viz_contributors_commits_size import viz_contributors_commits_size
 
 def register_contributors_callbacks(app):
     @app.callback(

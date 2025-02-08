@@ -1,7 +1,7 @@
 # last_commit_callbacks.py
 from dash import Input, Output
 from data.fetch_last_commit_buckets import fetch_last_commit_buckets
-from callbacks.viz_last_commit_buckets import viz_last_commit_buckets
+from viz.viz_last_commit_buckets import viz_last_commit_buckets
 
 def register_last_commit_callbacks(app):
     @app.callback(

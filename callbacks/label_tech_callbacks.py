@@ -1,7 +1,7 @@
 # label_tech_callbacks.py
 from dash import Input, Output
 from data.fetch_label_tech_data import fetch_label_tech_data
-from callbacks.viz_label_tech import viz_label_tech
+from viz.viz_label_tech import viz_label_tech
 
 def register_label_tech_callbacks(app):
     @app.callback(
@@ -42,7 +42,7 @@ def register_label_tech_callbacks(app):
         fig_spring_boot = viz_label_tech(fetch_label_tech_data(filters, "cto.io/spring-boot-version"))
         fig_middleware = viz_label_tech(fetch_label_tech_data(filters, "cto.io/middleware"))
         fig_logging = viz_label_tech(fetch_label_tech_data(filters, "cto.io/logging"))
-        
+
         return (
             fig_java,
             fig_build,
