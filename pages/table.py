@@ -11,45 +11,13 @@ layout = dbc.Container(
                 dash_table.DataTable(
                     id="temp-table",
                     columns=[
-                        {
-                            "name": "Repo Name",
-                            "id": "repo_id",
-                            "type": "text",
-                            "presentation": "markdown",
-                        },
-                        {
-                            "name": "TC",
-                            "id": "tc",
-                            "type": "numeric",
-                            "format": {"specifier": ",d"},
-                        },
-                        {
-                            "name": "App ID",
-                            "id": "app_id",
-                            "type": "text",
-                        },
-                        {
-                            "name": "Language",
-                            "id": "main_language",
-                            "type": "text",
-                        },
-                        {
-                            "name": "Commits",
-                            "id": "total_commits",
-                            "type": "numeric",
-                            "format": {"specifier": ",d"},
-                        },
-                        {
-                            "name": "Contributors",
-                            "id": "number_of_contributors",
-                            "type": "numeric",
-                            "format": {"specifier": ",d"},
-                        },
-                        {
-                            "name": "Last Commit",
-                            "id": "last_commit_date",
-                            "type": "text",
-                        },
+                        {"name": "Repo Name", "id": "repo_id", "type": "text", "presentation": "markdown"},
+                        {"name": "TC", "id": "tc", "type": "numeric", "format": {"specifier": ",d"}},
+                        {"name": "App ID", "id": "app_id", "type": "text"},
+                        {"name": "Language", "id": "main_language", "type": "text"},
+                        {"name": "Commits", "id": "total_commits", "type": "numeric", "format": {"specifier": ",d"}},
+                        {"name": "Contributors", "id": "number_of_contributors", "type": "numeric", "format": {"specifier": ",d"}},
+                        {"name": "Last Commit", "id": "last_commit_date", "type": "text"},
                     ],
                     data=[],  # Will be populated by callback
                     page_size=10,
@@ -64,14 +32,12 @@ layout = dbc.Container(
                         "textAlign": "left",
                         "padding": "10px",
                         "borderBottom": "1px solid #dee2e6",
-                        "maxWidth": "150px",         # Prevents long values from breaking the table
-                        "overflow": "hidden",         # Hides overflow text
-                        "textOverflow": "ellipsis",   # Shows an ellipsis when text is too long
-                        "whiteSpace": "nowrap",       # Prevents text wrapping
+                        "maxWidth": "150px",
+                        "overflow": "hidden",
+                        "textOverflow": "ellipsis",  # Ensures truncated text
+                        "whiteSpace": "nowrap",
                     },
-                    tooltip_duration=None,  # Tooltips stay as long as user hovers
-                    tooltip_delay=0,  # Removes delay before showing tooltips
-                    tooltip_delay_hide=200,  # Hides tooltips quickly after cursor leaves
+                    tooltip_duration=None,  # Keep tooltips visible while hovering
                     tooltip_data=[],  # Will be populated by callback
                     style_data_conditional=[
                         {"if": {"row_index": "odd"}, "backgroundColor": "#f9f9f9"},
