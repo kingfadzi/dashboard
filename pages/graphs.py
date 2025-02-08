@@ -11,24 +11,7 @@ dash.register_page(__name__, path="/")
 
 layout = dbc.Container(
     [
-        # Row for the filter criteria display at the top
-        dbc.Row(
-            dbc.Col(
-                dbc.Card(
-                    dbc.CardBody(
-                        html.Div(
-                            "No filters applied",
-                            id="current-filters",
-                            style={"fontSize": "0.9rem"}
-                        )
-                    ),
-                    className="mb-4"
-                ),
-                width=12
-            )
-        ),
-
-
+       
         filter_layout(),
         # KPI Cards layout
         kpi_layout(),
