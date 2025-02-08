@@ -1,11 +1,20 @@
-# build_filter_conditions.py
-
 def build_filter_conditions(filters, alias=None):
+    """
+    Builds SQL WHERE conditions from filter parameters.
+    
+    - Handles **free-text** searches (e.g., `app_id` using `ILIKE '%value%'`).
+    - Handles **list-based** filters (e.g., `status IN ('active', 'inactive')`).
+    - Supports **table aliasing** (for JOIN queries).
+    
+    Returns:
+        condition_string (str): The SQL WHERE clause.
+        param_dict (dict): Query parameters.
+    """
 
     if not filters:
         return None, {}
 
-    text_search_fields = {"app_id", "all_languages"}
+    text_search_fields = {"app_id", "all_languages", "name"}  # Fields that use wildcards
     conditions = []
     param_dict = {}
     placeholder_counter = 1
@@ -16,17 +25,20 @@ def build_filter_conditions(filters, alias=None):
 
         col = f"{alias}.{field}" if alias else field
 
+        # Ensure values are always a list (even if a single string is passed)
+        values = values if isinstance(values, list) else [values]
+
         if field in text_search_fields:
             or_clauses = []
             for val in values:
                 placeholder = f"p{placeholder_counter}"
                 placeholder_counter += 1
-                param_dict[placeholder] = f"%{val}%"
-                or_clauses.append(f"{col} LIKE :{placeholder}")
+                param_dict[placeholder] = f"%{val}%"  # Partial match with wildcards
+                or_clauses.append(f"{col} ILIKE :{placeholder}")  # Case-insensitive search
             if or_clauses:
                 conditions.append("(" + " OR ".join(or_clauses) + ")")
         else:
-            # For other fields -> IN (:pX, :pY, ...)
+            # List-based filters (e.g., status IN ('active', 'inactive'))
             placeholders = []
             for val in values:
                 placeholder = f"p{placeholder_counter}"
@@ -40,38 +52,9 @@ def build_filter_conditions(filters, alias=None):
         return None, {}
 
     condition_string = " AND ".join(conditions)
+
+    # 🔍 Debugging
+    print("\n🔍 DEBUG: Final SQL WHERE Clause:", condition_string)
+    print("🔍 DEBUG: SQL Parameters:", param_dict)
+
     return condition_string, param_dict
-
-
-
-def build_filter_conditions_with_alias(filters, alias):
-    if not alias:
-        raise ValueError("Alias must be specified for this method.")
-
-    conditions = []
-    for field, values in filters.items():
-        if values:
-            formatted_values = ",".join([f"'{value}'" for value in values])
-            conditions.append(f"{alias}.{field} IN ({formatted_values})")
-    return " AND ".join(conditions) if conditions else None
-
-def build_filter_conditions_with_wildcards(filters, alias=None):
-
-    wildcard_fields = ["app_id", "name"]
-
-    if alias is None:
-        alias = ""
-    else:
-        alias += "."
-
-    conditions = []
-    for field, values in filters.items():
-        if values:
-            if field in wildcard_fields:
-                like_conditions = [f"{alias}{field} LIKE '%{value}%'" for value in values]
-                conditions.append(f"({' OR '.join(like_conditions)})")
-            else:
-                formatted_values = ",".join([f"'{value}'" for value in values])
-                conditions.append(f"{alias}{field} IN ({formatted_values})")
-
-    return " AND ".join(conditions) if conditions else None
