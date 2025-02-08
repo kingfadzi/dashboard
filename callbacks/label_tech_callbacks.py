@@ -11,7 +11,7 @@ def create_label_tech_rows(
     fig_spring_fw, fig_spring_boot, fig_middleware, fig_logging,
     height=300
 ):
-    # List of chart definitions.
+    # Define each chart’s metadata in a list.
     charts = [
         {"title": "Java Versions", "id": "label-tech-bar-chart-java-version", "figure": fig_java},
         {"title": "Build Tools", "id": "label-tech-bar-chart-build-tool", "figure": fig_build},
@@ -25,17 +25,32 @@ def create_label_tech_rows(
 
     # Helper to create a chart card only if the figure has data.
     def create_chart_card(chart):
-        if not chart["figure"] or not chart["figure"].get("data"):
+        figure = chart["figure"]
+        # If figure is falsy, return None.
+        if not figure:
             return None
+
+        # Check if figure has data:
+        # - If it's a dict, try getting the "data" key.
+        # - Otherwise, assume it's a Plotly Figure object and use the .data attribute.
+        if isinstance(figure, dict):
+            data = figure.get("data")
+        else:
+            data = figure.data
+
+        # If no data is present, skip this chart.
+        if not data:
+            return None
+
         card = dbc.Card(
             [
                 dbc.CardHeader(
                     html.B(chart["title"], className="text-center"),
-                    className="bg-light"
+                    className="bg-light",
                 ),
                 dcc.Graph(
                     id=chart["id"],
-                    figure=chart["figure"],
+                    figure=figure,
                     config={"displayModeBar": False},
                     style={"height": height},
                 ),
@@ -46,7 +61,7 @@ def create_label_tech_rows(
 
     # Build a list of columns (cards) for charts that have data.
     cols = [create_chart_card(chart) for chart in charts]
-    # Filter out any None values (charts with no data).
+    # Filter out any charts that returned None (i.e. had no data).
     cols = [col for col in cols if col is not None]
 
     # Group columns into rows with 2 columns per row.
