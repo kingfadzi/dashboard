@@ -11,7 +11,6 @@ dash.register_page(__name__, path="/")
 
 layout = dbc.Container(
     [
-       
         filter_layout(),
         # KPI Cards layout
         kpi_layout(),
@@ -51,6 +50,22 @@ layout = dbc.Container(
                         className="mb-4",
                     ),
                     width=6,
+                ),
+            ],
+            className="mb-4",
+        ),
+
+        # Total Lines of Code moved here (fourth row)
+        dbc.Card(
+            [
+                dbc.CardHeader(
+                    html.B("Total Lines of Code", className="text-center"),
+                    className="bg-light",
+                ),
+                dcc.Graph(
+                    id="cloc-bar-chart",
+                    config={"displayModeBar": False},
+                    style={"height": 300},
                 ),
             ],
             className="mb-4",
@@ -121,21 +136,6 @@ layout = dbc.Container(
                         className="mb-4",
                     ),
                     width=6,
-                ),
-            ],
-            className="mb-4",
-        ),
-
-        dbc.Card(
-            [
-                dbc.CardHeader(
-                    html.B("Total Lines of Code", className="text-center"),
-                    className="bg-light",
-                ),
-                dcc.Graph(
-                    id="cloc-bar-chart",
-                    config={"displayModeBar": False},
-                    style={"height": 300},
                 ),
             ],
             className="mb-4",
