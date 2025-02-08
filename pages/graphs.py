@@ -3,9 +3,8 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-
-# Import your KPI layout function (adjust this import if needed)
 from layouts.layout_kpi import kpi_layout
+from layouts.layout_filters import filter_layout
 
 # Register this page at the root URL ("/")
 dash.register_page(__name__, path="/")
@@ -18,8 +17,8 @@ layout = dbc.Container(
                 dbc.Card(
                     dbc.CardBody(
                         html.Div(
-                            "No filters applied", 
-                            id="current-filters", 
+                            "No filters applied",
+                            id="current-filters",
                             style={"fontSize": "0.9rem"}
                         )
                     ),
@@ -29,6 +28,8 @@ layout = dbc.Container(
             )
         ),
 
+
+        filter_layout(),
         # KPI Cards layout
         kpi_layout(),
 

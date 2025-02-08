@@ -12,25 +12,8 @@ def main_layout():
 
             # Main title.
             html.H1(
-                "Custom Dashboard", 
+                "Custom Dashboard",
                 className="bg-secondary text-white p-2 mb-4 text-center"
-            ),
-
-            # Filter criteria display (now above the KPI layout).
-            dbc.Row(
-                dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody(
-                            html.Div(
-                                "No filters applied", 
-                                id="current-filters", 
-                                style={"fontSize": "0.9rem"}
-                            )
-                        ),
-                        className="mb-4"
-                    ),
-                    width=12
-                )
             ),
 
             # KPI Cards layout.

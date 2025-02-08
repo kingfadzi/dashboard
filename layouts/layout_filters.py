@@ -4,11 +4,9 @@ import dash_bootstrap_components as dbc
 def filter_layout():
     return dbc.Card(
         dbc.CardBody(
-            [
-                # Filters
-                html.Div(
-                    [
-                        dbc.Label("Host Name"),
+            dbc.Row(
+                [
+                    dbc.Col(
                         dcc.Dropdown(
                             id="host-name-filter",
                             options=[],  # Options will be populated dynamically
@@ -17,14 +15,11 @@ def filter_layout():
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style={"fontSize": "14px"}
+                            style={"fontSize": "14px"},
                         ),
-                    ],
-                    className="mb-4",
-                ),
-                html.Div(
-                    [
-                        dbc.Label("Activity Status"),
+                        width=2,
+                    ),
+                    dbc.Col(
                         dcc.Dropdown(
                             id="activity-status-filter",
                             options=[],  # Options will be populated dynamically
@@ -33,14 +28,11 @@ def filter_layout():
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style={"fontSize": "14px"}
+                            style={"fontSize": "14px"},
                         ),
-                    ],
-                    className="mb-4",
-                ),
-                html.Div(
-                    [
-                        dbc.Label("TC"),
+                        width=2,
+                    ),
+                    dbc.Col(
                         dcc.Dropdown(
                             id="tc-filter",
                             options=[],  # Options will be populated dynamically
@@ -49,14 +41,11 @@ def filter_layout():
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style={"fontSize": "14px"}
+                            style={"fontSize": "14px"},
                         ),
-                    ],
-                    className="mb-4",
-                ),
-                html.Div(
-                    [
-                        dbc.Label("Repo Main Language"),
+                        width=2,
+                    ),
+                    dbc.Col(
                         dcc.Dropdown(
                             id="language-filter",
                             options=[],  # Options will be populated dynamically
@@ -65,42 +54,11 @@ def filter_layout():
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style={"fontSize": "14px"}
+                            style={"fontSize": "14px"},
                         ),
-                    ],
-                    className="mb-4",
-                ),
-                html.Div(
-                    [
-                        dbc.Label(
-                            [
-                                "Classification",
-                                html.Span(
-                                    " ?",
-                                    id="classification-help-text",
-                                    style={"color": "blue", "cursor": "pointer", "fontSize": "12px", "marginLeft": "5px"},
-                                ),
-                            ]
-                        ),
-                        dbc.Tooltip(
-                            r"""
-                            Classification Guide:
-                            - Tiny: < 1MB.
-                            - Small: < 10MB.
-                            - Medium: < 100MB.
-                            - Large: < 1GB.
-                            - Massive: ≥ 1GB.
-                            - Unclassified: Doesn't fit any above criteria.
-                            """,
-                            target="classification-help-text",
-                            placement="left",
-                            style={
-                                "whiteSpace": "pre-wrap",
-                                "maxWidth": "400px",
-                                "width": "400px",
-                                "fontSize": "12px"
-                            },
-                        ),
+                        width=2,
+                    ),
+                    dbc.Col(
                         dcc.Dropdown(
                             id="classification-filter",
                             options=[],  # Options will be populated dynamically
@@ -109,26 +67,25 @@ def filter_layout():
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style={"fontSize": "14px"}
+                            style={"fontSize": "14px"},
                         ),
-                    ],
-                    className="mb-4",
-                ),
-                html.Div(
-                    [
-                        dbc.Label("App ID"),
+                        width=2,
+                    ),
+                    dbc.Col(
                         dcc.Input(
                             id="app-id-filter",
                             type="text",
-                            placeholder="Enter App IDs (comma-separated)...",
+                            placeholder="Enter App ID",
                             debounce=True,
                             className="form-control",
-                            style={"fontSize": "14px"}
+                            style={"fontSize": "14px"},
                         ),
-                    ],
-                    className="mb-4",
-                ),
-            ]
+                        width=2,
+                    ),
+                ],
+                align="center",
+                className="g-3",  # Adds spacing between columns
+            )
         ),
         className="bg-light mb-4",
     )
