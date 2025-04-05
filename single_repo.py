@@ -1,8 +1,4 @@
-import dash
-from dash import html, dcc, dash_table, Input, Output, State
-import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
-import pandas as pd
+import dash from dash import html, dcc, dash_table, Input, Output, State import dash_bootstrap_components as dbc import plotly.graph_objects as go import pandas as pd
 
 Sample data (replace with your actual extracted profile data)
 
@@ -25,11 +21,11 @@ html.Div([
 ], style={'display': 'flex', 'gap': '10px', 'marginBottom': '20px'}),
 
 dbc.CardGroup([
-    dbc.Card([html.H5('Repo Size (MB)'), html.P(profile_data['Repo Size (MB)'])]),
-    dbc.Card([html.H5('Files'), html.P(profile_data['File Count'])]),
-    dbc.Card([html.H5('Lines of Code'), html.P(profile_data['Lines of Code'])]),
-    dbc.Card([html.H5('Contributors'), html.P(profile_data['Contributors'])]),
-    dbc.Card([html.H5('Repo Age'), html.P(f"{profile_data['Repo Age (Years)']} years")]),
+    dbc.Card(dbc.CardBody([html.H5('Repo Size (MB)'), html.P(profile_data['Repo Size (MB)'])])),
+    dbc.Card(dbc.CardBody([html.H5('Files'), html.P(profile_data['File Count'])])),
+    dbc.Card(dbc.CardBody([html.H5('Lines of Code'), html.P(profile_data['Lines of Code'])])),
+    dbc.Card(dbc.CardBody([html.H5('Contributors'), html.P(profile_data['Contributors'])])),
+    dbc.Card(dbc.CardBody([html.H5('Repo Age'), html.P(f"{profile_data['Repo Age (Years)']} years")])),
 ], className='mb-4'),
 
 dcc.Graph(figure=create_health_chart(profile_data['Health Scores'])),
@@ -61,5 +57,5 @@ Callbacks
 
 @app.callback( Output("collapse", "is_open"), [Input("collapse-button", "n_clicks")], [State("collapse", "is_open")], ) def toggle_collapse(n, is_open): if n: return not is_open return is_open
 
-if name == 'main': app.run_server(debug=True)
+if name == 'main': app.run_server(debug=True, port=8050)
 
