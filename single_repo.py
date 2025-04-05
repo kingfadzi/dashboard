@@ -1,4 +1,8 @@
-import dash from dash import html, dcc, dash_table, Input, Output, State import dash_bootstrap_components as dbc import plotly.graph_objects as go import pandas as pd
+import dash
+from dash import html, dcc, dash_table, Input, Output, State
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+import pandas as pd
 
 Sample data (replace with your actual extracted profile data)
 
