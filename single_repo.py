@@ -117,7 +117,7 @@ top_subcategories = (
     dependencies_df['sub_category']
     .value_counts()
     .reset_index()
-    .rename(columns={'index': 'sub_category', 'sub_category': 'count'})
+    .rename(columns={'index': 'sub_category', 0: 'count'})
     .head(5)
 )
 
