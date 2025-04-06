@@ -113,3 +113,34 @@ def classify_total_ccn(total_ccn):
         return "Medium Risk"
     else:
         return "High Risk"
+        
+
+def create_dependency_category_bar(dependencies_df):
+    category_counts = dependencies_df['category'].value_counts().sort_values()
+    
+    fig = go.Figure(go.Bar(
+        x=category_counts.values,
+        y=category_counts.index,
+        orientation='h',
+        marker_color='rgb(30,144,255)',
+        text=category_counts.values,
+        textposition='outside',
+        hoverinfo='y+x',
+    ))
+
+    fig.update_layout(
+        margin=dict(t=20, b=20, l=40, r=10),
+        height=300,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        xaxis=dict(
+            showgrid=True,
+            gridcolor='rgba(200,200,200,0.2)',
+            zeroline=False
+        ),
+        yaxis=dict(
+            showgrid=False
+        ),
+        showlegend=False
+    )
+    return fig
