@@ -1,4 +1,5 @@
 from dash import dcc, html
+import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -32,7 +33,7 @@ def render(profile_data):
             x=pivot[sub_category],
             name=sub_category,
             orientation='h',
-            hovertemplate=f"<b>{sub_category}</b><br>Packages: %{x}<extra></extra>",
+            hovertemplate=f"<b>{sub_category}</b><br>Packages: %{{x}}<extra></extra>",  # << FIXED
         ))
 
     fig.update_layout(
@@ -43,7 +44,7 @@ def render(profile_data):
         paper_bgcolor='white',
         xaxis_title='Number of Packages',
         yaxis_title='Category',
-        showlegend=False,  # <--- No legend
+        showlegend=False,  # No legend
         hoverlabel=dict(
             bgcolor="white",
             font_size=12,
