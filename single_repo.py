@@ -1,10 +1,17 @@
 import dash
-from dash import html, dcc, dash_table, Input, Output, State
+from dash import Dash, html, dcc, dash_table, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import plotly.io as pio
 import pandas as pd
 import datetime
 
+# Set Plotly theme
+pio.templates.default = "plotly_white"
+
+# Initialize Dash app
+app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 # Sample data (replace with actual extracted profile data)
 profile_data = {
     'Repo ID': 'CTFd',
