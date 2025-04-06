@@ -1,14 +1,15 @@
 import pandas as pd
 import dash_bootstrap_components as dbc
-from dash import html, dcc, dash_table
+import dash_table
+from dash import html, dcc
 from helpers import create_dependency_category_bar
 
 def render(profile_data):
     """
-    Render the Dependency Category Analysis section from profile_data['Dependencies'].
+    Render Dependency Category Analysis with a full-width bar chart and a table underneath.
     """
 
-    # === 1. Parse dependencies from profile_data ===
+    # 1. Read Dependencies
     dependencies = profile_data.get('Dependencies', [])
 
     if not dependencies:
@@ -22,10 +23,10 @@ def render(profile_data):
 
     dependencies_df = pd.DataFrame(dependencies)
 
-    # === 2. Build the Category Bar Chart ===
+    # 2. Build Horizontal Bar Chart
     category_bar = create_dependency_category_bar(dependencies_df)
 
-    # === 3. Calculate Top Subcategories ===
+    # 3. Top Subcategories Table
     top_subcategories_age = (
         dependencies_df
         .groupby('sub_category')
@@ -38,69 +39,69 @@ def render(profile_data):
         .head(5)
     )
 
-    # === 4. Layout ===
+    # 4. Final layout
     return dbc.Card(
         dbc.CardBody([
             html.H4('Dependency Category Analysis', className='card-title mb-4'),
 
-            dbc.Row([
-                # Left: Bar Chart
-                dbc.Col([
-                    dcc.Graph(
-                        figure=category_bar,
-                        config={'displayModeBar': False}
-                    )
-                ], width=12, md=6),
+            # Bar Chart Full Width
+            html.Div([
+                html.H6('Category Distribution', className='text-muted mb-2'),
+                dcc.Graph(
+                    figure=category_bar,
+                    config={'displayModeBar': False},
+                    style={"height": "350px"}
+                ),
+            ], className="mb-4"),
 
-                # Right: Top Subcategories Table
-                dbc.Col([
-                    html.H6('Top Subcategories (by Package Count)', className='text-muted mb-3'),
-                    dash_table.DataTable(
-                        data=[
-                            {
-                                "Subcategory": row['sub_category'],
-                                "Packages": row['packages'],
-                                "Avg Age (Years)": f"{row['avg_age']:.1f}"
-                            }
-                            for _, row in top_subcategories_age.iterrows()
-                        ],
-                        columns=[
-                            {"name": "Subcategory", "id": "Subcategory"},
-                            {"name": "Packages", "id": "Packages"},
-                            {"name": "Avg Age (Years)", "id": "Avg Age (Years)"},
-                        ],
-                        style_cell={
-                            "fontSize": "0.8rem",
-                            "padding": "5px",
-                            "textAlign": "left"
+            # Table Full Width
+            html.Div([
+                html.H6('Top Subcategories by Packages', className='text-muted mb-3'),
+                dash_table.DataTable(
+                    data=[
+                        {
+                            "Subcategory": row['sub_category'],
+                            "Packages": row['packages'],
+                            "Avg Age (Years)": f"{row['avg_age']:.1f}"
+                        }
+                        for _, row in top_subcategories_age.iterrows()
+                    ],
+                    columns=[
+                        {"name": "Subcategory", "id": "Subcategory"},
+                        {"name": "Packages", "id": "Packages"},
+                        {"name": "Avg Age (Years)", "id": "Avg Age (Years)"},
+                    ],
+                    style_cell={
+                        "fontSize": "0.8rem",
+                        "padding": "5px",
+                        "textAlign": "left"
+                    },
+                    style_as_list_view=True,
+                    style_table={"overflowX": "auto"},
+                    style_header={
+                        "backgroundColor": "rgb(240,240,240)",
+                        "fontWeight": "bold"
+                    },
+                    style_data_conditional=[
+                        {
+                            'if': {'filter_query': '{Avg Age (Years)} >= 5', 'column_id': 'Avg Age (Years)'},
+                            'backgroundColor': 'rgba(255, 0, 0, 0.1)',
+                            'color': 'red',
+                            'fontWeight': 'bold'
                         },
-                        style_as_list_view=True,
-                        style_table={"overflowX": "auto"},
-                        style_header={
-                            "backgroundColor": "rgb(240,240,240)",
-                            "fontWeight": "bold"
+                        {
+                            'if': {'filter_query': '{Avg Age (Years)} >= 3 && {Avg Age (Years)} < 5', 'column_id': 'Avg Age (Years)'},
+                            'backgroundColor': 'rgba(255,165,0,0.1)',
+                            'color': 'orange'
                         },
-                        style_data_conditional=[
-                            {
-                                'if': {'filter_query': '{Avg Age (Years)} >= 5', 'column_id': 'Avg Age (Years)'},
-                                'backgroundColor': 'rgba(255, 0, 0, 0.1)',
-                                'color': 'red',
-                                'fontWeight': 'bold'
-                            },
-                            {
-                                'if': {'filter_query': '{Avg Age (Years)} >= 3 && {Avg Age (Years)} < 5', 'column_id': 'Avg Age (Years)'},
-                                'backgroundColor': 'rgba(255,165,0,0.1)',
-                                'color': 'orange'
-                            },
-                            {
-                                'if': {'filter_query': '{Avg Age (Years)} < 3', 'column_id': 'Avg Age (Years)'},
-                                'backgroundColor': 'rgba(0,255,0,0.1)',
-                                'color': 'green'
-                            },
-                        ],
-                    )
-                ], width=12, md=6),
-            ], className="g-4")
+                        {
+                            'if': {'filter_query': '{Avg Age (Years)} < 3', 'column_id': 'Avg Age (Years)'},
+                            'backgroundColor': 'rgba(0,255,0,0.1)',
+                            'color': 'green'
+                        },
+                    ],
+                )
+            ]),
         ]),
         className="mb-4 shadow-sm"
     )
