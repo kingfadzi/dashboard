@@ -10,6 +10,7 @@ import sections.section_kpis as section_kpis
 import sections.section_tech_stack as section_tech_stack
 import sections.section_modernization as section_modernization
 import sections.section_code_quality as section_code_quality
+import sections.section_dependencies as section_dependencies
 # (more sections later)
 
 # Initialize Dash app
@@ -26,7 +27,7 @@ app.layout = html.Div([
     section_tech_stack.render(profile_data),
     section_modernization.render(profile_data),
     section_code_quality.render(profile_data),
-
+    section_dependencies.render(profile_data),
     # (later you will add more sections here like dependency health, security, etc.)
 ], style={"padding": "20px"})
 
