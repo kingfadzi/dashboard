@@ -87,17 +87,12 @@ def create_language_pie(language_data):
         labels=labels,
         values=values,
         hole=.3,
-        textinfo='percent+label',  # show percentage + language name inside the pie
-        insidetextorientation='radial'  # better layout for inside labels
+        textinfo='percent+label',  # show % + language name inside
+        insidetextorientation='radial'  # nice radial text
     )])
     fig.update_layout(
-        margin=dict(t=0, b=0, l=0, r=0),  # Remove title space
-        showlegend=True,
-        legend_title_text='Languages',
-        legend=dict(
-            orientation='h',
-            y=-0.2
-        )
+        margin=dict(t=0, b=0, l=0, r=0),  # remove wasted space
+        showlegend=False  # <--- REMOVE LEGEND
     )
     return fig
 
