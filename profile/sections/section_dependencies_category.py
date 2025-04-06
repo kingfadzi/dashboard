@@ -1,11 +1,42 @@
 import pandas as pd
 import dash_bootstrap_components as dbc
-from dash import html, dcc, dash_table 
-from helpers import create_dependency_category_bar
+import dash_table
+from dash import html, dcc
+import plotly.graph_objects as go
 
+# --- Instead of using helper, let's define the bar inside this section ---
+def create_dependency_category_bar(dependencies_df):
+    category_counts = dependencies_df['category'].value_counts()
+    colors = [
+        "#7FC8A9", "#FDCB9E", "#FF9AA2", "#B5EAD7", "#C7CEEA",
+        "#FFDAC1", "#E2F0CB", "#B5EAD7", "#C7CEEA", "#FFB347"
+    ]
+
+    fig = go.Figure(go.Bar(
+        y=category_counts.index,
+        x=category_counts.values,
+        orientation='h',
+        marker=dict(
+            color=colors * (len(category_counts) // len(colors) + 1)  # Repeat colors if needed
+        ),
+        text=category_counts.values,
+        textposition='auto',
+    ))
+
+    fig.update_layout(
+        margin=dict(t=10, b=10, l=10, r=10),
+        height=350,
+        xaxis_title="Dependencies",
+        yaxis_title="Category",
+        showlegend=False,
+        dragmode=False,  # <-- Disable zoom/pan
+    )
+    return fig
+
+# --- Main Renderer ---
 def render(profile_data):
     """
-    Render Dependency Category Analysis with a full-width bar chart and a table underneath.
+    Renders Dependency Category Analysis with full-width bar chart and full table including category.
     """
 
     # 1. Read Dependencies
@@ -22,43 +53,47 @@ def render(profile_data):
 
     dependencies_df = pd.DataFrame(dependencies)
 
-    # 2. Build Horizontal Bar Chart
+    # 2. Build Chart
     category_bar = create_dependency_category_bar(dependencies_df)
 
-    # 3. Top Subcategories Table
+    # 3. Build Full Subcategories Table
     top_subcategories_age = (
         dependencies_df
-        .groupby('sub_category')
+        .groupby(['category', 'sub_category'])
         .agg(
             packages=('name', 'count'),
             avg_age=('age', 'mean')
         )
         .sort_values(by='packages', ascending=False)
         .reset_index()
-        .head(5)
+        .head(10)  # <-- Top 10 now since we have more granularity
     )
 
-    # 4. Final layout
+    # 4. Return layout
     return dbc.Card(
         dbc.CardBody([
             html.H4('Dependency Category Analysis', className='card-title mb-4'),
 
-            # Bar Chart Full Width
+            # Full-width Bar Chart
             html.Div([
                 html.H6('Category Distribution', className='text-muted mb-2'),
                 dcc.Graph(
                     figure=category_bar,
-                    config={'displayModeBar': False},
+                    config={
+                        'displayModeBar': False,  # no zoom
+                        'staticPlot': False       # no panning
+                    },
                     style={"height": "350px"}
                 ),
             ], className="mb-4"),
 
-            # Table Full Width
+            # Full-width Table
             html.Div([
                 html.H6('Top Subcategories by Packages', className='text-muted mb-3'),
                 dash_table.DataTable(
                     data=[
                         {
+                            "Category": row['category'],
                             "Subcategory": row['sub_category'],
                             "Packages": row['packages'],
                             "Avg Age (Years)": f"{row['avg_age']:.1f}"
@@ -66,6 +101,7 @@ def render(profile_data):
                         for _, row in top_subcategories_age.iterrows()
                     ],
                     columns=[
+                        {"name": "Category", "id": "Category"},
                         {"name": "Subcategory", "id": "Subcategory"},
                         {"name": "Packages", "id": "Packages"},
                         {"name": "Avg Age (Years)", "id": "Avg Age (Years)"},
