@@ -6,6 +6,7 @@ import plotly.io as pio
 import pandas as pd
 import datetime
 
+
 # Set Plotly theme
 pio.templates.default = "plotly_white"
 
@@ -540,8 +541,7 @@ html.Div([
     )
 ]),    
 
-import dash_bootstrap_components as dbc
-from dash import html, dcc
+
 
 html.Div([
 
