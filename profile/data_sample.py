@@ -15,7 +15,7 @@ profile_data = {
     'Total Cyclomatic Complexity': 2200,
     'Total Tokens': 560000,
     'Total Functions': 1250,
-    'Classification Label': 'Medium',  # or Tiny / Small / Large / Massive / Non-Code
+    'Classification Label': 'Medium',  # <-- NEW field, e.g., Tiny, Small, Medium, Large, Massive, Non-Code
     'Contributors': 149,
     'Repo Age (Years)': 10,
     'Last Commit Date': '2024-12-27',

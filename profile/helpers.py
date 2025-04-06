@@ -80,3 +80,36 @@ def get_top_subcategories_age(dependencies_df):
 
 def get_top_oldest_dependencies(dependencies_df):
     return dependencies_df.sort_values(by='age', ascending=False).head(5)
+    
+    
+def classify_avg_ccn(avg_ccn):
+    if avg_ccn < 4:
+        return "Good"
+    elif avg_ccn <= 6:
+        return "Moderate"
+    else:
+        return "High Risk"
+
+def classify_comment_quality(comment_percent):
+    if comment_percent >= 15:
+        return "Excellent"
+    elif comment_percent >= 8:
+        return "Moderate"
+    else:
+        return "Poor"
+
+def classify_function_density(total_functions):
+    if total_functions < 500:
+        return "Small Codebase"
+    elif total_functions <= 2000:
+        return "Medium Codebase"
+    else:
+        return "Large Codebase"
+
+def classify_total_ccn(total_ccn):
+    if total_ccn < 1500:
+        return "Low Risk"
+    elif total_ccn <= 3000:
+        return "Medium Risk"
+    else:
+        return "High Risk"
