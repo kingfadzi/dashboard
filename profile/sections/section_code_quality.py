@@ -2,85 +2,81 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 def render(profile_data):
+    # Helper for warning badges
+    def warning_badge(show):
+        if show:
+            return html.Span("⚠️", style={"marginLeft": "5px", "fontSize": "1.2rem"})
+        return None
+
     return dbc.Card(
         dbc.CardBody([
-            html.H4('Code Quality', className='card-title mb-4'),
+            html.H4('Code Metrics', className='card-title mb-4'),
 
             dbc.Row([
                 dbc.Col([
+                    html.H6('Lines of Code (NLOC)', className='text-muted'),
+                    html.Div([
+                        html.H4(f"{profile_data['Total NLOC']:,}", className="text-center mb-3"),
+                        dbc.Tooltip("Non-blank, non-comment lines of code (from CLOC)", target="nloc", placement="top"),
+                    ], id="nloc"),
+
+                    html.H6('Blank Lines', className='text-muted'),
+                    html.Div([
+                        html.H5(f"{profile_data['Blank Lines']:,}", className="text-center mb-3"),
+                        dbc.Tooltip("Blank or empty lines (from CLOC)", target="blank-lines", placement="top"),
+                    ], id="blank-lines"),
+
+                    html.H6('Comment Lines', className='text-muted'),
+                    html.Div([
+                        html.H5(f"{profile_data['Comment Lines']:,}", className="text-center"),
+                        dbc.Tooltip("Lines containing only comments (from CLOC)", target="comment-lines", placement="top"),
+                    ], id="comment-lines"),
+                ], width=12, md=4),
+
+                dbc.Col([
                     html.H6('Avg Cyclomatic Complexity', className='text-muted'),
                     dbc.Progress(
-                        value=min(profile_data['Cyclomatic Complexity Avg'] * 10, 100),
-                        color="info",
+                        value=min(profile_data['Avg Cyclomatic Complexity'] * 10, 100),
+                        color="info" if profile_data['Avg Cyclomatic Complexity'] <= 5 else "danger",
                         style={"height": "20px"},
                         striped=True,
                         animated=True,
-                        className="mt-2"
+                        className="mb-3 mt-2"
                     ),
                     html.Small(
-                        f"{profile_data['Cyclomatic Complexity Avg']:.1f} (lower is better)",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=12, md=4),
-
-                dbc.Col([
-                    html.H6('Max Cyclomatic Complexity', className='text-muted'),
-                    html.Div([
-                        dbc.Tooltip(
-                            "Highest single function complexity",
-                            target="max-cc-badge",
-                            placement="top"
-                        ),
-                        html.Span(
-                            f"{profile_data['Cyclomatic Complexity Max']}",
-                            id="max-cc-badge",
-                            className=f"badge {'bg-danger' if profile_data['Cyclomatic Complexity Max'] > 10 else 'bg-warning' if profile_data['Cyclomatic Complexity Max'] > 5 else 'bg-success'}",
-                            style={"fontSize": "1.2rem", "padding": "8px"}
-                        ),
-                        html.Small(
-                            "Highest complexity function",
-                            className="text-muted d-block text-center mt-2",
-                            style={"fontSize": "0.7rem"}
-                        )
-                    ], className="text-center mt-2")
-                ], width=12, md=4),
-
-                dbc.Col([
-                    html.H6('Comment Density', className='text-muted'),
-                    dbc.Progress(
-                        value=profile_data['Comment Density'],
-                        color="success" if profile_data['Comment Density'] > 10 else "warning",
-                        style={"height": "20px"},
-                        striped=True,
-                        animated=True,
-                        className="mt-2"
-                    ),
-                    html.Small(
-                        f"{profile_data['Comment Density']}% lines are comments",
-                        className="text-muted d-block text-center mt-2",
+                        html.Span([
+                            f"{profile_data['Avg Cyclomatic Complexity']:.1f} (lower is better)",
+                            warning_badge(profile_data['Avg Cyclomatic Complexity'] > 5)
+                        ]),
+                        className="text-muted d-block text-center mb-4",
                         style={"fontSize": "0.7rem"}
                     ),
 
+                    html.H6('Total Cyclomatic Complexity', className='text-muted'),
                     html.Div([
-                        html.H6('Monolith Risk', className='text-muted mt-4'),
-                        dbc.Tooltip(
-                            "Based on repo size, modularity, and branching structure",
-                            target="monolith-badge",
-                            placement="top"
-                        ),
-                        html.Span(
-                            profile_data['Monolith Risk'],
-                            id="monolith-badge",
-                            className=f"badge {'bg-success' if profile_data['Monolith Risk'] == 'Low' else 'bg-warning' if profile_data['Monolith Risk'] == 'Medium' else 'bg-danger'}",
-                            style={"fontSize": "1.2rem", "padding": "8px"}
-                        ),
-                        html.Small(
-                            "Based on repo structure",
-                            className="text-muted d-block text-center mt-2",
-                            style={"fontSize": "0.7rem"}
-                        )
-                    ], className="text-center")
+                        html.H5([
+                            f"{profile_data['Total Cyclomatic Complexity']:,}",
+                            warning_badge(profile_data['Total Cyclomatic Complexity'] > 3000)
+                        ], className="text-center"),
+                        dbc.Tooltip("Sum of CCN across all functions (from Lizard)", target="total-ccn", placement="top"),
+                    ], id="total-ccn")
+                ], width=12, md=4),
+
+                dbc.Col([
+                    html.H6('Total Tokens', className='text-muted'),
+                    html.Div([
+                        html.H5(f"{profile_data['Total Tokens']:,}", className="text-center mb-4"),
+                        dbc.Tooltip("Sum of parsed code tokens (from Lizard)", target="total-tokens", placement="top"),
+                    ], id="total-tokens"),
+
+                    html.H6('Total Functions', className='text-muted'),
+                    html.Div([
+                        html.H5([
+                            f"{profile_data['Total Functions']:,}",
+                            warning_badge(profile_data['Total Functions'] > 2000)
+                        ], className="text-center"),
+                        dbc.Tooltip("Total number of functions/methods detected", target="total-funcs", placement="top"),
+                    ], id="total-funcs"),
                 ], width=12, md=4),
             ], className="g-4")
         ]),
