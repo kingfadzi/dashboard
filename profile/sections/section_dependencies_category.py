@@ -1,6 +1,5 @@
-from dash import html, dcc
+from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
-import dash_table
 from helpers import create_dependency_category_bar
 
 def render(dependencies_df, top_subcategories_age):
