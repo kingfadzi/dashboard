@@ -541,7 +541,7 @@ html.Div([
 ]),    
 
 
-html.Div([
+
 
     # ====== Card 1: Dependency Health Summary ======
     dbc.Card(
@@ -672,8 +672,8 @@ html.Div([
             ], style={"fontSize": "0.9rem", "paddingLeft": "1rem"})
         ]),
         className="mb-4 shadow-sm"
-    )
-])
+    ),
+
 
 
     
