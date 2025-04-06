@@ -621,10 +621,10 @@ html.Div([
                 dbc.Col([
                     html.H6('Top Subcategories', className='text-muted mb-3'),
                     html.Ul([
-                    
-                        html.Li(f"{row['index']} ({row['sub_category']} packages)")
+                        html.Li(f"{row['sub_category']} ({row['count']} packages)")
                         for idx, row in top_subcategories.iterrows()
                     ], style={"fontSize": "0.9rem"})
+                    
                 ], width=6),
             ], className="g-4")
         ]),
