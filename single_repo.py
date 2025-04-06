@@ -295,18 +295,87 @@ app.layout = html.Div([
     )
 ]),
     
-    html.H4('Code Quality'),
-    html.P(f"Average Cyclomatic Complexity: {profile_data['Cyclomatic Complexity Avg']}", style={'marginBottom': '5px'}),
-    html.P(f"Max Cyclomatic Complexity: {profile_data['Cyclomatic Complexity Max']}", style={'marginBottom': '5px'}),
-    html.P(f"Comment Density: {profile_data['Comment Density']}%", style={'marginBottom': '5px'}),
-    html.P(f"Monolith Risk: {profile_data['Monolith Risk']}"),
+    html.Div([
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Code Quality', className='card-title mb-4'),
+
+            dbc.Row([
+                # Average Cyclomatic Complexity
+                dbc.Col([
+                    html.H6('Avg Cyclomatic Complexity', className='text-muted'),
+                    dbc.Progress(
+                        value=min(profile_data['Cyclomatic Complexity Avg'] * 10, 100),
+                        color="info",
+                        style={"height": "20px"},
+                        striped=True,
+                        animated=True,
+                    ),
+                    html.Small(
+                        f"{profile_data['Cyclomatic Complexity Avg']:.1f} (lower is better)",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=6),
+
+                # Max Cyclomatic Complexity
+                dbc.Col([
+                    html.H6('Max Cyclomatic Complexity', className='text-muted'),
+                    html.Div([
+                        html.Span(
+                            f"{profile_data['Cyclomatic Complexity Max']}",
+                            className=f"badge {'bg-danger' if profile_data['Cyclomatic Complexity Max'] > 10 else 'bg-warning' if profile_data['Cyclomatic Complexity Max'] > 5 else 'bg-success'}",
+                            style={"fontSize": "1.2rem", "padding": "8px"}
+                        ),
+                        html.Small(
+                            "in any single function",
+                            className="text-muted d-block text-center mt-2",
+                            style={"fontSize": "0.7rem"}
+                        )
+                    ], className="text-center")
+                ], width=6),
+            ], className="g-4 mb-4"),
+
+            dbc.Row([
+                # Comment Density
+                dbc.Col([
+                    html.H6('Comment Density', className='text-muted'),
+                    dbc.Progress(
+                        value=profile_data['Comment Density'],
+                        color="success" if profile_data['Comment Density'] > 10 else "warning",
+                        style={"height": "20px"},
+                        striped=True,
+                        animated=True,
+                    ),
+                    html.Small(
+                        f"{profile_data['Comment Density']}% of lines are comments",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=6),
+
+                # Monolith Risk
+                dbc.Col([
+                    html.H6('Monolith Risk', className='text-muted'),
+                    html.Div([
+                        html.Span(
+                            profile_data['Monolith Risk'],
+                            className=f"badge {'bg-success' if profile_data['Monolith Risk'] == 'Low' else 'bg-warning' if profile_data['Monolith Risk'] == 'Medium' else 'bg-danger'}",
+                            style={"fontSize": "1.2rem", "padding": "8px"}
+                        ),
+                        html.Small(
+                            "based on size and structure",
+                            className="text-muted d-block text-center mt-2",
+                            style={"fontSize": "0.7rem"}
+                        )
+                    ], className="text-center")
+                ], width=6),
+            ], className="g-4")
+        ]),
+        className="mb-4 shadow-sm"
+    )
+]),
     
-    html.H4('Dependency Health'),
-    dash_table.DataTable(
-        data=profile_data['Dependencies'],
-        columns=[{'name': i, 'id': i} for i in ['Name', 'Version', 'Age (Years)']],
-        style_table={'overflowX': 'auto'}
-    ),
     html.P(f"Outdated Dependencies: {profile_data['Outdated Dependencies %']}%", style={'marginTop': '10px'}),
     
     html.H4('Security Posture'),
