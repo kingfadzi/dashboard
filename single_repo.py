@@ -51,6 +51,12 @@ profile_data = {
     'Cyclomatic Complexity Avg': 3.5,
     'Cyclomatic Complexity Max': 12,
     'Comment Density': 12,
+    'Total Dependencies': 124,
+    'Outdated Dependencies %': 50,
+    'Vulnerable Dependencies %': 20,
+    'Critical Vuln Count': 3,
+    'EOL Packages Found': 5,
+    'Dependency Managers Used': ['PyPI', 'Maven'],
     'Monolith Risk': 'Low',
     'Dependencies': [
         {'Name': 'Flask', 'Version': '1.0', 'Age (Years)': 5},
