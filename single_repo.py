@@ -112,6 +112,18 @@ security_packages = dependencies_df[dependencies_df['category'] == 'Security & I
 # Top 5 Oldest Dependencies
 top_oldest_dependencies = dependencies_df.sort_values(by='age', ascending=False).head(5)
 
+top_subcategories_age = (
+    dependencies_df
+    .groupby('sub_category')
+    .agg(
+        packages=('name', 'count'),
+        avg_age=('age', 'mean')
+    )
+    .sort_values(by='packages', ascending=False)
+    .reset_index()
+    .head(5)
+)
+
 # Top Subcategories
 top_subcategories = (
     dependencies_df['sub_category']
@@ -518,64 +530,76 @@ html.Div([
 
 
     dbc.Card(
-        dbc.CardBody([
-            html.H4('Dependency Category Analysis', className='card-title mb-4'),
-            dcc.Graph(
-                figure=create_dependency_category_bar(dependencies_df),
-                config={'displayModeBar': False}
-            )
-        ]),
-        className="mb-4 shadow-sm"
-    ),
+    dbc.CardBody([
+        html.H4('Dependency Category Analysis', className='card-title mb-4'),
+
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(
+                    figure=create_dependency_category_bar(dependencies_df),
+                    config={'displayModeBar': False}
+                )
+            ], width=6),
+
+            dbc.Col([
+                html.H6('Top Categories (by Avg Age)', className='text-muted mb-3'),
+                dash_table.DataTable(
+                    data=top_subcategories_age.to_dict('records'),
+                    columns=[
+                        {"name": "Subcategory", "id": "sub_category"},
+                        {"name": "Packages", "id": "packages"},
+                        {"name": "Avg Age (Years)", "id": "avg_age"},
+                    ],
+                    style_cell={"fontSize": "0.8rem", "padding": "4px"},
+                    style_table={"overflowX": "auto"},
+                    style_as_list_view=True,
+                    style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
+                    style_data_conditional=[
+                        {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'},
+                        {
+                            'if': {
+                                'filter_query': '{avg_age} >= 5',
+                                'column_id': 'avg_age'
+                            },
+                            'color': 'red',
+                            'fontWeight': 'bold'
+                        }
+                    ],
+                )
+            ], width=6),
+        ], className="g-4")
+    ]),
+    className="mb-4 shadow-sm"
+),
 
 dbc.Card(
     dbc.CardBody([
         html.H4('Dependency Details', className='card-title mb-4'),
 
-        dbc.Row([
-            dbc.Col([
-                html.H6('Top Subcategories', className='text-muted mb-2'),
-                dash_table.DataTable(
-                    data=top_subcategories.to_dict('records'),
-                    columns=[
-                        {"name": "Subcategory", "id": "sub_category"},
-                        {"name": "Packages", "id": "count"},
-                    ],
-                    style_cell={"fontSize": "0.8rem", "padding": "4px"},
-                    style_table={"overflowX": "auto"},
-                    style_as_list_view=True,
-                    style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
-                    style_data_conditional=[
-                        {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'}
-                    ],
-                )
-            ], width=6),
+        html.H6('Top 5 Oldest Dependencies', className='text-muted mb-3'),
 
-            dbc.Col([
-                html.H6('Top 5 Oldest Dependencies', className='text-muted mb-2'),
-                dash_table.DataTable(
-                    data=top_oldest_dependencies[['name', 'age']].to_dict('records'),
-                    columns=[
-                        {"name": "Dependency", "id": "name"},
-                        {"name": "Age (Years)", "id": "age"},
-                    ],
-                    style_cell={"fontSize": "0.8rem", "padding": "4px"},
-                    style_table={"overflowX": "auto"},
-                    style_as_list_view=True,
-                    style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
-                    style_data_conditional=[
-                        {
-                            'if': {
-                                'filter_query': '{age} >= 5',
-                                'column_id': 'age'
-                            },
-                            'color': 'red',
-                            'fontWeight': 'bold'
-                        }
-                    ]
-                )
-            ], width=6),
-        ], className="g-4")
+        dash_table.DataTable(
+            data=top_oldest_dependencies[['name', 'age']].to_dict('records'),
+            columns=[
+                {"name": "Dependency", "id": "name"},
+                {"name": "Age (Years)", "id": "age"},
+            ],
+            style_cell={"fontSize": "0.8rem", "padding": "4px"},
+            style_table={"overflowX": "auto"},
+            style_as_list_view=True,
+            style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
+            style_data_conditional=[
+                {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'},
+                {
+                    'if': {
+                        'filter_query': '{age} >= 5',
+                        'column_id': 'age'
+                    },
+                    'color': 'red',
+                    'fontWeight': 'bold'
+                }
+            ],
+        )
     ]),
     className="mb-4 shadow-sm"
 ),
