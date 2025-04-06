@@ -6,9 +6,10 @@ import plotly.graph_objects as go
 # --- Instead of using helper, let's define the bar inside this section ---
 def create_dependency_category_bar(dependencies_df):
     category_counts = dependencies_df['category'].value_counts()
+
     colors = [
-        "#7FC8A9", "#FDCB9E", "#FF9AA2", "#B5EAD7", "#C7CEEA",
-        "#FFDAC1", "#E2F0CB", "#B5EAD7", "#C7CEEA", "#FFB347"
+        "#AEC6CF", "#FFB347", "#CFCFC4", "#B39EB5", "#77DD77",
+        "#F49AC2", "#FDFD96", "#84B6F4", "#FF6961", "#CB99C9"
     ]
 
     fig = go.Figure(go.Bar(
@@ -23,8 +24,8 @@ def create_dependency_category_bar(dependencies_df):
     ))
 
     fig.update_layout(
-        plot_bgcolor="white",       # <-- White or transparent
-        paper_bgcolor="white",      # <-- White or transparent
+        plot_bgcolor="white",
+        paper_bgcolor="white",
         margin=dict(t=10, b=10, l=10, r=10),
         height=350,
         xaxis_title="Dependencies",
@@ -32,6 +33,7 @@ def create_dependency_category_bar(dependencies_df):
         showlegend=False,
         dragmode=False,
     )
+
     return fig
 
 # --- Main Renderer ---
