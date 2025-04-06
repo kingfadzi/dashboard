@@ -83,8 +83,22 @@ def create_health_chart(health_scores):
 def create_language_pie(language_data):
     labels = list(language_data.keys())
     values = list(language_data.values())
-    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
-    fig.update_layout(title='Language Distribution')
+    fig = go.Figure(data=[go.Pie(
+        labels=labels,
+        values=values,
+        hole=.3,
+        textinfo='percent+label',  # show percentage + language name inside the pie
+        insidetextorientation='radial'  # better layout for inside labels
+    )])
+    fig.update_layout(
+        margin=dict(t=0, b=0, l=0, r=0),  # Remove title space
+        showlegend=True,
+        legend_title_text='Languages',
+        legend=dict(
+            orientation='h',
+            y=-0.2
+        )
+    )
     return fig
 
 # Commit activity sparkline
