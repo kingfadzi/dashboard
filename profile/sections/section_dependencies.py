@@ -16,7 +16,7 @@ def render(profile_data):
                 dbc.Col([
                     html.Div([
                         html.H6('Total Dependencies', className='text-muted mb-1'),
-                        html.H5(f"{profile_data['Total Dependencies']:,}", className="text-center"),
+                        html.Span(f"{profile_data['Total Dependencies']:,}", className="badge bg-primary", style={"fontSize": "1rem", "padding": "6px"})
                     ])
                 ], width=12, md=4),
 
