@@ -1,58 +1,63 @@
-from dash import html, dcc
-import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
+from dash import dcc, html
 import pandas as pd
+import plotly.graph_objects as go
 
 def render(profile_data):
+    # Prepare dependencies
     dependencies = profile_data.get('Dependencies', [])
-    
     if not dependencies:
-        return dbc.Card(
-            dbc.CardBody([
-                html.H4('Dependency Categories (Stacked)', className='card-title mb-4'),
-                html.P('No dependencies available.', className='text-muted')
-            ]),
-            className="mb-4 shadow-sm"
-        )
-
-    # Create DataFrame
+        return html.Div("No dependency data available.")
+    
     df = pd.DataFrame(dependencies)
+    
+    if df.empty or 'category' not in df.columns or 'sub_category' not in df.columns:
+        return html.Div("Invalid dependency structure.")
 
-    if df.empty:
-        return html.Div()
+    # Group for stacked chart
+    stacked_data = (
+        df.groupby(['category', 'sub_category'])
+        .size()
+        .reset_index(name='count')
+    )
 
-    # Group by category and subcategory
-    grouped = df.groupby(['category', 'sub_category']).size().reset_index(name='count')
-
-    categories = grouped['category'].unique()
+    # Create pivot table for stacking
+    pivot = stacked_data.pivot(index='category', columns='sub_category', values='count').fillna(0)
 
     fig = go.Figure()
 
-    # For each subcategory, create a bar trace
-    for subcat in grouped['sub_category'].unique():
-        filtered = grouped[grouped['sub_category'] == subcat]
+    # Add each subcategory as a separate color bar
+    for sub_category in pivot.columns:
         fig.add_trace(go.Bar(
-            y=filtered['category'],
-            x=filtered['count'],
-            name=subcat,
-            orientation='h'
+            y=pivot.index,
+            x=pivot[sub_category],
+            name=sub_category,
+            orientation='h',
+            hovertemplate=f"<b>{sub_category}</b><br>Packages: %{x}<extra></extra>",
         ))
 
     fig.update_layout(
         barmode='stack',
-        margin=dict(t=20, b=20, l=20, r=20),
-        height=450,
-        xaxis_title="Number of Dependencies",
-        yaxis_title="Category",
-        showlegend=True,
+        height=400,
+        margin=dict(t=10, b=10, l=40, r=10),
         plot_bgcolor='white',
-        paper_bgcolor='white'
+        paper_bgcolor='white',
+        xaxis_title='Number of Packages',
+        yaxis_title='Category',
+        showlegend=False,  # <--- No legend
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=12,
+            font_family="Arial"
+        ),
     )
+
+    # Disable zoom/pan
+    config = {'displayModeBar': False, 'staticPlot': True}
 
     return dbc.Card(
         dbc.CardBody([
-            html.H4('Dependency Categories (Stacked)', className='card-title mb-4'),
-            dcc.Graph(figure=fig, config={'displayModeBar': False}),
+            html.H4('Dependency Category Breakdown', className='card-title mb-4'),
+            dcc.Graph(figure=fig, config=config)
         ]),
         className="mb-4 shadow-sm"
     )
