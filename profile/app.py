@@ -13,7 +13,9 @@ import sections.section_code_quality as section_code_quality
 # (more sections later)
 
 # Initialize Dash app
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 server = app.server
 
 # App Layout
