@@ -185,17 +185,44 @@ app.layout = html.Div([
         justify="around"
     ),
     
-    html.H4('Technology Stack'),
-    html.Div([
-        html.P(f"Main Language: {profile_data['Main Language']}", style={'fontWeight': 'bold'}),
-        html.P("Other Languages: ", style={'fontWeight': 'bold'}),
-        *[html.Span(lang, className='badge bg-secondary', style={'marginRight': '5px'}) for lang in profile_data['Other Languages']],
-        html.P("Frameworks: ", style={'fontWeight': 'bold', 'marginTop': '10px'}),
-        *[html.Span(fw, className='badge bg-info', style={'marginRight': '5px'}) for fw in profile_data['Frameworks']],
-        html.P(f"Build Tool: {profile_data['Build Tool']}", style={'marginTop': '10px'}),
-        html.P(f"Runtime: {profile_data['Runtime Version']}", style={'marginBottom': '20px'}),
-        dcc.Graph(figure=create_language_pie(profile_data['Language Percentages']))
-    ], className='mb-4'),
+      html.Div([
+      dbc.Card(
+          dbc.CardBody([
+              html.H4('Technology Stack', className='card-title mb-4'),
+  
+              dbc.Row([
+                  dbc.Col([
+                      html.H6('Main Language', className='text-muted'),
+                      html.Span(profile_data['Main Language'], className='badge bg-primary', style={"fontSize": "0.9rem"}),
+                      html.Hr(),
+  
+                      html.H6('Other Languages', className='text-muted'),
+                      html.Div([
+                          *[html.Span(lang, className='badge bg-secondary me-2', style={"fontSize": "0.8rem"}) for lang in profile_data['Other Languages']]
+                      ]),
+                      html.Hr(),
+  
+                      html.H6('Frameworks', className='text-muted'),
+                      html.Div([
+                          *[html.Span(fw, className='badge bg-info me-2', style={"fontSize": "0.8rem"}) for fw in profile_data['Frameworks']]
+                      ]),
+                      html.Hr(),
+  
+                      html.H6('Build Tool', className='text-muted'),
+                      html.P(profile_data['Build Tool'], style={"fontWeight": "bold"}),
+  
+                      html.H6('Runtime Version', className='text-muted'),
+                      html.P(profile_data['Runtime Version'], style={"fontWeight": "bold"}),
+                  ], width=6),
+  
+                  dbc.Col([
+                      dcc.Graph(figure=create_language_pie(profile_data['Language Percentages']), config={'displayModeBar': False})
+                  ], width=6),
+              ])
+          ]),
+          className="mb-4 shadow-sm"
+      )
+  ]),
     
     html.H4('Modernization Readiness'),
     html.P(f"Dockerfile Present: {'Yes' if profile_data['Dockerfile'] else 'No'}"),
