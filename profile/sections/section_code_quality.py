@@ -19,21 +19,21 @@ def render(profile_data):
     else:
         size_color = "danger"
 
-    # Cyclomatic Complexity Badge
-    avg_ccn_label = classify_avg_ccn(profile_data['Avg Cyclomatic Complexity'])
-    avg_ccn_color = "success" if avg_ccn_label == "Good" else "warning" if avg_ccn_label == "Moderate" else "danger"
+    # Avg Cyclomatic Complexity Badge
+    avg_ccn_value = profile_data['Avg Cyclomatic Complexity']
+    avg_ccn_color = "success" if avg_ccn_value < 4 else "warning" if avg_ccn_value <= 6 else "danger"
 
     # Total CCN Badge
-    total_ccn_label = classify_total_ccn(profile_data['Total Cyclomatic Complexity'])
-    total_ccn_color = "success" if total_ccn_label == "Low Risk" else "warning" if total_ccn_label == "Medium Risk" else "danger"
+    total_ccn_value = profile_data['Total Cyclomatic Complexity']
+    total_ccn_color = "success" if total_ccn_value < 1500 else "warning" if total_ccn_value <= 3000 else "danger"
 
-    # Comment Quality Badge
-    comment_quality_label = classify_comment_quality(comment_ratio)
-    comment_quality_color = "success" if comment_quality_label == "Excellent" else "warning" if comment_quality_label == "Moderate" else "danger"
+    # Comment Ratio Badge
+    comment_percent = (profile_data['Comment Lines'] / profile_data['Total NLOC']) * 100
+    comment_color = "success" if comment_percent >= 15 else "warning" if comment_percent >= 8 else "danger"
 
-    # Function Density Badge
-    function_density_label = classify_function_density(profile_data['Total Functions'])
-    function_density_color = "success" if function_density_label == "Small Codebase" else "warning" if function_density_label == "Medium Codebase" else "danger"
+    # Function Count Badge
+    total_functions = profile_data['Total Functions']
+    function_color = "success" if total_functions < 500 else "warning" if total_functions <= 2000 else "danger"
 
     return dbc.Card(
         dbc.CardBody([
@@ -54,28 +54,28 @@ def render(profile_data):
                 ], width=12, md=4),
 
                 dbc.Col([
-                    html.H6('Complexity Level', className='text-muted'),
+                    html.H6('Avg Cyclomatic Complexity', className='text-muted'),
                     html.Div([
-                        html.Span(avg_ccn_label, className=f"badge bg-{avg_ccn_color}", style={"fontSize": "1rem", "padding": "6px"}),
+                        html.Span(f"{avg_ccn_value:.1f}", className=f"badge bg-{avg_ccn_color}", style={"fontSize": "1rem", "padding": "6px"}),
                     ], className="text-center mb-4"),
 
-                    html.H6('Overall Complexity', className='text-muted'),
+                    html.H6('Total Cyclomatic Complexity', className='text-muted'),
                     html.Div([
-                        html.Span(total_ccn_label, className=f"badge bg-{total_ccn_color}", style={"fontSize": "1rem", "padding": "6px"}),
+                        html.Span(f"{total_ccn_value:,}", className=f"badge bg-{total_ccn_color}", style={"fontSize": "1rem", "padding": "6px"}),
                         dbc.Tooltip("Sum of all CCN (via Lizard)", target="total-ccn", placement="top"),
                     ], id="total-ccn", className="text-center"),
                 ], width=12, md=4),
 
                 dbc.Col([
-                    html.H6('Comment Quality', className='text-muted'),
+                    html.H6('Comment Ratio', className='text-muted'),
                     html.Div([
-                        html.Span(comment_quality_label, className=f"badge bg-{comment_quality_color}", style={"fontSize": "1rem", "padding": "6px"}),
+                        html.Span(f"{comment_percent:.1f}%", className=f"badge bg-{comment_color}", style={"fontSize": "1rem", "padding": "6px"}),
                     ], className="text-center mb-4"),
 
-                    html.H6('Function Density', className='text-muted'),
+                    html.H6('Function Count', className='text-muted'),
                     html.Div([
-                        html.Span(function_density_label, className=f"badge bg-{function_density_color}", style={"fontSize": "1rem", "padding": "6px"}),
-                        dbc.Tooltip("Total number of functions (via Lizard)", target="total-funcs", placement="top"),
+                        html.Span(f"{total_functions:,}", className=f"badge bg-{function_color}", style={"fontSize": "1rem", "padding": "6px"}),
+                        dbc.Tooltip("Number of functions detected (via Lizard)", target="total-funcs", placement="top"),
                     ], id="total-funcs", className="text-center"),
                 ], width=12, md=4),
             ], className="g-4")
