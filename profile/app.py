@@ -2,7 +2,7 @@ from dash import Dash, html
 import dash_bootstrap_components as dbc
 
 # Import sample data and helpers
-from data_sample import profile_data, dependencies
+from data_sample import profile_data
 import helpers
 
 # Import sections
@@ -35,7 +35,7 @@ app.layout = html.Div([
     section_code_quality.render(profile_data),
     section_dependencies.render(profile_data),
     dependencies_category.render(profile_data),
-    dependencies_risk_by_subcategory.render(profile_data),
+    dependencies_category.render(profile_data),
     # (later you will add more sections here like dependency health, security, etc.)
 ], style={"padding": "20px"})
 
