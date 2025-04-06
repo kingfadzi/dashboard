@@ -45,7 +45,7 @@ profile_data = {
     'Cyclomatic Complexity Avg': 3.5,
     'Cyclomatic Complexity Max': 12,
     'Comment Density': 12,
-    'Total Dependencies': 5,
+    'Total Dependencies': 8,
     'Outdated Dependencies %': 40,
     'Vulnerable Dependencies %': 20,
     'Critical Vuln Count': 1,
@@ -56,7 +56,7 @@ profile_data = {
     'DevOps Best Practices': True,
     'Commits Last 12 Months': [5, 10, 8, 15, 9, 12, 6, 14, 11, 7, 13, 10],
 
-    # This is the only piece section_dependencies_risk_by_subcategory.py needs:
+    # Updated Dependencies section
     'Dependencies': [
         {
             "name": "Flask",
@@ -66,11 +66,25 @@ profile_data = {
             "sub_category": "Web Frameworks",
         },
         {
+            "name": "Jinja2",
+            "version": "2.11",
+            "package_type": "PyPI",
+            "category": "Application Development",
+            "sub_category": "Template Engines",
+        },
+        {
             "name": "psycopg2",
             "version": "2.8",
             "package_type": "PyPI",
             "category": "Data Management & Storage",
             "sub_category": "Relational Databases",
+        },
+        {
+            "name": "Redis",
+            "version": "4.2",
+            "package_type": "PyPI",
+            "category": "Data Management & Storage",
+            "sub_category": "Caching",
         },
         {
             "name": "requests",
@@ -93,24 +107,34 @@ profile_data = {
             "category": "Security & Identity",
             "sub_category": "Authentication",
         },
+        {
+            "name": "certifi",
+            "version": "2020.12.5",
+            "package_type": "PyPI",
+            "category": "Security & Identity",
+            "sub_category": "Transport & Data Security",
+        },
     ],
+
+    # Vulnerabilities
     'Vulnerabilities': [
-    {
-        'package': 'flask',
-        'version': '1.0',
-        'severity': 'Critical',
-        'fix_version': '2.0',
-        'source': 'G'
-    },
-    {
-        'package': 'requests',
-        'version': '2.8',
-        'severity': 'High',
-        'fix_version': '2.25.1',
-        'source': 'T'
-    }
-  ],
-  
+        {
+            'package': 'flask',
+            'version': '1.0',
+            'severity': 'Critical',
+            'fix_version': '2.0',
+            'source': 'G'
+        },
+        {
+            'package': 'requests',
+            'version': '2.8',
+            'severity': 'High',
+            'fix_version': '2.25.1',
+            'source': 'T'
+        }
+    ],
+
+    # EOL Results
     'EOL Results': [
         {
             'artifact_name': 'Python',
@@ -125,5 +149,4 @@ profile_data = {
             'latest_release': '2.3'
         }
     ]
-
 }
