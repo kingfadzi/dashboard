@@ -1,7 +1,6 @@
 import pandas as pd
 import dash_bootstrap_components as dbc
-import dash_table
-from dash import html, dcc
+from dash import html, dcc, dash_table
 from helpers import create_dependency_category_bar
 
 def render(profile_data):
