@@ -39,7 +39,9 @@ profile_data = {
     },
     'Dockerfile': True,
     'CI/CD Present': True,
-    'Cloud Native Score': 65,
+    'Deprecated APIs Found': 3,
+    'Hardcoded Secrets Found': 2,
+    'Other Modernization Findings': 8,
     'Health Scores': {
         'Code Quality': 80,
         'Security': 40,
