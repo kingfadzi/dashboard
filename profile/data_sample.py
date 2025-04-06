@@ -1,4 +1,3 @@
-# Sample profile data (replace with your real extracted data later)
 profile_data = {
     'Repo ID': 'CTFd',
     'Status': 'ACTIVE',
@@ -15,7 +14,7 @@ profile_data = {
     'Total Cyclomatic Complexity': 2200,
     'Total Tokens': 560000,
     'Total Functions': 1250,
-    'Classification Label': 'Medium',  # <-- NEW field, e.g., Tiny, Small, Medium, Large, Massive, Non-Code
+    'Classification Label': 'Medium',
     'Contributors': 149,
     'Repo Age (Years)': 10,
     'Last Commit Date': '2024-12-27',
@@ -33,7 +32,7 @@ profile_data = {
     },
     'Dockerfile': True,
     'CI/CD Present': True,
-    'IaC Config Present': True,  # or False
+    'IaC Config Present': True,
     'Deprecated APIs Found': 3,
     'Hardcoded Secrets Found': 2,
     'Other Modernization Findings': 8,
@@ -56,15 +55,43 @@ profile_data = {
     'Single Developer Risk': False,
     'DevOps Best Practices': True,
     'Commits Last 12 Months': [5, 10, 8, 15, 9, 12, 6, 14, 11, 7, 13, 10],
+
+    # This is the only piece section_dependencies_risk_by_subcategory.py needs:
+    'Dependencies': [
+        {
+            "name": "Flask",
+            "version": "1.0",
+            "package_type": "PyPI",
+            "category": "Application Development",
+            "sub_category": "Web Frameworks",
+        },
+        {
+            "name": "psycopg2",
+            "version": "2.8",
+            "package_type": "PyPI",
+            "category": "Data Management & Storage",
+            "sub_category": "Relational Databases",
+        },
+        {
+            "name": "requests",
+            "version": "2.22.0",
+            "package_type": "PyPI",
+            "category": "Utilities & Libraries",
+            "sub_category": "General-Purpose",
+        },
+        {
+            "name": "gunicorn",
+            "version": "20.0.4",
+            "package_type": "PyPI",
+            "category": "Infrastructure & Deployment",
+            "sub_category": "Containerization & Orchestration",
+        },
+        {
+            "name": "bcrypt",
+            "version": "3.2.0",
+            "package_type": "PyPI",
+            "category": "Security & Identity",
+            "sub_category": "Authentication",
+        },
+    ]
 }
-
-# Sample dependencies
-dependencies = [
-    {"name": "Flask", "version": "1.0", "package_type": "PyPI", "category": "Application Development", "sub_category": "Web Frameworks", "age": 5},
-    {"name": "psycopg2", "version": "2.8", "package_type": "PyPI", "category": "Data Management & Storage", "sub_category": "Relational Databases", "age": 4},
-    {"name": "requests", "version": None, "package_type": "PyPI", "category": "Utilities & Libraries", "sub_category": "General-Purpose", "age": 6},
-    {"name": "gunicorn", "version": "20.0.4", "package_type": "PyPI", "category": "Infrastructure & Deployment", "sub_category": "Containerization & Orchestration", "age": 5},
-    {"name": "bcrypt", "version": "3.2.0", "package_type": "PyPI", "category": "Security & Identity", "sub_category": "Authentication", "age": 2},
-]
-
-profile_data['Dependencies'] = dependencies

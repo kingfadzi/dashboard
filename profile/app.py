@@ -15,6 +15,9 @@ import sections.section_dependencies as section_dependencies
 import sections.section_dependencies_category as dependencies_category
 
 
+import sections.section_dependencies_risk_by_subcategory as dependencies_risk_by_subcategory
+
+
 
 # Initialize Dash app
 
@@ -32,6 +35,7 @@ app.layout = html.Div([
     section_code_quality.render(profile_data),
     section_dependencies.render(profile_data),
     dependencies_category.render(profile_data),
+    dependencies_risk_by_subcategory.render(profile_data),
     # (later you will add more sections here like dependency health, security, etc.)
 ], style={"padding": "20px"})
 
