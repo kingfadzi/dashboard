@@ -22,13 +22,19 @@ def render(profile_data):
                         className="text-muted d-block text-center mt-2",
                         style={"fontSize": "0.7rem"}
                     )
-                ], width=6),
+                ], width=12, md=4),
 
                 dbc.Col([
                     html.H6('Max Cyclomatic Complexity', className='text-muted'),
                     html.Div([
+                        dbc.Tooltip(
+                            "Highest single function complexity",
+                            target="max-cc-badge",
+                            placement="top"
+                        ),
                         html.Span(
                             f"{profile_data['Cyclomatic Complexity Max']}",
+                            id="max-cc-badge",
                             className=f"badge {'bg-danger' if profile_data['Cyclomatic Complexity Max'] > 10 else 'bg-warning' if profile_data['Cyclomatic Complexity Max'] > 5 else 'bg-success'}",
                             style={"fontSize": "1.2rem", "padding": "8px"}
                         ),
@@ -37,11 +43,9 @@ def render(profile_data):
                             className="text-muted d-block text-center mt-2",
                             style={"fontSize": "0.7rem"}
                         )
-                    ], className="text-center")
-                ], width=6),
-            ], className="g-4 mb-4"),
+                    ], className="text-center mt-2")
+                ], width=12, md=4),
 
-            dbc.Row([
                 dbc.Col([
                     html.H6('Comment Density', className='text-muted'),
                     dbc.Progress(
@@ -53,17 +57,21 @@ def render(profile_data):
                         className="mt-2"
                     ),
                     html.Small(
-                        f"{profile_data['Comment Density']}% of lines are comments",
+                        f"{profile_data['Comment Density']}% lines are comments",
                         className="text-muted d-block text-center mt-2",
                         style={"fontSize": "0.7rem"}
-                    )
-                ], width=6),
+                    ),
 
-                dbc.Col([
-                    html.H6('Monolith Risk', className='text-muted'),
                     html.Div([
+                        html.H6('Monolith Risk', className='text-muted mt-4'),
+                        dbc.Tooltip(
+                            "Based on repo size, modularity, and branching structure",
+                            target="monolith-badge",
+                            placement="top"
+                        ),
                         html.Span(
                             profile_data['Monolith Risk'],
+                            id="monolith-badge",
                             className=f"badge {'bg-success' if profile_data['Monolith Risk'] == 'Low' else 'bg-warning' if profile_data['Monolith Risk'] == 'Medium' else 'bg-danger'}",
                             style={"fontSize": "1.2rem", "padding": "8px"}
                         ),
@@ -73,7 +81,7 @@ def render(profile_data):
                             style={"fontSize": "0.7rem"}
                         )
                     ], className="text-center")
-                ], width=6),
+                ], width=12, md=4),
             ], className="g-4")
         ]),
         className="mb-4 shadow-sm"
