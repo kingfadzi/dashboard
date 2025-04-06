@@ -66,3 +66,5 @@ dependencies = [
     {"name": "gunicorn", "version": "20.0.4", "package_type": "PyPI", "category": "Infrastructure & Deployment", "sub_category": "Containerization & Orchestration", "age": 5},
     {"name": "bcrypt", "version": "3.2.0", "package_type": "PyPI", "category": "Security & Identity", "sub_category": "Authentication", "age": 2},
 ]
+
+profile_data['Dependencies'] = dependencies
