@@ -33,7 +33,7 @@ def render(profile_data):
             x=pivot[sub_category],
             name=sub_category,
             orientation='h',
-            hovertemplate=f"<b>{sub_category}</b><br>Packages: %{{x}}<extra></extra>",  # << FIXED
+            hovertemplate=f"<b>{sub_category}</b><br>Packages: %{{x}}<extra></extra>",
         ))
 
     fig.update_layout(
@@ -52,8 +52,11 @@ def render(profile_data):
         ),
     )
 
-    # Disable zoom/pan
-    config = {'displayModeBar': False, 'staticPlot': True}
+    # Config: no toolbar, but allow hover
+    config = {
+        'displayModeBar': False,
+        'staticPlot': False   # <<< FIXED
+    }
 
     return dbc.Card(
         dbc.CardBody([
