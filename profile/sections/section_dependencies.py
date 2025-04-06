@@ -1,7 +1,7 @@
 from dash import html
 import dash_bootstrap_components as dbc
 
-def render_dependency_health(profile_data):
+def render(profile_data):
     # Badge Colors
     outdated_color = "success" if profile_data['Outdated Dependencies %'] < 10 else "warning" if profile_data['Outdated Dependencies %'] <= 40 else "danger"
     vulnerable_color = "success" if profile_data['Vulnerable Dependencies %'] < 10 else "warning" if profile_data['Vulnerable Dependencies %'] <= 40 else "danger"
