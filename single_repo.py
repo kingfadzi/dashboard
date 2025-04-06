@@ -123,16 +123,24 @@ top_subcategories = (
 
 import plotly.graph_objects as go
 
-def create_dependency_category_pie(df):
+import plotly.graph_objects as go
+
+def create_dependency_category_bar(df):
     category_counts = df['category'].value_counts()
-    fig = go.Figure(data=[go.Pie(
-        labels=category_counts.index,
-        values=category_counts.values,
-        hole=.3,
-        textinfo='percent+label',
-        insidetextorientation='radial'
-    )])
-    fig.update_layout(margin=dict(t=0, b=0, l=0, r=0), showlegend=False)
+    fig = go.Figure(go.Bar(
+        y=category_counts.index,
+        x=category_counts.values,
+        orientation='h',
+        text=category_counts.values,
+        textposition='auto'
+    ))
+    fig.update_layout(
+        margin=dict(t=10, b=10, l=10, r=10),
+        height=300,
+        xaxis_title="Dependencies",
+        yaxis_title="Category",
+        showlegend=False,
+    )
     return fig
 
 
@@ -444,103 +452,6 @@ app.layout = html.Div([
     )
 ]),
     
-html.Div([
-    dbc.Card(
-        dbc.CardBody([
-            html.H4('Dependency Health', className='card-title mb-4'),
-
-            # Top KPIs
-            dbc.Row([
-                dbc.Col([
-                    html.H6('Total Dependencies', className='text-muted'),
-                    html.H4(
-                        f"{profile_data['Total Dependencies']}",
-                        className="text-center",
-                        style={"fontSize": "1.5rem"}
-                    ),
-                    html.Small(
-                        "Third-party packages scanned",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=4),
-
-                dbc.Col([
-                    html.H6('Outdated Dependencies', className='text-muted'),
-                    html.Span(
-                        f"{profile_data['Outdated Dependencies %']}%",
-                        className=f"badge {'bg-success' if profile_data['Outdated Dependencies %'] < 10 else 'bg-warning' if profile_data['Outdated Dependencies %'] <= 40 else 'bg-danger'}",
-                        style={"fontSize": "1.0rem", "padding": "8px"}
-                    ),
-                    html.Small(
-                        "Percentage outdated",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=4),
-
-                dbc.Col([
-                    html.H6('Vulnerable Dependencies', className='text-muted'),
-                    html.Span(
-                        f"{profile_data['Vulnerable Dependencies %']}%",
-                        className=f"badge {'bg-success' if profile_data['Vulnerable Dependencies %'] < 10 else 'bg-warning' if profile_data['Vulnerable Dependencies %'] <= 40 else 'bg-danger'}",
-                        style={"fontSize": "1.0rem", "padding": "8px"}
-                    ),
-                    html.Small(
-                        "Percentage with known CVEs",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=4),
-            ], className="g-4 mb-4"),
-
-            # Second Row KPIs
-            dbc.Row([
-                dbc.Col([
-                    html.H6('Critical Vulnerabilities', className='text-muted'),
-                    html.Span(
-                        f"{profile_data['Critical Vuln Count']}",
-                        className=f"badge {'bg-danger' if profile_data['Critical Vuln Count'] > 0 else 'bg-success'}",
-                        style={"fontSize": "1.0rem", "padding": "8px"}
-                    ),
-                    html.Small(
-                        "Grype/Trivy scans",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=4),
-
-                dbc.Col([
-                    html.H6('EOL Packages', className='text-muted'),
-                    html.Span(
-                        f"{profile_data['EOL Packages Found']}",
-                        className=f"badge {'bg-danger' if profile_data['EOL Packages Found'] > 0 else 'bg-success'}",
-                        style={"fontSize": "1.0rem", "padding": "8px"}
-                    ),
-                    html.Small(
-                        "End-of-Life packages (xeol)",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=4),
-
-                dbc.Col([
-                    html.H6('Dependency Managers', className='text-muted'),
-                    html.Div([
-                        *[html.Span(pm, className="badge bg-primary me-2", style={"fontSize": "0.8rem"}) for pm in profile_data['Dependency Managers Used']]
-                    ], className="text-center"),
-                    html.Small(
-                        "Detected from build files",
-                        className="text-muted d-block text-center mt-2",
-                        style={"fontSize": "0.7rem"}
-                    )
-                ], width=4),
-            ], className="g-4")
-        ]),
-        className="mb-4 shadow-sm"
-    )
-]),    
-
 
 
 html.Div([
@@ -630,6 +541,68 @@ html.Div([
         ]),
         className="mb-4 shadow-sm"
     ),
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Dependency Category Analysis', className='card-title mb-4'),
+            dcc.Graph(
+                figure=create_dependency_category_bar(dependencies_df),
+                config={'displayModeBar': False}
+            )
+        ]),
+        className="mb-4 shadow-sm"
+    ),
+
+dbc.Card(
+    dbc.CardBody([
+        html.H4('Dependency Details', className='card-title mb-4'),
+
+        dbc.Row([
+            dbc.Col([
+                html.H6('Top Subcategories', className='text-muted mb-2'),
+                dash_table.DataTable(
+                    data=top_subcategories.to_dict('records'),
+                    columns=[
+                        {"name": "Subcategory", "id": "sub_category"},
+                        {"name": "Packages", "id": "count"},
+                    ],
+                    style_cell={"fontSize": "0.8rem", "padding": "4px"},
+                    style_table={"overflowX": "auto"},
+                    style_as_list_view=True,
+                    style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
+                    style_data_conditional=[
+                        {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'}
+                    ],
+                )
+            ], width=6),
+
+            dbc.Col([
+                html.H6('Top 5 Oldest Dependencies', className='text-muted mb-2'),
+                dash_table.DataTable(
+                    data=top_oldest_dependencies[['name', 'age']].to_dict('records'),
+                    columns=[
+                        {"name": "Dependency", "id": "name"},
+                        {"name": "Age (Years)", "id": "age"},
+                    ],
+                    style_cell={"fontSize": "0.8rem", "padding": "4px"},
+                    style_table={"overflowX": "auto"},
+                    style_as_list_view=True,
+                    style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
+                    style_data_conditional=[
+                        {
+                            'if': {
+                                'filter_query': '{age} >= 5',
+                                'column_id': 'age'
+                            },
+                            'color': 'red',
+                            'fontWeight': 'bold'
+                        }
+                    ]
+                )
+            ], width=6),
+        ], className="g-4")
+    ]),
+    className="mb-4 shadow-sm"
+),
 
     # ====== Card 3: Dependency Details ======
     dbc.Card(
