@@ -23,12 +23,14 @@ def create_dependency_category_bar(dependencies_df):
     ))
 
     fig.update_layout(
+        plot_bgcolor="white",       # <-- White or transparent
+        paper_bgcolor="white",      # <-- White or transparent
         margin=dict(t=10, b=10, l=10, r=10),
         height=350,
         xaxis_title="Dependencies",
         yaxis_title="Category",
         showlegend=False,
-        dragmode=False,  # <-- Disable zoom/pan
+        dragmode=False,
     )
     return fig
 
