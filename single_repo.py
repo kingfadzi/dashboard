@@ -382,6 +382,103 @@ app.layout = html.Div([
     )
 ]),
     
+html.Div([
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Dependency Health', className='card-title mb-4'),
+
+            # Top KPIs
+            dbc.Row([
+                dbc.Col([
+                    html.H6('Total Dependencies', className='text-muted'),
+                    html.H4(
+                        f"{profile_data['Total Dependencies']}",
+                        className="text-center",
+                        style={"fontSize": "1.5rem"}
+                    ),
+                    html.Small(
+                        "Third-party packages scanned",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('Outdated Dependencies', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['Outdated Dependencies %']}%",
+                        className=f"badge {'bg-success' if profile_data['Outdated Dependencies %'] < 10 else 'bg-warning' if profile_data['Outdated Dependencies %'] <= 40 else 'bg-danger'}",
+                        style={"fontSize": "1.0rem", "padding": "8px"}
+                    ),
+                    html.Small(
+                        "Percentage outdated",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('Vulnerable Dependencies', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['Vulnerable Dependencies %']}%",
+                        className=f"badge {'bg-success' if profile_data['Vulnerable Dependencies %'] < 10 else 'bg-warning' if profile_data['Vulnerable Dependencies %'] <= 40 else 'bg-danger'}",
+                        style={"fontSize": "1.0rem", "padding": "8px"}
+                    ),
+                    html.Small(
+                        "Percentage with known CVEs",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=4),
+            ], className="g-4 mb-4"),
+
+            # Second Row KPIs
+            dbc.Row([
+                dbc.Col([
+                    html.H6('Critical Vulnerabilities', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['Critical Vuln Count']}",
+                        className=f"badge {'bg-danger' if profile_data['Critical Vuln Count'] > 0 else 'bg-success'}",
+                        style={"fontSize": "1.0rem", "padding": "8px"}
+                    ),
+                    html.Small(
+                        "Grype/Trivy scans",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('EOL Packages', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['EOL Packages Found']}",
+                        className=f"badge {'bg-danger' if profile_data['EOL Packages Found'] > 0 else 'bg-success'}",
+                        style={"fontSize": "1.0rem", "padding": "8px"}
+                    ),
+                    html.Small(
+                        "End-of-Life packages (xeol)",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('Dependency Managers', className='text-muted'),
+                    html.Div([
+                        *[html.Span(pm, className="badge bg-primary me-2", style={"fontSize": "0.8rem"}) for pm in profile_data['Dependency Managers Used']]
+                    ], className="text-center"),
+                    html.Small(
+                        "Detected from build files",
+                        className="text-muted d-block text-center mt-2",
+                        style={"fontSize": "0.7rem"}
+                    )
+                ], width=4),
+            ], className="g-4")
+        ]),
+        className="mb-4 shadow-sm"
+    )
+]),    
+    
     html.P(f"Outdated Dependencies: {profile_data['Outdated Dependencies %']}%", style={'marginTop': '10px'}),
     
     html.H4('Security Posture'),
