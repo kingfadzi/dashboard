@@ -18,7 +18,7 @@ import sections.section_vulnerabilities_combined as vulnerabilities_combined
 
 import sections.section_dependencies_risk_by_subcategory as dependencies_risk_by_subcategory
 
-
+import sections.section_vulnerabilities_combined as vulnerabilities_combined
 
 # Initialize Dash app
 
@@ -35,7 +35,7 @@ app.layout = html.Div([
     section_modernization.render(profile_data),
     section_code_quality.render(profile_data),
     section_dependencies.render(profile_data),
-    #dependencies_risk_by_subcategory.render(profile_data),
+    vulnerabilities_combined.render(profile_data),
     dependencies_risk_by_subcategory.render(profile_data),
     # (later you will add more sections here like dependency health, security, etc.)
 ], style={"padding": "20px"})
