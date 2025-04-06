@@ -12,7 +12,7 @@ import sections.section_modernization as section_modernization
 import sections.section_code_quality as section_code_quality
 import sections.section_dependencies as section_dependencies
 # (more sections later)
-from sections.section_dependencies_category import render as dependency_category
+from sections.section_dependencies_category as dependencies_category
 
 
 
@@ -31,7 +31,7 @@ app.layout = html.Div([
     section_modernization.render(profile_data),
     section_code_quality.render(profile_data),
     section_dependencies.render(profile_data),
-    dependency_category.render(profile_data),
+    dependencies_category.render(profile_data),
     # (later you will add more sections here like dependency health, security, etc.)
 ], style={"padding": "20px"})
 
