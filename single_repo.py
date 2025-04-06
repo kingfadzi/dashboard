@@ -69,10 +69,71 @@ profile_data = {
     'Critical Vuln Count': 1,
     'Single Developer Risk': False,
     'DevOps Best Practices': True,
-    'Commits Last 12 Months': [5, 10, 8, 15, 9, 12, 6, 14, 11, 7, 13, 10]
+    'Commits Last 12 Months': [5, 10, 8, 15, 9, 12, 6, 14, 11, 7, 13, 10], 
+    'Total Dependencies': 5,
+    'Outdated Dependencies %': 40,  # Example placeholder
+    'Vulnerable Dependencies %': 20, # Example placeholder
+    'Critical Vuln Count': 1,        # Example placeholder
+    'EOL Packages Found': 1,         # Example placeholder
+    'Dependency Managers Used': ['PyPI'],
+
 }
 
+dependencies = [
+    {"name": "Flask", "version": "1.0", "package_type": "PyPI", "category": "Application Development", "sub_category": "Web Frameworks", "age": 5},
+    {"name": "psycopg2", "version": "2.8", "package_type": "PyPI", "category": "Data Management & Storage", "sub_category": "Relational Databases", "age": 4},
+    {"name": "requests", "version": None, "package_type": "PyPI", "category": "Utilities & Libraries", "sub_category": "General-Purpose", "age": 6},
+    {"name": "gunicorn", "version": "20.0.4", "package_type": "PyPI", "category": "Infrastructure & Deployment", "sub_category": "Containerization & Orchestration", "age": 5},
+    {"name": "bcrypt", "version": "3.2.0", "package_type": "PyPI", "category": "Security & Identity", "sub_category": "Authentication", "age": 2},
+]
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+import pandas as pd
+
+dependencies_df = pd.DataFrame(dependencies)
+
+# Oldest Dependency
+oldest_dependency = dependencies_df.sort_values(by='age', ascending=False).iloc[0]
+oldest_dependency_name = oldest_dependency['name']
+oldest_dependency_age = oldest_dependency['age']
+
+# % Unpinned
+unpinned = dependencies_df['version'].isnull().sum()
+unpinned_percent = (unpinned / len(dependencies_df)) * 100
+
+# Cloud Native Packages (Infrastructure & Deployment category)
+cloud_native_packages = dependencies_df[dependencies_df['category'] == 'Infrastructure & Deployment'].shape[0]
+
+# Security Packages (Security & Identity category)
+security_packages = dependencies_df[dependencies_df['category'] == 'Security & Identity'].shape[0]
+
+# Top 5 Oldest Dependencies
+top_oldest_dependencies = dependencies_df.sort_values(by='age', ascending=False).head(5)
+
+# Top Subcategories
+top_subcategories = (
+    dependencies_df['sub_category']
+    .value_counts()
+    .reset_index()
+    .rename(columns={'index': 'sub_category', 'sub_category': 'count'})
+    .head(5)
+)
+
+import plotly.graph_objects as go
+
+def create_dependency_category_pie(df):
+    category_counts = df['category'].value_counts()
+    fig = go.Figure(data=[go.Pie(
+        labels=category_counts.index,
+        values=category_counts.values,
+        hole=.3,
+        textinfo='percent+label',
+        insidetextorientation='radial'
+    )])
+    fig.update_layout(margin=dict(t=0, b=0, l=0, r=0), showlegend=False)
+    return fig
+
 
 # Health overview chart
 def create_health_chart(health_scores):
@@ -478,6 +539,145 @@ html.Div([
         className="mb-4 shadow-sm"
     )
 ]),    
+
+import dash_bootstrap_components as dbc
+from dash import html, dcc
+
+html.Div([
+
+    # ====== Card 1: Dependency Health Summary ======
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Dependency Health Overview', className='card-title mb-4'),
+
+            dbc.Row([
+                dbc.Col([
+                    html.H6('Total Dependencies', className='text-muted'),
+                    html.H4(f"{profile_data['Total Dependencies']}", className="text-center"),
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('Outdated Dependencies', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['Outdated Dependencies %']}%",
+                        className=f"badge {'bg-success' if profile_data['Outdated Dependencies %'] < 10 else 'bg-warning' if profile_data['Outdated Dependencies %'] <= 40 else 'bg-danger'}",
+                        style={"fontSize": "1.0rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('Vulnerable Dependencies', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['Vulnerable Dependencies %']}%",
+                        className=f"badge {'bg-success' if profile_data['Vulnerable Dependencies %'] < 10 else 'bg-warning' if profile_data['Vulnerable Dependencies %'] <= 40 else 'bg-danger'}",
+                        style={"fontSize": "1.0rem"}
+                    )
+                ], width=4),
+            ], className="g-4 mb-4"),
+
+            dbc.Row([
+                dbc.Col([
+                    html.H6('Critical Vulnerabilities', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['Critical Vuln Count']}",
+                        className=f"badge {'bg-danger' if profile_data['Critical Vuln Count'] > 0 else 'bg-success'}",
+                        style={"fontSize": "1.0rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('EOL Packages Found', className='text-muted'),
+                    html.Span(
+                        f"{profile_data['EOL Packages Found']}",
+                        className=f"badge {'bg-danger' if profile_data['EOL Packages Found'] > 0 else 'bg-success'}",
+                        style={"fontSize": "1.0rem"}
+                    )
+                ], width=4),
+
+                dbc.Col([
+                    html.H6('Dependency Managers', className='text-muted'),
+                    html.Div([
+                        *[html.Span(pm, className="badge bg-primary me-2", style={"fontSize": "0.8rem"}) for pm in profile_data['Dependency Managers Used']]
+                    ], className="text-center"),
+                ], width=4),
+            ], className="g-4")
+        ]),
+        className="mb-4 shadow-sm"
+    ),
+
+    # ====== Card 2: Dependency Category Analysis ======
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Dependency Category Analysis', className='card-title mb-4'),
+
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(
+                        figure=create_dependency_category_pie(dependencies_df),
+                        config={'displayModeBar': False}
+                    )
+                ], width=6),
+
+                dbc.Col([
+                    html.H6('Top Subcategories', className='text-muted mb-3'),
+                    html.Ul([
+                        html.Li(f"{row['sub_category']} ({row['count']} packages)")
+                        for idx, row in top_subcategories.iterrows()
+                    ], style={"fontSize": "0.9rem"})
+                ], width=6),
+            ], className="g-4")
+        ]),
+        className="mb-4 shadow-sm"
+    ),
+
+    # ====== Card 3: Dependency Details ======
+    dbc.Card(
+        dbc.CardBody([
+            html.H4('Dependency Details', className='card-title mb-4'),
+
+            dbc.Row([
+                dbc.Col([
+                    html.H6('Oldest Dependency', className='text-muted'),
+                    html.Div([
+                        html.H5(f"{oldest_dependency_name} ({oldest_dependency_age} yrs)", className="text-center"),
+                    ])
+                ], width=6),
+
+                dbc.Col([
+                    html.H6('Unpinned Dependencies', className='text-muted'),
+                    html.Div([
+                        html.H5(
+                            f"{unpinned_percent:.1f}%",
+                            className="text-center",
+                            style={"color": "red" if unpinned_percent > 10 else "green"}
+                        ),
+                    ])
+                ], width=6),
+            ], className="g-4 mb-4"),
+
+            dbc.Row([
+                dbc.Col([
+                    html.H6('Cloud Native Packages', className='text-muted'),
+                    html.H5(f"{cloud_native_packages}", className="text-center")
+                ], width=6),
+
+                dbc.Col([
+                    html.H6('Security Packages', className='text-muted'),
+                    html.H5(f"{security_packages}", className="text-center")
+                ], width=6),
+            ], className="g-4 mb-4"),
+
+            html.H6('Top 5 Oldest Dependencies', className='text-muted mt-4'),
+            html.Ul([
+                html.Li(f"{row['name']} ({row['age']} yrs)")
+                for idx, row in top_oldest_dependencies.iterrows()
+            ], style={"fontSize": "0.9rem", "paddingLeft": "1rem"})
+        ]),
+        className="mb-4 shadow-sm"
+    )
+])
+
+
     
     html.P(f"Outdated Dependencies: {profile_data['Outdated Dependencies %']}%", style={'marginTop': '10px'}),
     
