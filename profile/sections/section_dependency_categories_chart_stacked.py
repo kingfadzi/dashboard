@@ -42,9 +42,15 @@ def render(profile_data):
         margin=dict(t=10, b=10, l=40, r=10),
         plot_bgcolor='white',
         paper_bgcolor='white',
-        xaxis_title='Number of Packages',
-        yaxis_title='Category',
-        showlegend=False,  # No legend
+        xaxis=dict(
+            title="Number of Packages",
+            fixedrange=True  # <--- disable x-axis zoom
+        ),
+        yaxis=dict(
+            title="Category",
+            fixedrange=True  # <--- disable y-axis zoom
+        ),
+        showlegend=False,
         hoverlabel=dict(
             bgcolor="white",
             font_size=12,
@@ -52,10 +58,10 @@ def render(profile_data):
         ),
     )
 
-    # Config: no toolbar, but allow hover
+    # Config: no toolbar, allow hover
     config = {
         'displayModeBar': False,
-        'staticPlot': False   # <<< FIXED
+        'staticPlot': False  # hover works
     }
 
     return dbc.Card(
