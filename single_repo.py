@@ -106,16 +106,84 @@ app.layout = html.Div([
         html.Span('Tech Debt Risk', className='badge bg-info') if profile_data['Tech Debt Risk'] else None,
     ], style={'display': 'flex', 'gap': '10px', 'marginBottom': '20px'}),
     
-    dbc.CardGroup([
-        dbc.Card(dbc.CardBody([html.H5('Repo Size (MB)'), html.P(profile_data['Repo Size (MB)'])])),
-        dbc.Card(dbc.CardBody([html.H5('Files'), html.P(profile_data['File Count'])])),
-        dbc.Card(dbc.CardBody([html.H5('Lines of Code'), html.P(profile_data['Lines of Code'])])),
-        dbc.Card(dbc.CardBody([html.H5('Contributors'), html.P(profile_data['Contributors'])])),
-        dbc.Card(dbc.CardBody([html.H5('Active Branches'), html.P(profile_data['Active Branch Count'])])),
-        dbc.Card(dbc.CardBody([html.H5('Repo Age'), html.P(f"{profile_data['Repo Age (Years)']} years")])),
-        dbc.Card(dbc.CardBody([html.H5('Last Commit Date'), html.P(profile_data['Last Commit Date'])])),
-        dbc.Card(dbc.CardBody([html.H5('Activity Status'), html.P(profile_data['Activity Status'])])),
-    ], className='mb-4'),
+    dbc.Row(
+        [
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader("Repo Size (MB)", className="text-center bg-light", style={"fontSize": "0.8rem"}),
+                        dbc.CardBody([
+                            html.H4(f"{profile_data['Repo Size (MB)']} MB", className="text-center"),
+                            html.Small(f"Files={profile_data['File Count']}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                        ])
+                    ],
+                    className="mb-4"
+                )
+            ),
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader("Lines of Code", className="text-center bg-light", style={"fontSize": "0.8rem"}),
+                        dbc.CardBody([
+                            html.H4(f"{profile_data['Lines of Code']:,}", className="text-center"),
+                            html.Small("All Files", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                        ])
+                    ],
+                    className="mb-4"
+                )
+            ),
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader("Contributors", className="text-center bg-light", style={"fontSize": "0.8rem"}),
+                        dbc.CardBody([
+                            html.H4(f"{profile_data['Contributors']}", className="text-center"),
+                            html.Small("Active contributors", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                        ])
+                    ],
+                    className="mb-4"
+                )
+            ),
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader("Active Branches", className="text-center bg-light", style={"fontSize": "0.8rem"}),
+                        dbc.CardBody([
+                            html.H4(f"{profile_data['Active Branch Count']}", className="text-center"),
+                            html.Small("Main + Dev", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                        ])
+                    ],
+                    className="mb-4"
+                )
+            ),
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader("Repo Age", className="text-center bg-light", style={"fontSize": "0.8rem"}),
+                        dbc.CardBody([
+                            html.H4(f"{profile_data['Repo Age (Years)']}y", className="text-center"),
+                            html.Small(f"Since {profile_data['Last Commit Date'][:4]}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                        ])
+                    ],
+                    className="mb-4"
+                )
+            ),
+            dbc.Col(
+                dbc.Card(
+                    [
+                        dbc.CardHeader("Activity Status", className="text-center bg-light", style={"fontSize": "0.8rem"}),
+                        dbc.CardBody([
+                            html.H4(profile_data['Activity Status'], className="text-center"),
+                            html.Small("Based on commits", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                        ])
+                    ],
+                    className="mb-4"
+                )
+            ),
+        ],
+        className="mb-4 mt-2",
+        justify="around"
+    ),
     
     html.H4('Technology Stack'),
     html.Div([
