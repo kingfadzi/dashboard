@@ -12,7 +12,7 @@ import sections.section_modernization as section_modernization
 import sections.section_code_quality as section_code_quality
 import sections.section_dependencies as section_dependencies
 # (more sections later)
-from sections.section_dependencies_category as dependencies_category
+import sections.section_dependencies_category as dependencies_category
 
 
 
