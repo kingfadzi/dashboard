@@ -20,6 +20,8 @@ import sections.section_dependencies_risk_by_subcategory as dependencies_risk_by
 
 import sections.section_vulnerabilities_combined as vulnerabilities_combined
 
+import sections.section_eol_risks as eol_risks
+
 # Initialize Dash app
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -37,6 +39,7 @@ app.layout = html.Div([
     section_dependencies.render(profile_data),
     vulnerabilities_combined.render(profile_data),
     dependencies_risk_by_subcategory.render(profile_data),
+    eol_risk.render(profile_data),
     # (later you will add more sections here like dependency health, security, etc.)
 ], style={"padding": "20px"})
 

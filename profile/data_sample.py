@@ -109,5 +109,21 @@ profile_data = {
         'fix_version': '2.25.1',
         'source': 'T'
     }
-]
+  ],
+  
+    'EOL Results': [
+        {
+            'artifact_name': 'Python',
+            'artifact_version': '3.6',
+            'eol_date': '2021-12-31',
+            'latest_release': '3.11'
+        },
+        {
+            'artifact_name': 'Flask',
+            'artifact_version': '1.0',
+            'eol_date': '2025-01-01',
+            'latest_release': '2.3'
+        }
+    ]
+
 }
