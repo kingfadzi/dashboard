@@ -151,7 +151,7 @@ app.layout = html.Div([
     
     html.H4('Compliance Metrics'),
     html.P(f"Single Developer Risk: {'Yes' if profile_data['Single Developer Risk'] else 'No'}"),
-    html.P(f"DevOps Best Practices Followed: {'Yes' if profile_data['DevOps Best Practices'] else 'No'}),
+    html.P(f"DevOps Best Practices Followed: {'Yes' if profile_data['DevOps Best Practices'] else 'No'}"),
     
     html.H4('Recent Activity'),
     dcc.Graph(figure=create_commit_sparkline(profile_data['Commits Last 12 Months'])),
