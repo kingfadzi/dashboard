@@ -1,82 +1,45 @@
 from dash import html
 import dash_bootstrap_components as dbc
+from helpers import (
+    classify_avg_ccn,
+    classify_comment_quality,
+    classify_function_density,
+    classify_total_ccn,
+)
 
 def render(profile_data):
-    # Helper for warning badges
-    def warning_badge(show):
-        if show:
-            return html.Span("⚠️", style={"marginLeft": "5px", "fontSize": "1.2rem"})
-        return None
+    comment_ratio = (profile_data['Comment Lines'] / profile_data['Total NLOC']) * 100
 
     return dbc.Card(
         dbc.CardBody([
-            html.H4('Code Metrics', className='card-title mb-4'),
+            html.H4('Code Metrics Overview', className='card-title mb-4'),
 
             dbc.Row([
                 dbc.Col([
-                    html.H6('Lines of Code (NLOC)', className='text-muted'),
-                    html.Div([
-                        html.H4(f"{profile_data['Total NLOC']:,}", className="text-center mb-3"),
-                        dbc.Tooltip("Non-blank, non-comment lines of code (from CLOC)", target="nloc", placement="top"),
-                    ], id="nloc"),
+                    html.H6('Size Rating', className='text-muted'),
+                    html.H5(profile_data['Classification Label'], className="text-center mb-3"),
 
                     html.H6('Blank Lines', className='text-muted'),
-                    html.Div([
-                        html.H5(f"{profile_data['Blank Lines']:,}", className="text-center mb-3"),
-                        dbc.Tooltip("Blank or empty lines (from CLOC)", target="blank-lines", placement="top"),
-                    ], id="blank-lines"),
-
-                    html.H6('Comment Lines', className='text-muted'),
-                    html.Div([
-                        html.H5(f"{profile_data['Comment Lines']:,}", className="text-center"),
-                        dbc.Tooltip("Lines containing only comments (from CLOC)", target="comment-lines", placement="top"),
-                    ], id="comment-lines"),
+                    html.H5(f"{profile_data['Blank Lines']:,}", className="text-center"),
+                    dbc.Tooltip("Total blank lines from CLOC", target="blank-lines", placement="top", id="blank-lines")
                 ], width=12, md=4),
 
                 dbc.Col([
-                    html.H6('Avg Cyclomatic Complexity', className='text-muted'),
-                    dbc.Progress(
-                        value=min(profile_data['Avg Cyclomatic Complexity'] * 10, 100),
-                        color="info" if profile_data['Avg Cyclomatic Complexity'] <= 5 else "danger",
-                        style={"height": "20px"},
-                        striped=True,
-                        animated=True,
-                        className="mb-3 mt-2"
-                    ),
-                    html.Small(
-                        html.Span([
-                            f"{profile_data['Avg Cyclomatic Complexity']:.1f} (lower is better)",
-                            warning_badge(profile_data['Avg Cyclomatic Complexity'] > 5)
-                        ]),
-                        className="text-muted d-block text-center mb-4",
-                        style={"fontSize": "0.7rem"}
-                    ),
+                    html.H6('Complexity Level', className='text-muted'),
+                    html.H5(classify_avg_ccn(profile_data['Avg Cyclomatic Complexity']), className="text-center mb-3"),
 
-                    html.H6('Total Cyclomatic Complexity', className='text-muted'),
-                    html.Div([
-                        html.H5([
-                            f"{profile_data['Total Cyclomatic Complexity']:,}",
-                            warning_badge(profile_data['Total Cyclomatic Complexity'] > 3000)
-                        ], className="text-center"),
-                        dbc.Tooltip("Sum of CCN across all functions (from Lizard)", target="total-ccn", placement="top"),
-                    ], id="total-ccn")
+                    html.H6('Overall Complexity', className='text-muted'),
+                    html.H5(classify_total_ccn(profile_data['Total Cyclomatic Complexity']), className="text-center"),
+                    dbc.Tooltip("Aggregated CCN from Lizard", target="total-ccn", placement="top", id="total-ccn")
                 ], width=12, md=4),
 
                 dbc.Col([
-                    html.H6('Total Tokens', className='text-muted'),
-                    html.Div([
-                        html.H5(f"{profile_data['Total Tokens']:,}", className="text-center mb-4"),
-                        dbc.Tooltip("Sum of parsed code tokens (from Lizard)", target="total-tokens", placement="top"),
-                    ], id="total-tokens"),
+                    html.H6('Comment Quality', className='text-muted'),
+                    html.H5(classify_comment_quality(comment_ratio), className="text-center mb-3"),
 
-                    html.H6('Total Functions', className='text-muted'),
-                    html.Div([
-                        html.H5([
-                            f"{profile_data['Total Functions']:,}",
-                            warning_badge(profile_data['Total Functions'] > 2000)
-                        ], className="text-center"),
-                        dbc.Tooltip("Total number of functions/methods detected", target="total-funcs", placement="top"),
-                    ], id="total-funcs"),
+                    html.H6('Function Density', className='text-muted'),
+                    html.H5(classify_function_density(profile_data['Total Functions']), className="text-center"),
+                    dbc.Tooltip("Total number of functions/methods from Lizard", target="total-funcs", placement="top", id="total-funcs")
                 ], width=12, md=4),
             ], className="g-4")
         ]),
