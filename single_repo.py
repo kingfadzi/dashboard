@@ -516,31 +516,7 @@ html.Div([
         className="mb-4 shadow-sm"
     ),
 
-    # ====== Card 2: Dependency Category Analysis ======
-    dbc.Card(
-        dbc.CardBody([
-            html.H4('Dependency Category Analysis', className='card-title mb-4'),
 
-            dbc.Row([
-                dbc.Col([
-                    dcc.Graph(
-                        figure=create_dependency_category_pie(dependencies_df),
-                        config={'displayModeBar': False}
-                    )
-                ], width=6),
-
-                dbc.Col([
-                    html.H6('Top Subcategories', className='text-muted mb-3'),
-                    html.Ul([
-                        html.Li(f"{row['sub_category']} ({row['count']} packages)")
-                        for idx, row in top_subcategories.iterrows()
-                    ], style={"fontSize": "0.9rem"})
-                    
-                ], width=6),
-            ], className="g-4")
-        ]),
-        className="mb-4 shadow-sm"
-    ),
     dbc.Card(
         dbc.CardBody([
             html.H4('Dependency Category Analysis', className='card-title mb-4'),
