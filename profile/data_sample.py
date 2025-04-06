@@ -93,5 +93,21 @@ profile_data = {
             "category": "Security & Identity",
             "sub_category": "Authentication",
         },
-    ]
+    ],
+    'Vulnerabilities': [
+    {
+        'package': 'flask',
+        'version': '1.0',
+        'severity': 'Critical',
+        'fix_version': '2.0',
+        'source': 'G'
+    },
+    {
+        'package': 'requests',
+        'version': '2.8',
+        'severity': 'High',
+        'fix_version': '2.25.1',
+        'source': 'T'
+    }
+]
 }
