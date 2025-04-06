@@ -24,6 +24,15 @@ def render(profile_data):
                         style={"fontSize": "0.9rem", "padding": "5px 10px"}
                     )
                 ], width=4),
+
+                dbc.Col([
+                    html.H6('IaC/Cloud Config', className='text-muted'),
+                    html.Span(
+                        "Present" if profile_data['IaC Config Present'] else "Missing",
+                        className=f"badge {'bg-success' if profile_data['IaC Config Present'] else 'bg-danger'}",
+                        style={"fontSize": "0.9rem", "padding": "5px 10px"}
+                    )
+                ], width=4),
             ], className="g-3 mb-4"),
 
             html.H5('Modernization Findings', className='mt-2 mb-3'),
@@ -48,7 +57,7 @@ def render(profile_data):
                 ], width=4),
 
                 dbc.Col([
-                    html.H6('Other Findings', className='text-muted'),
+                    html.H6('Other Modernization Issues', className='text-muted'),
                     html.Span(
                         f"{profile_data['Other Modernization Findings']}",
                         className="badge bg-info",

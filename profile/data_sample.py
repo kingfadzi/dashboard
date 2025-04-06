@@ -25,6 +25,7 @@ profile_data = {
     },
     'Dockerfile': True,
     'CI/CD Present': True,
+    'IaC Config Present': True,  # or False
     'Deprecated APIs Found': 3,
     'Hardcoded Secrets Found': 2,
     'Other Modernization Findings': 8,
