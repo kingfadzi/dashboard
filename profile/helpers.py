@@ -59,7 +59,8 @@ def create_language_bar(language_data):
         paper_bgcolor="white",
         xaxis=dict(visible=False),
         yaxis=dict(visible=True, automargin=True),
-        showlegend=False
+        showlegend=False,
+        dragmode=False
     )
 
     return fig
