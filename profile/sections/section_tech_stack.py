@@ -3,33 +3,41 @@ import dash_bootstrap_components as dbc
 import helpers
 
 def render(profile_data):
+    frameworks = profile_data.get('Frameworks', [])
+    build_tool = profile_data.get('Build Tool')
+    runtime_version = profile_data.get('Runtime Version')
+
+    language_percentages = profile_data.get('Language Percentages', {})
+
     return dbc.Card(
         dbc.CardBody([
             html.H4('Technology Stack', className='card-title mb-4'),
 
             dbc.Row([
                 dbc.Col([
-                    html.H6('Frameworks', className='text-muted'),
                     html.Div([
-                        *[html.Span(fw, className='badge bg-info me-2 mb-2', style={"fontSize": "0.8rem"}) for fw in profile_data.get('Frameworks', [])]
-                    ]) if profile_data.get('Frameworks') else html.P('No frameworks detected.', className='text-muted'),
 
-                    html.Hr(),
+                        html.H6('Frameworks', className='text-muted'),
+                        html.Div([
+                            *[html.Span(fw, className='badge bg-info me-2 mb-2', style={"fontSize": "0.8rem"}) for fw in frameworks]
+                        ]) if frameworks else html.P('No frameworks detected.', className='text-muted'),
 
-                    html.H6('Build Tool', className='text-muted'),
-                    html.P(profile_data.get('Build Tool') or '-', style={"fontWeight": "bold", "fontSize": "0.9rem"}),
+                        html.Hr(),
 
-                    html.H6('Runtime Version', className='text-muted'),
-                    html.P(profile_data.get('Runtime Version') or '-', style={"fontWeight": "bold", "fontSize": "0.9rem"}),
-                ], width=6),
+                        html.H6('Build Tool', className='text-muted'),
+                        html.P(build_tool or '-', style={"fontWeight": "bold", "fontSize": "0.9rem"}),
 
-                dbc.Col([
+                        html.H6('Runtime Version', className='text-muted'),
+                        html.P(runtime_version or '-', style={"fontWeight": "bold", "fontSize": "0.9rem"}),
+
+                    ], className="mb-4"),
+
                     dcc.Graph(
-                        figure=helpers.create_language_bar(profile_data.get('Language Percentages', {})),
+                        figure=helpers.create_language_bar(language_percentages),
                         config={'displayModeBar': False}
                     )
-                ], width=6),
-            ])
+                ], width=8, style={"margin": "0 auto"}),  # Center it nicely
+            ]),
         ]),
         className="mb-4 shadow-sm"
     )
