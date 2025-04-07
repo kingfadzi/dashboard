@@ -21,14 +21,14 @@ def create_health_chart(health_scores):
     return fig
 
 
+import plotly.graph_objects as go
+
 def create_language_bar(language_data):
     if not language_data:
-        return go.Figure()  # Empty figure fallback
+        return go.Figure()
 
-    # Sort languages by usage % descending
     sorted_langs = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
 
-    # Keep top 9 languages, bundle rest as "Other"
     top_langs = sorted_langs[:9]
     if len(sorted_langs) > 9:
         others_pct = sum(pct for _, pct in sorted_langs[9:])
@@ -46,11 +46,10 @@ def create_language_bar(language_data):
         marker_color=[
             "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A",
             "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"
-        ]  # Consistent neutral/cool palette, NO red/green meaning
+        ]
     ))
 
     fig.update_layout(
-        title=None,
         margin=dict(t=0, b=0, l=0, r=0),
         height=350,
         showlegend=False,
@@ -58,10 +57,9 @@ def create_language_bar(language_data):
         yaxis_title='Language',
         xaxis=dict(showgrid=False),
         yaxis=dict(showgrid=False),
-    )
-
-    fig.update_layout(
-        dragmode=False  # Disable zooming/panning
+        paper_bgcolor='white',  # <- Set background to white
+        plot_bgcolor='white',   # <- Set plot background to white
+        dragmode=False
     )
 
     return fig
