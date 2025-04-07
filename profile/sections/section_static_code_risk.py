@@ -6,12 +6,24 @@ def render(profile_data):
     findings = profile_data.get('Semgrep Findings', [])
 
     if not findings:
-        return html.Div("No static code risks available.")
+        return dbc.Card(
+            dbc.CardBody([
+                html.H4('Top Code Risks by Category', className='card-title mb-4'),
+                html.P('No static code risks available.', className='text-muted')
+            ]),
+            className="mb-4 shadow-sm"
+        )
 
     df = pd.DataFrame(findings)
 
     if df.empty or 'subcategory' not in df.columns or 'severity' not in df.columns:
-        return html.Div("Invalid static code risk data.")
+        return dbc.Card(
+            dbc.CardBody([
+                html.H4('Top Code Risks by Category', className='card-title mb-4'),
+                html.P('Invalid static code risk data.', className='text-muted')
+            ]),
+            className="mb-4 shadow-sm"
+        )
 
     # Only Critical, High, Medium
     df = df[df['severity'].isin(['Critical', 'High', 'Medium'])]
@@ -48,7 +60,7 @@ def render(profile_data):
                             '●',
                             style={
                                 'color': severity_colors.get(severity, 'gray'),
-                                'fontSize': '2.0rem',
+                                'fontSize': '1.5rem',
                                 'textShadow': '0px 0px 3px rgba(0,0,0,0.5)',
                                 'marginRight': '6px',
                                 'lineHeight': '1'
@@ -56,7 +68,7 @@ def render(profile_data):
                         ),
                         html.Span(
                             f"{severity}: {count}",
-                            style={'fontSize': '0.9rem'}
+                            style={"fontSize": "0.85rem"}
                         )
                     ], style={"display": "flex", "alignItems": "center", "marginRight": "12px"})
                 )
@@ -74,13 +86,13 @@ def render(profile_data):
                     html.Div(badges, style={"display": "flex", "flexWrap": "wrap"}),
                     width=6
                 ),
-            ], className="mb-2 align-items-center", style={"borderBottom": "1px solid #f0f0f0"})
+            ], className="g-2 mb-2 align-items-center", style={"borderBottom": "1px solid #f0f0f0"})
         )
 
     return dbc.Card(
         dbc.CardBody([
             html.H4('Top Code Risks by Category', className='card-title mb-4'),
-            html.Div(rows)
+            html.Div(rows, className="mb-2")
         ]),
         className="mb-4 shadow-sm"
     )
