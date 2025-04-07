@@ -2,14 +2,39 @@ import dash_bootstrap_components as dbc
 from dash import html
 
 def render(profile_data):
+    # Fetch values
     repo_name = profile_data.get("Repo Name", "Unknown")
     clone_url = profile_data.get("Clone URL", "#")
-    department_appid = profile_data.get("Department AppID", "Unknown")
-    product_owner = profile_data.get("Product Owner", "Unknown")
-    investment_status = profile_data.get("Investment Status", "Unknown")
 
-    # Color badge only for Investment Status
+    fields = {
+        "App ID": profile_data.get("Department AppID", "Unknown"),
+        "Department": profile_data.get("Department", "Unknown"),
+        "Team": profile_data.get("Team", "Unknown"),
+        "Product Owner": profile_data.get("Product Owner", "Unknown"),
+    }
+
+    investment_status = profile_data.get("Investment Status", "Unknown")
     investment_color = "success" if investment_status.lower() == "active" else "warning"
+
+    # Build the fields table
+    table_rows = []
+    for label, value in fields.items():
+        table_rows.append(
+            html.Tr([
+                html.Td(label, style={"fontWeight": "bold", "fontSize": "0.85rem", "width": "35%"}),
+                html.Td(value, style={"fontSize": "0.85rem"}),
+            ])
+        )
+
+    # Add Investment Status separately (with badge)
+    table_rows.append(
+        html.Tr([
+            html.Td("Investment Status", style={"fontWeight": "bold", "fontSize": "0.85rem"}),
+            html.Td(
+                dbc.Badge(investment_status, color=investment_color, className="p-2", style={"fontSize": "0.75rem"}),
+            )
+        ])
+    )
 
     return dbc.Card(
         dbc.CardBody([
@@ -23,22 +48,13 @@ def render(profile_data):
                 style={"fontSize": "0.8rem"}
             ),
 
-            dbc.Row([
-                dbc.Col([
-                    html.P("App ID", className="text-muted mb-1", style={"fontSize": "0.8rem"}),
-                    html.P(department_appid, style={"fontWeight": "500", "fontSize": "1rem"}),
-                ], width=4),
-
-                dbc.Col([
-                    html.P("Product Owner", className="text-muted mb-1", style={"fontSize": "0.8rem"}),
-                    html.P(product_owner, style={"fontWeight": "500", "fontSize": "1rem"}),
-                ], width=4),
-
-                dbc.Col([
-                    html.P("Investment Status", className="text-muted mb-1", style={"fontSize": "0.8rem"}),
-                    dbc.Badge(investment_status, color=investment_color, className="p-2", style={"fontSize": "0.9rem"})
-                ], width=4),
-            ], className="mb-2"),
+            dbc.Table(
+                table_rows,
+                bordered=False,
+                hover=False,
+                size="sm",
+                className="table-borderless",
+            )
         ]),
         className="mb-4 shadow-sm"
     )
