@@ -23,30 +23,45 @@ def create_health_chart(health_scores):
 
 def create_language_bar(language_data):
     if not language_data:
-        return go.Figure()
+        return go.Figure()  # Empty figure fallback
 
-    # Sort languages by percentage descending
-    sorted_langs = dict(sorted(language_data.items(), key=lambda item: item[1], reverse=True))
+    # Sort languages by usage % descending
+    sorted_langs = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
 
-    languages = list(sorted_langs.keys())
-    percentages = list(sorted_langs.values())
+    # Keep top 9 languages, bundle rest as "Other"
+    top_langs = sorted_langs[:9]
+    if len(sorted_langs) > 9:
+        others_pct = sum(pct for _, pct in sorted_langs[9:])
+        top_langs.append(("Other", others_pct))
+
+    languages = [lang for lang, _ in top_langs]
+    percentages = [pct for _, pct in top_langs]
 
     fig = go.Figure(go.Bar(
         x=percentages,
         y=languages,
         orientation='h',
         text=[f"{p}%" for p in percentages],
-        textposition='auto'
+        textposition='auto',
+        marker_color=[
+            "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A",
+            "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"
+        ]  # Consistent neutral/cool palette, NO red/green meaning
     ))
 
     fig.update_layout(
-        title="Language Composition",
-        xaxis_title="Percentage",
-        yaxis_title="Language",
-        margin=dict(l=80, r=20, t=30, b=20),
-        height=300,
+        title=None,
+        margin=dict(t=0, b=0, l=0, r=0),
+        height=350,
         showlegend=False,
-        template="plotly_white",
+        xaxis_title='Percentage (%)',
+        yaxis_title='Language',
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False),
+    )
+
+    fig.update_layout(
+        dragmode=False  # Disable zooming/panning
     )
 
     return fig
