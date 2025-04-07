@@ -3,15 +3,6 @@ import dash_bootstrap_components as dbc
 import helpers
 
 def render(profile_data):
-    frameworks = profile_data.get('Frameworks', [])
-    build_tool = profile_data.get('Build Tool', '-')
-    runtime_version = profile_data.get('Runtime Version', '-')
-
-    return dbc.Cardfrom dash import html, dcc
-import dash_bootstrap_components as dbc
-import helpers
-
-def render(profile_data):
     main_language = profile_data.get('Main Language', 'Unknown')
     build_tool = profile_data.get('Build Tool', 'N/A') or 'N/A'
     runtime_version = profile_data.get('Runtime Version', 'N/A') or 'N/A'
