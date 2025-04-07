@@ -19,7 +19,7 @@ def render(profile_data):
     # Group
     agg = df.groupby(['subcategory', 'severity']).size().unstack(fill_value=0)
 
-    # Sort by severity priority
+    # Sort
     agg['sort_key'] = (
         agg.get('Critical', 0) * 1000 +
         agg.get('High', 0) * 100 +
@@ -48,7 +48,8 @@ def render(profile_data):
                             '●',
                             style={
                                 'color': severity_colors.get(severity, 'gray'),
-                                'fontSize': '1.6rem',
+                                'fontSize': '2.0rem',
+                                'textShadow': '0px 0px 3px rgba(0,0,0,0.5)',
                                 'marginRight': '6px',
                                 'lineHeight': '1'
                             }
@@ -62,9 +63,18 @@ def render(profile_data):
 
         rows.append(
             dbc.Row([
-                dbc.Col(html.Span(subcategory, style={"fontWeight": "bold", "fontSize": "0.9rem"}), width=6),
-                dbc.Col(html.Div(badges, style={"display": "flex", "flexWrap": "wrap"}), width=6),
-            ], className="mb-2 align-items-center")
+                dbc.Col(
+                    html.Span(
+                        subcategory,
+                        style={"fontWeight": "500", "fontSize": "0.9rem"}
+                    ),
+                    width=6
+                ),
+                dbc.Col(
+                    html.Div(badges, style={"display": "flex", "flexWrap": "wrap"}),
+                    width=6
+                ),
+            ], className="mb-2 align-items-center", style={"borderBottom": "1px solid #f0f0f0"})
         )
 
     return dbc.Card(
