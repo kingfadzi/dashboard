@@ -148,5 +148,52 @@ profile_data = {
             'eol_date': '2025-01-01',
             'latest_release': '2.3'
         }
-    ]
+    ],
+    'Semgrep Findings': [
+    {
+        'path': 'src/app.py',
+        'start_line': 15,
+        'end_line': 16,
+        'rule_id': 'python.sql.injection',
+        'severity': 'Critical',
+        'message': 'Possible SQL Injection vulnerability.',
+        'category': 'Security',
+        'subcategory': 'Injection',
+        'technology': 'Python',
+        'cwe': 'CWE-89',
+        'likelihood': 'High',
+        'impact': 'Severe',
+        'confidence': 'High'
+    },
+    {
+        'path': 'src/config.py',
+        'start_line': 45,
+        'end_line': 45,
+        'rule_id': 'python.secrets.hardcoded',
+        'severity': 'High',
+        'message': 'Hardcoded API key.',
+        'category': 'Security',
+        'subcategory': 'Secrets Management',
+        'technology': 'Python',
+        'cwe': 'CWE-798',
+        'likelihood': 'High',
+        'impact': 'Medium',
+        'confidence': 'Medium'
+    },
+    {
+        'path': 'src/main.py',
+        'start_line': 10,
+        'end_line': 12,
+        'rule_id': 'python.best_practices.logging',
+        'severity': 'Medium',
+        'message': 'Logging configuration missing.',
+        'category': 'Best Practices',
+        'subcategory': 'Logging',
+        'technology': 'Python',
+        'cwe': None,
+        'likelihood': 'Medium',
+        'impact': 'Low',
+        'confidence': 'High'
+    }
+]
 }

@@ -24,6 +24,7 @@ import sections.section_eol_risks as eol_risks
 
 import sections.section_dependency_categories_chart_stacked as categories_chart_stacked
 
+import sections.section_static_code_risk as static_code_risk
 
 # Initialize Dash app
 
@@ -39,6 +40,7 @@ app.layout = html.Div([
     section_tech_stack.render(profile_data),
     section_modernization.render(profile_data),
     section_code_quality.render(profile_data),
+    static_code_risk.render(profile_data),
     section_dependencies.render(profile_data),
     categories_chart_stacked.render(profile_data),
     vulnerabilities_combined.render(profile_data),
