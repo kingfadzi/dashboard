@@ -44,7 +44,7 @@ def render_page_content(search):
     if not repo_id:
         return html.Div([
             html.H3("No repo_id provided in the URL."),
-            html.P("Try: http://<your-host>:8050/?repo_id=CTFd")
+            html.P("Try: http://<your-host>:8050/?repo_id=vulnerable-apps/secDevLabs")
         ])
 
     session = SessionLocal()

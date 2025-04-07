@@ -9,8 +9,8 @@ def render(profile_data):
                     [
                         dbc.CardHeader("Repo Size", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
-                            html.H4(f"{profile_data['Repo Size (MB)']} MB", className="text-center"),
-                            html.Small(f"Files={profile_data['File Count']}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                            html.H4(f"{profile_data.get('Repo Size (MB)', 0)} MB", className="text-center"),
+                            html.Small(f"Files={profile_data.get('File Count', 0)}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
                     className="mb-4 shadow-sm"
@@ -22,7 +22,7 @@ def render(profile_data):
                     [
                         dbc.CardHeader("Lines of Code", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
-                            html.H4(f"{profile_data['Lines of Code']:,}", className="text-center"),
+                            html.H4(f"{profile_data.get('Lines of Code', 0):,}", className="text-center"),
                             html.Small("All files", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
@@ -35,7 +35,7 @@ def render(profile_data):
                     [
                         dbc.CardHeader("Contributors", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
-                            html.H4(f"{profile_data['Contributors']}", className="text-center"),
+                            html.H4(f"{profile_data.get('Contributors', 0)}", className="text-center"),
                             html.Small("Active", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
@@ -48,7 +48,7 @@ def render(profile_data):
                     [
                         dbc.CardHeader("Active Branches", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
-                            html.H4(f"{profile_data['Active Branch Count']}", className="text-center"),
+                            html.H4(f"{profile_data.get('Active Branch Count', 0)}", className="text-center"),
                             html.Small("Main + Dev", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
@@ -61,8 +61,8 @@ def render(profile_data):
                     [
                         dbc.CardHeader("Repo Age", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
-                            html.H4(f"{profile_data['Repo Age (Years)']} yrs", className="text-center"),
-                            html.Small(f"Since {profile_data['Last Commit Date'][:4]}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                            html.H4(f"{profile_data.get('Repo Age (Years)', 0)} yrs", className="text-center"),
+                            html.Small(f"Since {str(profile_data.get('Last Commit Date', 'N/A'))[:4]}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
                     className="mb-4 shadow-sm"
@@ -74,7 +74,7 @@ def render(profile_data):
                     [
                         dbc.CardHeader("Activity Status", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
-                            html.H4(profile_data['Activity Status'], className="text-center"),
+                            html.H4(profile_data.get('Activity Status', 'Inactive'), className="text-center"),
                             html.Small("Based on commits", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
