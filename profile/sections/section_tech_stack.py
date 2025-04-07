@@ -9,24 +9,12 @@ def render(profile_data):
 
     language_percentages = profile_data.get('Language Percentages', {})
 
-    return dbc.Cardfrom dash import html, dcc
-import dash_bootstrap_components as dbc
-import helpers
-
-def render(profile_data):
-    frameworks = profile_data.get('Frameworks', [])
-    build_tool = profile_data.get('Build Tool')
-    runtime_version = profile_data.get('Runtime Version')
-
-    language_percentages = profile_data.get('Language Percentages', {})
-
     return dbc.Card(
         dbc.CardBody([
             html.H4('Technology Stack', className='card-title mb-4'),
 
             dbc.Row([
                 dbc.Col([
-                    # --- Inline metadata fields ---
                     dbc.Row([
                         dbc.Col([
                             html.H6('Frameworks', className='text-muted'),
@@ -46,12 +34,11 @@ def render(profile_data):
                         ], width=4),
                     ], className="mb-4 g-2"),
 
-                    # --- Language bar chart ---
                     dcc.Graph(
                         figure=helpers.create_language_bar(language_percentages),
                         config={'displayModeBar': False}
                     )
-                ], width=8, style={"margin": "0 auto"}),  # Center nicely
+                ], width=8, style={"margin": "0 auto"}),
             ]),
         ]),
         className="mb-4 shadow-sm"
