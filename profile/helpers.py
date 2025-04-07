@@ -21,45 +21,45 @@ def create_health_chart(health_scores):
     return fig
 
 
-import plotly.graph_objects as go
-
-import plotly.graph_objects as go
-
 def create_language_bar(language_data):
-    # Sort and limit to top 10 languages
-    sorted_items = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
-    top_languages = dict(sorted_items[:10])
+    if not language_data:
+        return go.Figure()
 
-    # If more than 10, bundle the rest into 'Other'
-    if len(sorted_items) > 10:
-        other_total = sum([v for k, v in sorted_items[10:]])
-        top_languages['Other'] = round(other_total, 2)
+    # Sort languages descending
+    sorted_langs = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
+
+    # Take top 10, group the rest into "Other"
+    top_langs = sorted_langs[:10]
+    others = sorted_langs[10:]
+
+    if others:
+        other_total = sum(v for _, v in others)
+        top_langs.append(('Other', other_total))
+
+    labels = [lang for lang, _ in top_langs]
+    values = [usage for _, usage in top_langs]
 
     fig = go.Figure(go.Bar(
-        y=list(top_languages.keys()),
-        x=list(top_languages.values()),
+        x=values,
+        y=labels,
         orientation='h',
-        text=[f"{v}%" for v in top_languages.values()],
-        textposition='auto',
+        marker_color=[
+            '#636EFA', '#EF553B', '#AB63FA', '#FFA15A',
+            '#00CC96', '#19D3F3', '#FF6692', '#B6E880',
+            '#FF97FF', '#FECB52', '#CCCCCC'  # 'Other'
+        ],
+        text=[f"{v:.1f}%" for v in values],
+        textposition='auto'
     ))
 
     fig.update_layout(
         margin=dict(t=10, b=10, l=10, r=10),
-        height=300,
-        showlegend=False,
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        xaxis=dict(
-            title=None,
-            showgrid=True,
-            zeroline=False,
-            showticklabels=False
-        ),
-        yaxis=dict(
-            title=None,
-            showgrid=False,
-            zeroline=False,
-        )
+        height=400,
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=True, automargin=True),
+        showlegend=False
     )
 
     return fig
