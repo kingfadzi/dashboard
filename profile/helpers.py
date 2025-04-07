@@ -23,43 +23,43 @@ def create_health_chart(health_scores):
 
 import plotly.graph_objects as go
 
+import plotly.graph_objects as go
+
 def create_language_bar(language_data):
-    if not language_data:
-        return go.Figure()
+    # Sort and limit to top 10 languages
+    sorted_items = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
+    top_languages = dict(sorted_items[:10])
 
-    sorted_langs = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
-
-    top_langs = sorted_langs[:9]
-    if len(sorted_langs) > 9:
-        others_pct = sum(pct for _, pct in sorted_langs[9:])
-        top_langs.append(("Other", others_pct))
-
-    languages = [lang for lang, _ in top_langs]
-    percentages = [pct for _, pct in top_langs]
+    # If more than 10, bundle the rest into 'Other'
+    if len(sorted_items) > 10:
+        other_total = sum([v for k, v in sorted_items[10:]])
+        top_languages['Other'] = round(other_total, 2)
 
     fig = go.Figure(go.Bar(
-        x=percentages,
-        y=languages,
+        y=list(top_languages.keys()),
+        x=list(top_languages.values()),
         orientation='h',
-        text=[f"{p}%" for p in percentages],
+        text=[f"{v}%" for v in top_languages.values()],
         textposition='auto',
-        marker_color=[
-            "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A",
-            "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"
-        ]
     ))
 
     fig.update_layout(
-        margin=dict(t=0, b=0, l=0, r=0),
-        height=350,
+        margin=dict(t=10, b=10, l=10, r=10),
+        height=300,
         showlegend=False,
-        xaxis_title='Percentage (%)',
-        yaxis_title='Language',
-        xaxis=dict(showgrid=False),
-        yaxis=dict(showgrid=False),
-        paper_bgcolor='white',  # <- Set background to white
-        plot_bgcolor='white',   # <- Set plot background to white
-        dragmode=False
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        xaxis=dict(
+            title=None,
+            showgrid=True,
+            zeroline=False,
+            showticklabels=False
+        ),
+        yaxis=dict(
+            title=None,
+            showgrid=False,
+            zeroline=False,
+        )
     )
 
     return fig
