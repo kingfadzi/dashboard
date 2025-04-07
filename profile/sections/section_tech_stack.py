@@ -48,7 +48,7 @@ def render(profile_data):
 
                 dbc.Col([
                     dcc.Graph(
-                        figure=helpers.create_language_pie(language_percentages),
+                        figure=helpers.create_language_bar(language_percentages),
                         config={'displayModeBar': False}
                     )
                 ], width=6),

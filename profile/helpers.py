@@ -20,20 +20,35 @@ def create_health_chart(health_scores):
     )
     return fig
 
-def create_language_pie(language_data):
-    labels = list(language_data.keys())
-    values = list(language_data.values())
-    fig = go.Figure(data=[go.Pie(
-        labels=labels,
-        values=values,
-        hole=.3,
-        textinfo='percent+label',
-        insidetextorientation='radial'
-    )])
+
+def create_language_bar(language_data):
+    if not language_data:
+        return go.Figure()
+
+    # Sort languages by percentage descending
+    sorted_langs = dict(sorted(language_data.items(), key=lambda item: item[1], reverse=True))
+
+    languages = list(sorted_langs.keys())
+    percentages = list(sorted_langs.values())
+
+    fig = go.Figure(go.Bar(
+        x=percentages,
+        y=languages,
+        orientation='h',
+        text=[f"{p}%" for p in percentages],
+        textposition='auto'
+    ))
+
     fig.update_layout(
-        margin=dict(t=0, b=0, l=0, r=0),
-        showlegend=False
+        title="Language Composition",
+        xaxis_title="Percentage",
+        yaxis_title="Language",
+        margin=dict(l=80, r=20, t=30, b=20),
+        height=300,
+        showlegend=False,
+        template="plotly_white",
     )
+
     return fig
 
 def create_commit_sparkline(commits):
