@@ -1,14 +1,6 @@
-from dash import dcc, html, dash_table
+from dash import html
 import dash_bootstrap_components as dbc
 import pandas as pd
-import plotly.graph_objects as go
-
-SEVERITY_ORDER = {
-    "Critical": 4,
-    "High": 3,
-    "Medium": 2,
-    "Low": 1
-}
 
 def render(profile_data):
     findings = profile_data.get('Semgrep Findings', [])
@@ -19,89 +11,48 @@ def render(profile_data):
     df = pd.DataFrame(findings)
 
     if df.empty or 'category' not in df.columns or 'subcategory' not in df.columns or 'severity' not in df.columns:
-        return html.Div("Invalid code risk data structure.")
+        return html.Div("Invalid static code risk data.")
 
-    df['severity_weight'] = df['severity'].map(SEVERITY_ORDER).fillna(0)
+    # Focus only on Critical, High, Medium
+    df = df[df['severity'].isin(['Critical', 'High', 'Medium'])]
 
-    agg = (
-        df.groupby(['category', 'subcategory'])
-        .agg(findings=('severity', 'count'), highest_severity_weight=('severity_weight', 'max'))
-        .reset_index()
+    # Group by subcategory and severity
+    agg = df.groupby(['subcategory', 'severity']).size().unstack(fill_value=0)
+
+    # Sort: Critical > High > Medium findings
+    agg['sort_key'] = (
+        agg.get('Critical', 0) * 1000 +
+        agg.get('High', 0) * 100 +
+        agg.get('Medium', 0)
     )
+    agg = agg.sort_values('sort_key', ascending=False).drop(columns=['sort_key'])
 
-    agg = agg.sort_values(by=['highest_severity_weight', 'findings'], ascending=[False, False])
+    # Limit to top 5 risky subcategories
+    top_agg = agg.head(5)
 
-    pivot = agg.pivot(index='category', columns='subcategory', values='findings').fillna(0)
+    # Generate rows with badges
+    rows = []
+    for subcategory, row in top_agg.iterrows():
+        badges = []
 
-    fig = go.Figure()
+        if row.get('Critical', 0) > 0:
+            badges.append(dbc.Badge(f"Critical {int(row['Critical'])}", color="danger", className="me-1", pill=True))
+        if row.get('High', 0) > 0:
+            badges.append(dbc.Badge(f"High {int(row['High'])}", color="warning", className="me-1", pill=True))
+        if row.get('Medium', 0) > 0:
+            badges.append(dbc.Badge(f"Medium {int(row['Medium'])}", color="secondary", className="me-1", pill=True))
 
-    for subcategory in pivot.columns:
-        fig.add_trace(go.Bar(
-            y=pivot.index,
-            x=pivot[subcategory],
-            name=subcategory,
-            orientation='h',
-            hovertemplate=f"<b>{subcategory}</b><br>Findings: %{{x}}<extra></extra>",
-        ))
-
-    fig.update_layout(
-        barmode='stack',
-        height=400,
-        margin=dict(t=10, b=10, l=40, r=10),
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        xaxis=dict(
-            title="Findings",
-            fixedrange=True
-        ),
-        yaxis=dict(
-            title="Category",
-            fixedrange=True
-        ),
-        showlegend=False,
-        hoverlabel=dict(
-            bgcolor="white",
-            font_size=12,
-            font_family="Arial"
-        ),
-    )
-
-    config = {
-        'displayModeBar': False,
-        'staticPlot': False
-    }
+        rows.append(
+            dbc.Row([
+                dbc.Col(html.Span(subcategory, style={"fontWeight": "bold"}), width=6),
+                dbc.Col(badges, width=6),
+            ], className="mb-2 align-items-center")
+        )
 
     return dbc.Card(
         dbc.CardBody([
-            html.H4('Static Code Risk by Category', className='card-title mb-4'),
-
-            dcc.Graph(figure=fig, config=config),
-
-            html.H5('Top Risky Subcategories', className='mt-4 mb-3'),
-
-            dash_table.DataTable(
-                data=agg[['category', 'subcategory', 'findings']].to_dict('records'),
-                columns=[
-                    {"name": "Category", "id": "category"},
-                    {"name": "Subcategory", "id": "subcategory"},
-                    {"name": "Findings", "id": "findings"},
-                ],
-                style_cell={"fontSize": "0.8rem", "padding": "4px"},
-                style_table={"overflowX": "auto"},
-                style_as_list_view=True,
-                style_header={"backgroundColor": "rgb(240,240,240)", "fontWeight": "bold"},
-                style_data_conditional=[
-                    {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(248, 248, 248)'},
-                    {
-                        'if': {
-                            'filter_query': '{findings} >= 5',
-                            'column_id': 'findings'
-                        },
-                        'color': 'red',
-                        'fontWeight': 'bold'
-                    }
-                ],
-            )
+            html.H4('Top Code Risks by Category', className='card-title mb-4'),
+            html.Div(rows)
         ]),
         className="mb-4 shadow-sm"
     )

@@ -149,11 +149,11 @@ profile_data = {
             'latest_release': '2.3'
         }
     ],
-    'Semgrep Findings': [
+  'Semgrep Findings': [
     {
         'path': 'src/app.py',
-        'start_line': 15,
-        'end_line': 16,
+        'start_line': 10,
+        'end_line': 11,
         'rule_id': 'python.sql.injection',
         'severity': 'Critical',
         'message': 'Possible SQL Injection vulnerability.',
@@ -166,34 +166,64 @@ profile_data = {
         'confidence': 'High'
     },
     {
+        'path': 'src/auth.py',
+        'start_line': 20,
+        'end_line': 21,
+        'rule_id': 'python.auth.missing',
+        'severity': 'Critical',
+        'message': 'Missing authentication check.',
+        'category': 'Security',
+        'subcategory': 'Authorization',
+        'technology': 'Python',
+        'cwe': 'CWE-285',
+        'likelihood': 'High',
+        'impact': 'Severe',
+        'confidence': 'High'
+    },
+    {
         'path': 'src/config.py',
-        'start_line': 45,
-        'end_line': 45,
+        'start_line': 30,
+        'end_line': 30,
         'rule_id': 'python.secrets.hardcoded',
         'severity': 'High',
-        'message': 'Hardcoded API key.',
+        'message': 'Hardcoded API key found.',
         'category': 'Security',
         'subcategory': 'Secrets Management',
         'technology': 'Python',
         'cwe': 'CWE-798',
-        'likelihood': 'High',
+        'likelihood': 'Medium',
         'impact': 'Medium',
         'confidence': 'Medium'
     },
     {
-        'path': 'src/main.py',
-        'start_line': 10,
-        'end_line': 12,
-        'rule_id': 'python.best_practices.logging',
+        'path': 'src/logs.py',
+        'start_line': 5,
+        'end_line': 6,
+        'rule_id': 'python.logging.best_practices',
         'severity': 'Medium',
-        'message': 'Logging configuration missing.',
+        'message': 'Logging misconfiguration detected.',
         'category': 'Best Practices',
         'subcategory': 'Logging',
         'technology': 'Python',
         'cwe': None,
-        'likelihood': 'Medium',
+        'likelihood': 'Low',
         'impact': 'Low',
         'confidence': 'High'
+    },
+    {
+        'path': 'src/error.py',
+        'start_line': 12,
+        'end_line': 13,
+        'rule_id': 'python.error.handling',
+        'severity': 'High',
+        'message': 'Error handling could be improved.',
+        'category': 'Best Practices',
+        'subcategory': 'Error Handling',
+        'technology': 'Python',
+        'cwe': None,
+        'likelihood': 'Medium',
+        'impact': 'Medium',
+        'confidence': 'Medium'
     }
 ]
 }
