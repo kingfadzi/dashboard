@@ -47,6 +47,7 @@ def render_page_content(search):
             html.P("Try: http://<your-host>:8050/?repo_id=vulnerable-apps/secDevLabs")
         ])
 
+
     session = SessionLocal()
     try:
         profile_data = load_profile(session, repo_id)
