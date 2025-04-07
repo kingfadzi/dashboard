@@ -35,7 +35,6 @@ def render(profile_data):
         'Medium': 'gold'
     }
 
-    # Build rows
     rows = []
     for subcategory, row in top_agg.iterrows():
         badges = []
@@ -45,14 +44,25 @@ def render(profile_data):
             if count > 0:
                 badges.append(
                     html.Div([
-                        html.Span('●', style={'color': severity_colors.get(severity, 'gray'), 'fontSize': '1.2rem', 'marginRight': '6px'}),
-                        html.Span(f"{severity}: {count}", style={'fontSize': '0.85rem'})
-                    ], style={"display": "flex", "alignItems": "center", "marginRight": "10px"})
+                        html.Span(
+                            '●',
+                            style={
+                                'color': severity_colors.get(severity, 'gray'),
+                                'fontSize': '1.6rem',
+                                'marginRight': '6px',
+                                'lineHeight': '1'
+                            }
+                        ),
+                        html.Span(
+                            f"{severity}: {count}",
+                            style={'fontSize': '0.9rem'}
+                        )
+                    ], style={"display": "flex", "alignItems": "center", "marginRight": "12px"})
                 )
 
         rows.append(
             dbc.Row([
-                dbc.Col(html.Span(subcategory, style={"fontWeight": "bold"}), width=6),
+                dbc.Col(html.Span(subcategory, style={"fontWeight": "bold", "fontSize": "0.9rem"}), width=6),
                 dbc.Col(html.Div(badges, style={"display": "flex", "flexWrap": "wrap"}), width=6),
             ], className="mb-2 align-items-center")
         )
