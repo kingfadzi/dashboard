@@ -26,6 +26,8 @@ import sections.section_dependency_categories_chart_stacked as categories_chart_
 
 import sections.section_static_code_risk as static_code_risk
 
+import sections.section_git_activity_hygiene as git_activity_hygiene
+
 # Initialize Dash app
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -38,6 +40,7 @@ app.layout = html.Div([
 
     section_kpis.render(profile_data),
     section_tech_stack.render(profile_data),
+    git_activity_hygiene.render(profile_data),
     section_modernization.render(profile_data),
     section_code_quality.render(profile_data),
     static_code_risk.render(profile_data),

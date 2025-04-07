@@ -55,6 +55,12 @@ profile_data = {
     'Single Developer Risk': False,
     'DevOps Best Practices': True,
     'Commits Last 12 Months': [5, 10, 8, 15, 9, 12, 6, 14, 11, 7, 13, 10],
+    # Add these to your profile_data
+
+    'Single Developer %': 81,  # % commits by top committer
+    'Repo Size per File (MB)': 0.9,  # total repo size (MB) divided by total files
+    'Commits-to-Files Ratio': 2.5,  # commits / file count
+    'Days Since Last Commit': 45,  # calculated from today - last commit
 
     # Updated Dependencies section
     'Dependencies': [
