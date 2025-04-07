@@ -36,7 +36,7 @@ def render(profile_data):
                         dbc.CardHeader("Contributors", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
                             html.H4(f"{profile_data.get('Contributors', 0)}", className="text-center"),
-                            html.Small("Active", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                            html.Small("All time", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
                     className="mb-4 shadow-sm"
