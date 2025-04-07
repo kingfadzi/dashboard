@@ -7,41 +7,51 @@ def render(profile_data):
     build_tool = profile_data.get('Build Tool', '-')
     runtime_version = profile_data.get('Runtime Version', '-')
 
+    return dbc.Cardfrom dash import html, dcc
+import dash_bootstrap_components as dbc
+import helpers
+
+def render(profile_data):
+    main_language = profile_data.get('Main Language', 'Unknown')
+    build_tool = profile_data.get('Build Tool', 'N/A') or 'N/A'
+    runtime_version = profile_data.get('Runtime Version', 'N/A') or 'N/A'
+    frameworks = profile_data.get('Frameworks', [])
+
     return dbc.Card(
         dbc.CardBody([
             html.H4('Technology Stack', className='card-title mb-4'),
 
-            # Build tool and runtime version at top
             dbc.Row([
                 dbc.Col([
-                    html.H6('Build Tool', className='text-muted mb-1'),
-                    html.P(build_tool, style={"fontWeight": "bold", "fontSize": "0.9rem"}),
-                ], width=6),
-                dbc.Col([
-                    html.H6('Runtime Version', className='text-muted mb-1'),
-                    html.P(runtime_version, style={"fontWeight": "bold", "fontSize": "0.9rem"}),
-                ], width=6),
-            ], className="mb-4"),
+                    dbc.Row([
+                        dbc.Col(html.Small('Build Tool:', className='text-muted'), width="auto"),
+                        dbc.Col(html.Span(build_tool, style={"fontWeight": "bold", "fontSize": "0.9rem"})),
+                    ], align="center", className="mb-2"),
 
-            # Language bar chart and frameworks
-            dbc.Row([
+                    dbc.Row([
+                        dbc.Col(html.Small('Runtime Version:', className='text-muted'), width="auto"),
+                        dbc.Col(html.Span(runtime_version, style={"fontWeight": "bold", "fontSize": "0.9rem"})),
+                    ], align="center", className="mb-4"),
+
+                    html.H6('Frameworks', className='text-muted'),
+                    html.Div([
+                        html.Div(
+                            html.Span(fw, className='badge bg-info me-2 mb-2', style={"fontSize": "0.8rem"}),
+                            style={"display": "inline-block"}
+                        )
+                        for fw in frameworks
+                    ]) if frameworks else html.Div(
+                        html.Small("No frameworks detected.", className="text-muted"),
+                        className="mb-2"
+                    ),
+                ], width=4),
+
                 dbc.Col([
                     dcc.Graph(
                         figure=helpers.create_language_bar(profile_data.get('Language Percentages', {})),
                         config={'displayModeBar': False}
                     )
                 ], width=8),
-
-                dbc.Col([
-                    html.H6('Frameworks', className='text-muted mb-2'),
-                    html.Div(
-                        [
-                            html.Span(fw, className='badge bg-info me-1 mb-1', style={"fontSize": "0.8rem"})
-                            for fw in frameworks
-                        ] if frameworks else html.P("No frameworks detected.", className="text-muted"),
-                        style={"display": "flex", "flexWrap": "wrap"}
-                    )
-                ], width=4),
             ])
         ]),
         className="mb-4 shadow-sm"
