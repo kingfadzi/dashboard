@@ -3,8 +3,9 @@ from dash import html
 
 def render(profile_data):
     repo_name = profile_data.get("Repo Name", "Unknown")
-    clone_url = profile_data.get("Clone URL", "#")
+    clone_url = profile_data.get("Clone URL SSH", "#")  # <-- fix typo SSH not SSh
     vcs_hostname = profile_data.get("VCS Hostname", "Unknown")
+    last_updated = profile_data.get("Last Updated", "Unknown")
 
     fields = {
         "App ID": profile_data.get("Department AppID", "Unknown"),
@@ -17,7 +18,8 @@ def render(profile_data):
             href=clone_url,
             target="_blank",
             style={"textDecoration": "none", "color": "#0d6efd", "fontSize": "0.85rem"}
-        )
+        ),
+        "Last Updated": last_updated,
     }
 
     investment_status = profile_data.get("Investment Status", "Unknown")
