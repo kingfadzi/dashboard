@@ -16,7 +16,7 @@ import sections.section_eol_risks as eol_risks
 
 # Import the profile loader from services (no duplication here):
 from services.profile_loader import load_profile
-import section.section_bio as bio
+import sections.section_bio as bio
 
 
 # Database info
