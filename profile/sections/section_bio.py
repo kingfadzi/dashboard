@@ -3,7 +3,7 @@ from dash import html
 
 def render(profile_data):
     repo_name = profile_data.get("Repo Name", "Unknown")
-    clone_url = profile_data.get("Clone URL SSH", "#")  # <-- fix typo SSH not SSh
+    clone_url = profile_data.get("Clone URL SSH", "#")
     vcs_hostname = profile_data.get("VCS Hostname", "Unknown")
     last_updated = profile_data.get("Last Updated", "Unknown")
 
