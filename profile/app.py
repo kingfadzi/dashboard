@@ -1,56 +1,68 @@
-from dash import Dash, html
+from dash import Dash, html, dcc, Output, Input
 import dash_bootstrap_components as dbc
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from services.profile_loader import load_profile
 
-# Import sample data and helpers
-from data_sample import profile_data
-import helpers
-
-# Import sections
-import sections.section_kpis as section_kpis
-import sections.section_tech_stack as section_tech_stack
-import sections.section_modernization as section_modernization
-import sections.section_code_quality as section_code_quality
-import sections.section_dependencies as section_dependencies
-# (more sections later)
-import sections.section_dependencies_category as dependencies_category
-
-import sections.section_vulnerabilities_combined as vulnerabilities_combined
-
-import sections.section_dependencies_risk_by_subcategory as dependencies_risk_by_subcategory
-
-import sections.section_vulnerabilities_combined as vulnerabilities_combined
-
-import sections.section_eol_risks as eol_risks
-
-import sections.section_dependency_categories_chart_stacked as categories_chart_stacked
-
-import sections.section_static_code_risk as static_code_risk
-
-import sections.section_git_activity_hygiene as git_activity_hygiene
+# Database connection
+DATABASE_URL = "postgresql://postgres:postgres@192.168.1.188:5432/gitlab-usage"
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
 
 # Initialize Dash app
-
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+app = Dash(__name__, use_pages=False, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-# App Layout
+# Layout: Location + page content
 app.layout = html.Div([
-    html.H2(f"{profile_data['Repo ID']} Repository Profile", style={"marginBottom": "30px"}),
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
+])
 
-    section_kpis.render(profile_data),
-    section_tech_stack.render(profile_data),
-    git_activity_hygiene.render(profile_data),
-    section_modernization.render(profile_data),
-    section_code_quality.render(profile_data),
-    static_code_risk.render(profile_data),
-    section_dependencies.render(profile_data),
-    categories_chart_stacked.render(profile_data),
-    vulnerabilities_combined.render(profile_data),
-    eol_risks.render(profile_data),
-    
-    # (later you will add more sections here like dependency health, security, etc.)
-], style={"padding": "20px"})
+# URL-based callback
+@app.callback(
+    Output('page-content', 'children'),
+    Input('url', 'search')
+)
+def render_page_content(search):
+    import urllib.parse
+    params = urllib.parse.parse_qs(search.lstrip('?'))
+    repo_id = params.get('repo_id', [None])[0]
+
+    if not repo_id:
+        return html.Div([
+            html.H3("No repo_id provided in the URL."),
+            html.P("Example: http://your-dashboard:8050/?repo_id=CTFd")
+        ])
+
+    session = SessionLocal()
+
+    try:
+        profile_data = load_profile(session, repo_id)
+    except Exception as e:
+        session.close()
+        return html.Div([
+            html.H3(f"Error loading repo profile"),
+            html.Pre(str(e))
+        ])
+
+    session.close()
+
+    return html.Div([
+        section_kpis.render(profile_data),
+        section_tech_stack.render(profile_data),
+        section_modernization.render(profile_data),
+        section_code_metrics.render(profile_data),
+        section_dependencies.render(profile_data),
+        section_dependency_categories_chart_stacked.render(profile_data),
+        section_dependency_risk_summary.render(profile_data),
+        section_vulnerabilities.render(profile_data),
+        section_eol.render(profile_data),
+        section_code_risks_by_category.render(profile_data),
+        section_compliance.render(profile_data),
+        section_recent_activity.render(profile_data),
+        section_health_overview.render(profile_data),
+    ], style={"padding": "20px"})
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8050)
