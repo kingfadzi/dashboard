@@ -10,29 +10,26 @@ def render(profile_data):
 
     return dbc.Card(
         dbc.CardBody([
-            html.H4("Repository Bio", className="card-title mb-4"),
-            html.Div([
-                html.H6("Repo Name", className="text-muted"),
-                html.P(repo_name, style={"fontWeight": "bold"})
-            ], className="mb-3"),
-            html.Div([
-                html.H6("Repository URL", className="text-muted"),
-                html.A(clone_url, href=clone_url, target="_blank", style={"fontWeight": "bold"})
-                if clone_url != "Unknown" else
-                html.Span("Unknown", style={"fontWeight": "bold"})
-            ], className="mb-3"),
-            html.Div([
-                html.H6("Department AppID", className="text-muted"),
-                html.P(department_appid, style={"fontWeight": "bold"})
-            ], className="mb-3"),
-            html.Div([
-                html.H6("Product Owner", className="text-muted"),
-                html.P(product_owner, style={"fontWeight": "bold"})
-            ], className="mb-3"),
-            html.Div([
-                html.H6("Investment Status", className="text-muted"),
-                html.P(investment_status, style={"fontWeight": "bold"})
-            ], className="mb-3"),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.H2(repo_name, className="mb-2", style={"fontWeight": "bold"}),
+                        html.A(
+                            "View Repository",
+                            href=clone_url if clone_url != "Unknown" else "#",
+                            target="_blank",
+                            className="btn btn-primary btn-sm mb-3",
+                            style={"fontSize": "0.8rem"}
+                        ),
+                        html.Div([
+                            dbc.Badge(f"App ID: {department_appid}", color="info", className="me-2 mb-2", pill=True),
+                            dbc.Badge(f"Product Owner: {product_owner}", color="secondary", className="me-2 mb-2", pill=True),
+                            dbc.Badge(f"Investment Status: {investment_status}", color="success" if investment_status.lower() == "active" else "warning", className="me-2 mb-2", pill=True),
+                        ], style={"fontSize": "0.85rem"})
+                    ])
+                ], width=12, lg=8),
+
+            ], align="center"),
         ]),
         className="mb-4 shadow-sm"
     )
