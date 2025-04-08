@@ -2,11 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import html
 
 def render(profile_data):
-    # First, Semgrep Findings
     semgrep_findings = profile_data.get('Semgrep Findings', [])
-
-    # Group findings by category and determine highest severity in each
-    category_data = {}
 
     severity_rank = {
         "Critical": 3,
@@ -17,12 +13,15 @@ def render(profile_data):
     }
 
     severity_color = {
-        "Critical": "danger",
-        "High": "warning",
-        "Medium": "info",
-        "Low": "secondary",
+        "Critical": "danger",   # Red
+        "High": "warning",       # Orange
+        "Medium": "info",        # Blue
+        "Low": "secondary",      # Grey
         "Info": "secondary"
     }
+
+    # Group findings by category
+    category_data = {}
 
     for finding in semgrep_findings:
         category = finding.get('category', 'Unknown')
@@ -43,21 +42,19 @@ def render(profile_data):
     for category, data in top_categories:
         semgrep_cols.append(
             dbc.Col([
-                html.H6(f"{category} Issues", className='text-muted'),
+                html.H6(f"{category.title()} Issues", className='text-muted'),
                 dbc.Badge(
-                    f"{data['count']} issues",
+                    f"{data['count']}",
                     color=severity_color.get(data["highest_severity"], "secondary"),
                     className="p-2",
-                    style={"fontSize": "0.9rem"}
+                    style={"fontSize": "1.0rem"}
                 )
             ], width=4)
         )
 
-    # If there are no findings
     if not semgrep_cols:
         semgrep_cols = [dbc.Col(html.P('No static code risks detected.', className="text-muted"))]
 
-    # Modernization Readiness card
     return dbc.Card(
         dbc.CardBody([
             html.H4('Modernization Readiness', className='card-title mb-4'),
@@ -91,7 +88,6 @@ def render(profile_data):
                 ], width=4),
             ], className="g-3 mb-4"),
 
-            # Semgrep Issues second row
             dbc.Row(semgrep_cols, className="g-3"),
         ]),
         className="mb-4 shadow-sm"
