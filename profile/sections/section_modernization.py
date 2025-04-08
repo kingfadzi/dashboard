@@ -4,20 +4,18 @@ from dash import html
 def render(profile_data):
     semgrep_findings = profile_data.get('Semgrep Findings', [])
 
+    # Updated severity mapping to match your labels
     severity_rank = {
-        "Critical": 3,
-        "High": 2,
-        "Medium": 1,
-        "Low": 0,
-        "Info": 0
+        "error": 3,    # Highest priority
+        "warning": 2,
+        "info": 1,
+        "unlabeled": 0  # Fallback
     }
 
     severity_color = {
-        "Critical": "danger",   # Red
-        "High": "warning",       # Orange
-        "Medium": "info",        # Blue
-        "Low": "secondary",      # Grey
-        "Info": "secondary"
+        "error": "danger",     # Red
+        "warning": "warning",  # Orange
+        "info": "secondary"    # Grey
     }
 
     # Group findings by category
@@ -25,17 +23,19 @@ def render(profile_data):
 
     for finding in semgrep_findings:
         category = finding.get('category', 'Unknown')
-        severity = finding.get('severity', 'Info')
+        severity = finding.get('severity', 'unlabeled').lower()  # Handle case variations
 
         if category not in category_data:
             category_data[category] = {"count": 0, "highest_severity": severity}
         category_data[category]["count"] += 1
 
-        # Update highest severity if necessary
-        if severity_rank.get(severity, 0) > severity_rank.get(category_data[category]["highest_severity"], 0):
+        # Update highest severity using correct ranking
+        current_rank = severity_rank.get(severity, 0)
+        existing_rank = severity_rank.get(category_data[category]["highest_severity"], 0)
+        if current_rank > existing_rank:
             category_data[category]["highest_severity"] = severity
 
-    # Sort by count
+    # Sort by count (descending)
     top_categories = sorted(category_data.items(), key=lambda x: x[1]['count'], reverse=True)[:3]
 
     semgrep_cols = []
@@ -58,7 +58,7 @@ def render(profile_data):
     return dbc.Card(
         dbc.CardBody([
             html.H4('Modernization Readiness', className='card-title mb-4'),
-
+            
             dbc.Row([
                 dbc.Col([
                     html.H6('Dockerfile', className='text-muted'),
