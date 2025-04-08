@@ -2,42 +2,66 @@ import dash_bootstrap_components as dbc
 from dash import html
 
 def render(profile_data):
-    # Semgrep Issues Count - count the top 3 issues
-    semgrep_issues = profile_data.get('Semgrep Findings', [])
-    
-    if not semgrep_issues:
-        return dbc.Card(
-            dbc.CardBody([
-                html.H4('Modernization Readiness', className='card-title mb-4'),
-                html.P('No Semgrep issues detected.', className='text-muted')
-            ]),
-            className="mb-4 shadow-sm"
+    # First, Semgrep Findings
+    semgrep_findings = profile_data.get('Semgrep Findings', [])
+
+    # Group findings by category and determine highest severity in each
+    category_data = {}
+
+    severity_rank = {
+        "Critical": 3,
+        "High": 2,
+        "Medium": 1,
+        "Low": 0,
+        "Info": 0
+    }
+
+    severity_color = {
+        "Critical": "danger",
+        "High": "warning",
+        "Medium": "info",
+        "Low": "secondary",
+        "Info": "secondary"
+    }
+
+    for finding in semgrep_findings:
+        category = finding.get('category', 'Unknown')
+        severity = finding.get('severity', 'Info')
+
+        if category not in category_data:
+            category_data[category] = {"count": 0, "highest_severity": severity}
+        category_data[category]["count"] += 1
+
+        # Update highest severity if necessary
+        if severity_rank.get(severity, 0) > severity_rank.get(category_data[category]["highest_severity"], 0):
+            category_data[category]["highest_severity"] = severity
+
+    # Sort by count
+    top_categories = sorted(category_data.items(), key=lambda x: x[1]['count'], reverse=True)[:3]
+
+    semgrep_cols = []
+    for category, data in top_categories:
+        semgrep_cols.append(
+            dbc.Col([
+                html.H6(f"{category} Issues", className='text-muted'),
+                dbc.Badge(
+                    f"{data['count']} issues",
+                    color=severity_color.get(data["highest_severity"], "secondary"),
+                    className="p-2",
+                    style={"fontSize": "0.9rem"}
+                )
+            ], width=4)
         )
-    
-    # Aggregating semgrep issues by category
-    category_count = {}
-    for issue in semgrep_issues:
-        category = issue.get('category', 'Unknown')
-        if category not in category_count:
-            category_count[category] = 0
-        category_count[category] += 1
 
-    # Sorting by the most frequent issues
-    top_issues = sorted(category_count.items(), key=lambda x: x[1], reverse=True)[:3]
+    # If there are no findings
+    if not semgrep_cols:
+        semgrep_cols = [dbc.Col(html.P('No static code risks detected.', className="text-muted"))]
 
-    # Build the badges for the top issues
-    issue_badges = []
-    for category, count in top_issues:
-        issue_badges.append(
-            html.Span(f"{category}: {count}", className="badge bg-info me-2", style={"fontSize": "0.9rem"})
-        )
-
-    # Build the Modernization Readiness Card
+    # Modernization Readiness card
     return dbc.Card(
         dbc.CardBody([
             html.H4('Modernization Readiness', className='card-title mb-4'),
 
-            # The first row for Dockerfile, CI/CD, etc.
             dbc.Row([
                 dbc.Col([
                     html.H6('Dockerfile', className='text-muted'),
@@ -67,10 +91,8 @@ def render(profile_data):
                 ], width=4),
             ], className="g-3 mb-4"),
 
-            # The second row for Semgrep Issues Count
-            html.H5("Semgrep Issues (Top 3)", className="mt-3 mb-2"),
-            html.Div(issue_badges),
-
+            # Semgrep Issues second row
+            dbc.Row(semgrep_cols, className="g-3"),
         ]),
         className="mb-4 shadow-sm"
     )
