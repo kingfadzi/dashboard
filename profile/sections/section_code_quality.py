@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 
 def render(profile_data):
     # Safely extract values with defaults
-    total_nloc = profile_data.get('Total NLOC', 0)
+    lines_of_code = profile_data.get('Lines of Code', 0)
     comment_lines = profile_data.get('Comment Lines', 0)
     blank_lines = profile_data.get('Blank Lines', 0)
     size_label = profile_data.get('Classification Label', "not detected")
@@ -11,15 +11,19 @@ def render(profile_data):
     total_ccn_value = profile_data.get('Total Cyclomatic Complexity', 0)
     total_functions = profile_data.get('Total Functions', 0)
 
-    # Compute ratios only if total_nloc is greater than 0
-    if total_nloc > 0:
-        comment_ratio = (comment_lines / total_nloc) * 100
-        blank_line_ratio = (blank_lines / total_nloc) * 100
+    # Correct comment density calculation (using only CLOC metrics)
+    if lines_of_code + comment_lines > 0:
+        comment_density = (comment_lines / (lines_of_code + comment_lines)) * 100
     else:
-        comment_ratio = 0
+        comment_density = 0
+
+    # Correct blank line density (still using CLOC)
+    if lines_of_code + comment_lines + blank_lines > 0:
+        blank_line_ratio = (blank_lines / (lines_of_code + comment_lines + blank_lines)) * 100
+    else:
         blank_line_ratio = 0
 
-    # Determine size label coloring
+    # Size classification coloring
     if size_label.lower() in ['tiny', 'small']:
         size_color = "success"
     elif size_label.lower() in ['medium', 'non-code']:
@@ -27,10 +31,10 @@ def render(profile_data):
     else:
         size_color = "danger"
 
-    # Determine metrics coloring
+    # Metric color coding
     avg_ccn_color = "success" if avg_ccn_value < 4 else "warning" if avg_ccn_value <= 6 else "danger"
     total_ccn_color = "success" if total_ccn_value < 1500 else "warning" if total_ccn_value <= 3000 else "danger"
-    comment_color = "success" if comment_ratio >= 15 else "warning" if comment_ratio >= 8 else "danger"
+    comment_color = "success" if comment_density >= 15 else "warning" if comment_density >= 8 else "danger"
     blank_color = "success" if blank_line_ratio < 10 else "warning" if blank_line_ratio <= 20 else "danger"
     function_color = "success" if total_functions < 500 else "warning" if total_functions <= 2000 else "danger"
 
@@ -50,7 +54,7 @@ def render(profile_data):
                     ], className="mb-4"),
 
                     html.Div([
-                        html.H6('Blank Lines (%)', className='text-muted mb-1'),
+                        html.H6('Blank Line Ratio', className='text-muted mb-1'),
                         html.Span(
                             f"{blank_line_ratio:.1f}%",
                             className=f"badge bg-{blank_color}",
@@ -81,9 +85,9 @@ def render(profile_data):
 
                 dbc.Col([
                     html.Div([
-                        html.H6('Comment Ratio', className='text-muted mb-1'),
+                        html.H6('Comment Density', className='text-muted mb-1'),
                         html.Span(
-                            f"{comment_ratio:.1f}%",
+                            f"{comment_density:.1f}%",
                             className=f"badge bg-{comment_color}",
                             style={"fontSize": "1rem", "padding": "6px"}
                         ),

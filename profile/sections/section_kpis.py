@@ -75,13 +75,18 @@ def render(profile_data):
                         dbc.CardHeader("Activity Status", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
                             html.H4(profile_data.get('Activity Status', 'Inactive'), className="text-center"),
-                            html.Small("Based on commits", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                            html.Small(
+                                f"Last commit: {profile_data.get('Last Commit Date', 'N/A').split('T')[0]}",
+                                className="text-center text-muted d-block",
+                                style={"fontSize": "0.7rem"}
+                            )
                         ])
                     ],
                     className="mb-4 shadow-sm"
                 ),
                 xs=12, sm=6, md=4, lg=2
-            ),
+            )
+
         ],
         className="g-3 mb-4",
         justify="around"

@@ -173,3 +173,36 @@ def create_dependency_category_bar(dependencies_df):
         showlegend=False
     )
     return fig
+
+def calculate_dependency_risks(profile_data):
+    vulnerabilities = profile_data.get('Vulnerabilities', [])
+    total_deps = profile_data.get('Total Dependencies', 1)  # Protect against division by zero
+
+    vuln_count = len(vulnerabilities)
+    vuln_percentage = round((vuln_count / total_deps) * 100, 1)
+
+    critical_or_high = sum(1 for v in vulnerabilities if v.get('severity') in ('Critical', 'High'))
+    critical_or_high_percentage = round((critical_or_high / total_deps) * 100, 1)
+
+    no_fix_vulns = sum(1 for v in vulnerabilities if not v.get('fix_version') or v.get('fix_version') in ('None', '-', ''))
+    critical_no_fix = sum(1 for v in vulnerabilities if v.get('severity') == 'Critical' and (not v.get('fix_version') or v.get('fix_version') in ('None', '-', '')))
+
+    severity_counts = {
+        'Critical': 0,
+        'High': 0,
+        'Medium': 0,
+        'Low': 0
+    }
+    for v in vulnerabilities:
+        sev = v.get('severity')
+        if sev in severity_counts:
+            severity_counts[sev] += 1
+
+    return {
+        "total_dependencies": total_deps,
+        "vulnerable_percentage": vuln_percentage,
+        "critical_high_percentage": critical_or_high_percentage,
+        "vulnerable_without_fix": no_fix_vulns,
+        "critical_without_fix": critical_no_fix,
+        "severity_counts": severity_counts
+    }
