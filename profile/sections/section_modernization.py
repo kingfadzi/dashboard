@@ -4,18 +4,17 @@ from dash import html
 def render(profile_data):
     semgrep_findings = profile_data.get('Semgrep Findings', [])
 
-    # Updated severity mapping to match your labels
     severity_rank = {
         "error": 3,    # Highest priority
         "warning": 2,
         "info": 1,
-        "unlabeled": 0  # Fallback
+        "unlabeled": 0
     }
 
     severity_color = {
         "error": "danger",     # Red
         "warning": "warning",  # Orange
-        "info": "secondary"    # Grey
+        "info": "primary"      # Blue (changed from secondary)
     }
 
     # Group findings by category
@@ -23,19 +22,19 @@ def render(profile_data):
 
     for finding in semgrep_findings:
         category = finding.get('category', 'Unknown')
-        severity = finding.get('severity', 'unlabeled').lower()  # Handle case variations
+        severity = finding.get('severity', 'unlabeled').lower()
 
         if category not in category_data:
             category_data[category] = {"count": 0, "highest_severity": severity}
         category_data[category]["count"] += 1
 
-        # Update highest severity using correct ranking
+        # Update highest severity if necessary
         current_rank = severity_rank.get(severity, 0)
         existing_rank = severity_rank.get(category_data[category]["highest_severity"], 0)
         if current_rank > existing_rank:
             category_data[category]["highest_severity"] = severity
 
-    # Sort by count (descending)
+    # Sort by count
     top_categories = sorted(category_data.items(), key=lambda x: x[1]['count'], reverse=True)[:3]
 
     semgrep_cols = []
@@ -58,7 +57,7 @@ def render(profile_data):
     return dbc.Card(
         dbc.CardBody([
             html.H4('Modernization Readiness', className='card-title mb-4'),
-            
+
             dbc.Row([
                 dbc.Col([
                     html.H6('Dockerfile', className='text-muted'),
