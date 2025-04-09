@@ -23,7 +23,7 @@ def render(profile_data):
     }
 
     investment_status = profile_data.get("Investment Status", "Unknown")
-    investment_color = "success" if investment_status.lower() == "active" else "warning"
+    investment_color = "success" if investment_status.lower() == "invest" else "warning"
 
     table_rows = []
     for label, value in fields.items():
