@@ -5,23 +5,26 @@ def render(profile_data):
     recent_commit_dates = profile_data.get('Recent Commit Dates', [])
     last_updated = profile_data.get('Last Updated', 'Unknown')
 
+    # Calculate metrics safely
+    total_commits = profile_data.get('Total Commits', 0)
+    top_contributor_commits = profile_data.get('Top Contributor Commits', 0)
+    file_count = profile_data.get('File Count', 1)
+    repo_size_mb = profile_data.get('Repo Size (MB)', 0)
+
+    # Derived metrics
+    commits_per_file = total_commits / max(file_count, 1)
+    size_per_file = repo_size_mb / max(file_count, 1)
+    single_dev_percent = (top_contributor_commits / total_commits) * 100 if total_commits > 0 else 0
+
     commits_last_90_days = sum(
         1 for date in recent_commit_dates
         if is_within_last_n_days(date, 90)
     )
 
-    single_dev_percent = profile_data.get('Single Developer %', 0)
-    repo_size_mb = profile_data.get('Repo Size (MB)', 0)
-    file_count = profile_data.get('File Count', 1)
-    total_commits = profile_data.get('Total Commits', 0)
-
-    commits_per_file = total_commits / max(file_count, 1)
-    size_per_file = repo_size_mb / max(file_count, 1)
-
     rows = [
         {
             "risk": "Single Developer Risk",
-            "status": risk_badge(single_dev_percent,  thresholds=(50, 75), reverse=True, low_label="High", high_label="Low"),
+            "status": risk_badge(single_dev_percent, thresholds=(50, 75), reverse=True, low_label="High", high_label="Low"),
             "details": f"{single_dev_percent:.1f}% commits from 1 developer"
         },
         {
@@ -36,7 +39,7 @@ def render(profile_data):
         },
         {
             "risk": "Dormancy Risk",
-            "status": risk_badge(commits_last_90_days,  thresholds=(5, 10), reverse=False, low_label="High", high_label="Low"),
+            "status": risk_badge(commits_last_90_days, thresholds=(5, 10), reverse=False, low_label="High", high_label="Low"),
             "details": html.Span([
                 f"{commits_last_90_days} commits in last 90 days ",
                 html.Small(f"(as of {last_updated.split('T')[0]})", className="text-muted")
@@ -101,7 +104,6 @@ def risk_badge(value, thresholds=(50, 75), reverse=False, low_label="High", high
             color = "danger"
             label = low_label
     else:
-
         if value > thresholds[1]:
             color = "success"
             label = high_label
@@ -113,4 +115,3 @@ def risk_badge(value, thresholds=(50, 75), reverse=False, low_label="High", high
             label = low_label
 
     return dbc.Badge(label, color=color, className="me-1", pill=True)
-

@@ -21,49 +21,51 @@ def create_health_chart(health_scores):
     return fig
 
 
+import plotly.graph_objects as go
+
 def create_language_bar(language_data):
     if not language_data:
         return go.Figure()
 
-    # Sort languages descending
-    sorted_langs = sorted(language_data.items(), key=lambda x: x[1], reverse=True)
+    labels = list(language_data.keys())
+    values = list(language_data.values())
 
-    # Take top 10, group the rest into "Other"
-    top_langs = sorted_langs[:10]
-    others = sorted_langs[10:]
+    bar_colors = [
+        '#fc8d62',
+        '#66c2a5',
+        '#e78ac3',
+        '#a6d854',
+        '#ffd92f',
+        '#e5c494',
+        '#c7e9b4',
+        '#fdb462',
+    ]
 
-    if others:
-        other_total = sum(v for _, v in others)
-        top_langs.append(('Other', other_total))
-
-    labels = [lang for lang, _ in top_langs]
-    values = [usage for _, usage in top_langs]
-
-    fig = go.Figure(go.Bar(
-        x=values,
-        y=labels,
-        orientation='h',
-        marker_color=[
-            '#636EFA', '#EF553B', '#AB63FA', '#FFA15A',
-            '#00CC96', '#19D3F3', '#FF6692', '#B6E880',
-            '#FF97FF', '#FECB52', '#CCCCCC'  # 'Other'
-        ],
-        text=[f"{v:.1f}%" for v in values],
-        textposition='auto'
-    ))
+    fig = go.Figure(data=[
+        go.Bar(
+            x=values,
+            y=labels,
+            orientation='h',
+            marker_color=[bar_colors[i % len(bar_colors)] for i in range(len(labels))],
+            text=[f"{v}%" for v in values],  # Show value inside bar
+            textposition='auto',
+        )
+    ])
 
     fig.update_layout(
-        margin=dict(t=10, b=10, l=10, r=10),
-        height=400,
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        xaxis=dict(visible=False),
-        yaxis=dict(visible=True, automargin=True),
+        margin=dict(t=0, b=0, l=0, r=0),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        xaxis_title=None,
+        yaxis_title=None,
+        xaxis=dict(showgrid=False, zeroline=False),
+        yaxis=dict(showgrid=False, zeroline=False),
         showlegend=False,
-        dragmode=False
     )
 
     return fig
+
+
 
 def create_commit_sparkline(commits):
     months = pd.date_range(end=datetime.date.today(), periods=12, freq='M').strftime('%b').tolist()
