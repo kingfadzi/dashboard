@@ -56,7 +56,7 @@ def render(profile_data):
                         dbc.CardHeader("Repo Size", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
                             html.H4(f"{profile_data.get('Repo Size (MB)', 0)} MB", className="text-center"),
-                            html.Small(f"Files={profile_data.get('File Count', 0)}", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
+                            html.Small(f"Code Size (MB)={profile_data.get('Code Size (MB)', 0)} MB", className="text-center text-muted d-block", style={"fontSize": "0.7rem"})
                         ])
                     ],
                     className="mb-4 shadow-sm"

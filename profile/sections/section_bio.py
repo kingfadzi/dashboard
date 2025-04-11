@@ -8,7 +8,7 @@ def render(profile_data):
     last_updated = profile_data.get("Last Updated", "Unknown")
 
     fields = {
-        "App ID": profile_data.get("Department AppID", "Unknown"),
+        "App ID": profile_data.get("App ID", "Unknown"),
         "Department": profile_data.get("Department", "Unknown"),
         "Team": profile_data.get("Team", "Unknown"),
         "Product Owner": profile_data.get("Product Owner", "Unknown"),
