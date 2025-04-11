@@ -3,7 +3,7 @@ from dash import html
 
 def render(profile_data):
     repo_name = profile_data.get("Repo ID", "Unknown")
-    clone_url = profile_data.get("Clone URL SSH", "#")
+    browse_url = profile_data.get("Browse URL", "#")
     vcs_hostname = profile_data.get("VCS Hostname", "Unknown")
     last_updated = profile_data.get("Last Updated", "Unknown")
 
@@ -14,8 +14,8 @@ def render(profile_data):
         "Product Owner": profile_data.get("Product Owner", "Unknown"),
         "VCS Hostname": vcs_hostname,
         "Repository URL": html.A(
-            clone_url,
-            href=clone_url,
+            browse_url,
+            href=browse_url,
             target="_blank",
             style={"textDecoration": "none", "color": "#0d6efd", "fontSize": "0.85rem"}
         ),

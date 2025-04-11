@@ -47,7 +47,7 @@ def create_language_bar(language_data):
             y=labels,
             orientation='h',
             marker_color=[bar_colors[i % len(bar_colors)] for i in range(len(labels))],
-            text=[f"{v}%" for v in values],  # Show value inside bar
+            text=[f"{v}%" for v in values],
             textposition='auto',
         )
     ])
@@ -58,8 +58,8 @@ def create_language_bar(language_data):
         paper_bgcolor='white',
         xaxis_title=None,
         yaxis_title=None,
-        xaxis=dict(showgrid=False, zeroline=False),
-        yaxis=dict(showgrid=False, zeroline=False),
+        xaxis=dict(showgrid=False, zeroline=False, fixedrange=True),
+        yaxis=dict(showgrid=False, zeroline=False, fixedrange=True),
         showlegend=False,
     )
 
