@@ -28,6 +28,7 @@ layout = dbc.Container(
                         ],
                         data=[],  # Will be populated by callback
                         page_size=10,
+                        markdown_options={"html": True},
                         style_table={
                             "overflowX": "auto",
                         },

@@ -34,6 +34,12 @@ def fetch_table_data(filters=None):
         if "last_commit_date" in df.columns:
             df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%Y-%m-%d")
 
+        # ⭐ Real HTML link instead of markdown
+        if "repo_id" in df.columns:
+            df["repo_id"] = df["repo_id"].apply(
+                lambda repo_id: f"<a href='/repo?repo_id={repo_id}' style='text-decoration: none; color: #007bff;'>{repo_id}</a>"
+            )
+
         return df
 
     condition_string, param_dict = build_filter_conditions(filters)

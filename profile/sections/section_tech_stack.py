@@ -1,6 +1,6 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-import helpers
+import profile.helpers as helpers
 
 def render(profile_data):
     build_tool = profile_data.get('Build Tool', '-')

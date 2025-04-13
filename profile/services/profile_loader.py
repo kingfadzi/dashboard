@@ -1,6 +1,6 @@
 import json
 from sqlalchemy.orm import Session
-from models.repo_profile_cache import RepoProfileCache
+from profile.models.repo_profile_cache import RepoProfileCache
 
 def load_profile(session: Session, repo_id: str):
     cached = session.query(RepoProfileCache).filter_by(repo_id=repo_id).first()
