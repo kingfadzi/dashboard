@@ -71,8 +71,8 @@ def render(profile_data):
                 dbc.Col([
                     html.H6('CI/CD Pipeline', className='text-muted'),
                     html.Span(
-                        "Present" if profile_data.get('CI/CD Present', False) else "Missing",
-                        className=f"badge {'bg-success' if profile_data.get('CI/CD Present', False) else 'bg-danger'}",
+                        "Present" if profile_data.get('CI/CD Pipeline', False) else "Missing",
+                        className=f"badge {'bg-success' if profile_data.get('CI/CD Pipeline', False) else 'bg-danger'}",
                         style={"fontSize": "0.9rem"}
                     )
                 ], width=4),
@@ -80,8 +80,8 @@ def render(profile_data):
                 dbc.Col([
                     html.H6('IaC Config', className='text-muted'),
                     html.Span(
-                        "Present" if profile_data.get('IaC Config Present', False) else "Missing",
-                        className=f"badge {'bg-success' if profile_data.get('IaC Config Present', False) else 'bg-danger'}",
+                        "Present" if profile_data.get('IaC Config', False) else "Missing",
+                        className=f"badge {'bg-success' if profile_data.get('IaC Config', False) else 'bg-danger'}",
                         style={"fontSize": "0.9rem"}
                     )
                 ], width=4),
