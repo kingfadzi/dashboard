@@ -6,6 +6,7 @@ from layouts.layout_filters import filter_layout
 import dash
 from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
+import callbacks.repo_profile_callback
 
 # Initialize Dash app
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
