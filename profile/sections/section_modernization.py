@@ -3,6 +3,7 @@ from dash import html
 
 def render(profile_data):
     semgrep_findings = profile_data.get('Semgrep Findings', [])
+    modernization_signals = profile_data.get('Modernization Signals', {})
 
     severity_rank = {
         "error": 3,    # Highest priority
@@ -14,7 +15,7 @@ def render(profile_data):
     severity_color = {
         "error": "danger",     # Red
         "warning": "warning",  # Orange
-        "info": "primary"      # Blue (changed from secondary)
+        "info": "primary"      # Blue
     }
 
     # Group findings by category
@@ -62,8 +63,8 @@ def render(profile_data):
                 dbc.Col([
                     html.H6('Dockerfile', className='text-muted'),
                     html.Span(
-                        "Present" if profile_data.get('Dockerfile', False) else "Missing",
-                        className=f"badge {'bg-success' if profile_data.get('Dockerfile', False) else 'bg-danger'}",
+                        "Present" if modernization_signals.get('Dockerfile', False) else "Missing",
+                        className=f"badge {'bg-success' if modernization_signals.get('Dockerfile', False) else 'bg-danger'}",
                         style={"fontSize": "0.9rem"}
                     )
                 ], width=4),
@@ -71,8 +72,8 @@ def render(profile_data):
                 dbc.Col([
                     html.H6('CI/CD Pipeline', className='text-muted'),
                     html.Span(
-                        "Present" if profile_data.get('CI/CD Pipeline', False) else "Missing",
-                        className=f"badge {'bg-success' if profile_data.get('CI/CD Pipeline', False) else 'bg-danger'}",
+                        "Present" if modernization_signals.get('CI/CD Pipeline', False) else "Missing",
+                        className=f"badge {'bg-success' if modernization_signals.get('CI/CD Pipeline', False) else 'bg-danger'}",
                         style={"fontSize": "0.9rem"}
                     )
                 ], width=4),
@@ -80,8 +81,8 @@ def render(profile_data):
                 dbc.Col([
                     html.H6('IaC Config', className='text-muted'),
                     html.Span(
-                        "Present" if profile_data.get('IaC Config', False) else "Missing",
-                        className=f"badge {'bg-success' if profile_data.get('IaC Config', False) else 'bg-danger'}",
+                        "Present" if modernization_signals.get('IaC Config', False) else "Missing",
+                        className=f"badge {'bg-success' if modernization_signals.get('IaC Config', False) else 'bg-danger'}",
                         style={"fontSize": "0.9rem"}
                     )
                 ], width=4),
