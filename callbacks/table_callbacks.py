@@ -1,3 +1,4 @@
+import math
 from dash import Input, Output
 from data.fetch_table_data import fetch_table_data
 from viz.viz_table_data import viz_table_data
@@ -18,19 +19,29 @@ def register_table_callbacks(app):
             Input("app-id-filter", "value"),
             Input("temp-table", "page_current"),
             Input("temp-table", "page_size"),
-            Input("temp-table", "sort_by"),
         ],
     )
-    def update_table(*args):
-        filter_keys = ["host_name", "activity_status", "tc", "main_language", "classification_label", "app_id"]
-        filters = {key: (arg if arg else []) for key, arg in zip(filter_keys, args[:-3])}
+    def update_table(
+            host_names,
+            statuses,
+            tcs,
+            languages,
+            classifications,
+            app_id_input,
+            page_current,
+            page_size,
+    ):
+        filters = {
+            "host_name": host_names or [],
+            "activity_status": statuses or [],
+            "tc": tcs or [],
+            "main_language": languages or [],
+            "classification_label": classifications or [],
+            "app_id": app_id_input.strip() if app_id_input else None,
+        }
 
-        page_current = args[-3]
-        page_size = args[-2]
-        sort_by = args[-1]
-
-        table_raw_df, total_records = fetch_table_data(filters, page_current, page_size, sort_by)
-        table_data = viz_table_data(table_raw_df)
+        df, total_count = fetch_table_data(filters, page_current, page_size)
+        table_data = viz_table_data(df)
 
         tooltip_data = []
         for row in table_data:
@@ -42,6 +53,4 @@ def register_table_callbacks(app):
                     row_tooltip[key] = {"value": "", "type": "text"}
             tooltip_data.append(row_tooltip)
 
-        page_count = (total_records + page_size - 1) // page_size
-
-        return table_data, tooltip_data, page_count
+        return table_data, tooltip_data, math.ceil(total_count / page_size)

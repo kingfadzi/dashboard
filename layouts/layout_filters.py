@@ -2,14 +2,6 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 def filter_layout():
-    dropdown_style = {
-        "fontSize": "14px",
-        "whiteSpace": "nowrap",
-        "overflow": "hidden",
-        "textOverflow": "ellipsis",
-        "width": "100%",
-    }
-
     return dbc.Card(
         dbc.CardBody(
             dbc.Row(
@@ -17,65 +9,65 @@ def filter_layout():
                     dbc.Col(
                         dcc.Dropdown(
                             id="host-name-filter",
-                            options=[],
+                            options=[],  # Options will be populated dynamically
                             multi=True,
                             placeholder="Select Host Name(s)",
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style=dropdown_style,
+                            style={"fontSize": "14px"},
                         ),
                         width=2,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
                             id="activity-status-filter",
-                            options=[],
+                            options=[],  # Options will be populated dynamically
                             multi=True,
                             placeholder="Select Activity Status",
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style=dropdown_style,
+                            style={"fontSize": "14px"},
                         ),
                         width=2,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
                             id="tc-filter",
-                            options=[],
+                            options=[],  # Options will be populated dynamically
                             multi=True,
                             placeholder="Select TC(s)",
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style=dropdown_style,
+                            style={"fontSize": "14px"},
                         ),
                         width=2,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
                             id="language-filter",
-                            options=[],
+                            options=[],  # Options will be populated dynamically
                             multi=True,
                             placeholder="Select Language(s)",
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style=dropdown_style,
+                            style={"fontSize": "14px"},
                         ),
                         width=2,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
                             id="classification-filter",
-                            options=[],
+                            options=[],  # Options will be populated dynamically
                             multi=True,
                             placeholder="Select Classification(s)",
                             clearable=True,
                             maxHeight=600,
                             optionHeight=50,
-                            style=dropdown_style,
+                            style={"fontSize": "14px"},
                         ),
                         width=2,
                     ),
@@ -86,13 +78,13 @@ def filter_layout():
                             placeholder="Enter App ID or Repo Slug",
                             debounce=True,
                             className="form-control",
-                            style={"fontSize": "14px", "width": "100%"},
+                            style={"fontSize": "14px"},
                         ),
                         width=2,
                     ),
                 ],
                 align="center",
-                className="g-3",
+                className="g-3",  # Adds spacing between columns
             )
         ),
         className="bg-light mb-4",

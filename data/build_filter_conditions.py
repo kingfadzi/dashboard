@@ -16,11 +16,11 @@ def build_filter_conditions(filters, alias=None):
 
         if field == "app_id":
             or_clauses = []
+            repo_slug_col = f"{alias}.repo_slug" if alias else "repo_slug"
             for val in values:
                 placeholder = f"p{placeholder_counter}"
                 placeholder_counter += 1
                 param_dict[placeholder] = f"%{val}%"
-                repo_slug_col = f"{alias}.repo_slug" if alias else "repo_slug"
                 or_clauses.append(f"({col} ILIKE :{placeholder} OR {repo_slug_col} ILIKE :{placeholder})")
             if or_clauses:
                 conditions.append("(" + " OR ".join(or_clauses) + ")")
