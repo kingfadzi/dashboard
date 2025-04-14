@@ -20,15 +20,24 @@ def create_health_chart(health_scores):
     )
     return fig
 
-
 import plotly.graph_objects as go
 
 def create_language_bar(language_data):
     if not language_data:
         return go.Figure()
 
-    labels = list(language_data.keys())
-    values = list(language_data.values())
+    sorted_items = sorted(language_data.items(), key=lambda item: item[1], reverse=True)
+    top_5 = sorted_items[:5]
+    others = sorted_items[5:]
+
+    labels = [label for label, _ in top_5]
+    values = [value for _, value in top_5]
+
+    if others:
+        others_value = sum(value for _, value in others)
+        if others_value > 0:
+            labels.append('Others')
+            values.append(others_value)
 
     bar_colors = [
         '#fc8d62',
@@ -47,7 +56,7 @@ def create_language_bar(language_data):
             y=labels,
             orientation='h',
             marker_color=[bar_colors[i % len(bar_colors)] for i in range(len(labels))],
-            text=[f"{v}%" for v in values],
+            text=[f"{v:.1f}%" for v in values],
             textposition='auto',
         )
     ])

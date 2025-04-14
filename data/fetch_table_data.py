@@ -4,9 +4,9 @@ from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 
-def fetch_table_data(filters=None):
+def fetch_table_data(filters=None, page_current=0, page_size=10):
     @cache.memoize()
-    def query_data(condition_string, param_dict):
+    def query_data(condition_string, param_dict, page_current, page_size):
         base_query = """
             SELECT
                 repo_id,
@@ -23,6 +23,20 @@ def fetch_table_data(filters=None):
         if condition_string:
             base_query += f" WHERE {condition_string}"
 
+        base_query += """
+            ORDER BY 
+                last_commit_date DESC NULLS LAST,
+                number_of_contributors DESC
+            LIMIT :limit
+            OFFSET :offset
+        """
+
+        param_dict = param_dict.copy()
+        param_dict.update({
+            "limit": page_size,
+            "offset": page_current * page_size
+        })
+
         stmt = text(base_query)
         df = pd.read_sql(stmt, engine, params=param_dict)
 
@@ -32,9 +46,8 @@ def fetch_table_data(filters=None):
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
 
         if "last_commit_date" in df.columns:
-            df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%Y-%m-%d")
+            df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%Y-%m-%dT%H:%M:%S")
 
-        # ⭐ Real HTML link instead of markdown
         if "repo_id" in df.columns:
             df["repo_id"] = df["repo_id"].apply(
                 lambda repo_id: f"<a href='/repo?repo_id={repo_id}' style='text-decoration: none; color: #007bff;'>{repo_id}</a>"
@@ -43,4 +56,4 @@ def fetch_table_data(filters=None):
         return df
 
     condition_string, param_dict = build_filter_conditions(filters)
-    return query_data(condition_string, param_dict)
+    return query_data(condition_string, param_dict, page_current, page_size)

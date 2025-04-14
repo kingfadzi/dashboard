@@ -11,7 +11,6 @@ def render(profile_data):
         dbc.CardBody([
             html.H4('Technology Stack', className='card-title mb-4'),
 
-
             dbc.Row([
                 dbc.Col(html.Small('Build Tool:', className='text-muted'), width="auto"),
                 dbc.Col(html.Span(build_tool, style={"fontWeight": "bold", "fontSize": "0.9rem"}), width="auto"),
