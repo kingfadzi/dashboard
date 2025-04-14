@@ -6,3 +6,4 @@ psycopg2-binary
 dash_bootstrap_components==1.6.0
 flask_caching
 redis
+python-dotenv
