@@ -62,6 +62,7 @@ def create_language_bar(language_data):
     ])
 
     fig.update_layout(
+        height=180,  # ✅ Reduced height here
         margin=dict(t=0, b=0, l=0, r=0),
         plot_bgcolor='white',
         paper_bgcolor='white',
@@ -73,6 +74,7 @@ def create_language_bar(language_data):
     )
 
     return fig
+
 
 
 

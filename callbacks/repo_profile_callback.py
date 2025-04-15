@@ -43,8 +43,8 @@ def render_repo_profile(search):
     return html.Div([
         bio.render(profile_data),
         section_kpis.render(profile_data),
-        section_tech_stack.render(profile_data),
         section_modernization.render(profile_data),
+        section_tech_stack.render(profile_data),
         section_code_quality.render(profile_data),
         section_git_activity_hygiene.render(profile_data),
         section_dependency_risk_summary.render(profile_data),
