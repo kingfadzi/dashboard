@@ -33,6 +33,7 @@ RUN python3 -m pip install --no-cache-dir \
     plotly \
     dash-bootstrap-components==1.6.0 \
     python-dotenv \
+    redis \
     flask_caching
 
 RUN useradd -m dashuser
