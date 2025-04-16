@@ -31,11 +31,12 @@ def create_language_bar(language_data):
             font=dict(size=14, color="gray"),
             xref="paper",
             yref="paper",
-            x=0.5,
-            y=0.5
+            x=0,
+            y=0.5,
+            xanchor='left'
         )
         fig.update_layout(
-            height=300,  # ⬅️ match the height of other cards
+            height=80,
             plot_bgcolor='white',
             paper_bgcolor='white',
             margin=dict(t=0, b=0, l=0, r=0),
