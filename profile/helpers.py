@@ -24,7 +24,25 @@ import plotly.graph_objects as go
 
 def create_language_bar(language_data):
     if not language_data:
-        return go.Figure()
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No languages detected",
+            showarrow=False,
+            font=dict(size=14, color="gray"),
+            xref="paper",
+            yref="paper",
+            x=0.5,
+            y=0.5
+        )
+        fig.update_layout(
+            height=300,  # ⬅️ match the height of other cards
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            margin=dict(t=0, b=0, l=0, r=0),
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False)
+        )
+        return fig
 
     sorted_items = sorted(language_data.items(), key=lambda item: item[1], reverse=True)
     top_5 = sorted_items[:5]
@@ -62,7 +80,7 @@ def create_language_bar(language_data):
     ])
 
     fig.update_layout(
-        height=180,  # ✅ Reduced height here
+        height=180,
         margin=dict(t=0, b=0, l=0, r=0),
         plot_bgcolor='white',
         paper_bgcolor='white',
