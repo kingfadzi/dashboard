@@ -9,7 +9,7 @@ def render(profile_data):
 
     fields = {
         "App ID": profile_data.get("App ID", "Unknown"),
-        "Department": profile_data.get("Department", "Unknown"),
+        "TC": profile_data.get("TC", "Unknown"),
         "Team": profile_data.get("Team", "Unknown"),
         "Product Owner": profile_data.get("Product Owner", "Unknown"),
         "VCS Hostname": vcs_hostname,
