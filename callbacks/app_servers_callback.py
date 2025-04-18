@@ -20,5 +20,12 @@ def register_appserver_callbacks(app):
             "main_language": langs
         }
 
+        print("[AppServer] Incoming filters:", filters)
+
         df = fetch_appserver_data(filters)
+
+        print("[AppServer] Returned DataFrame:")
+        print(df.head(10))
+        print("[AppServer] Total rows:", len(df))
+
         return viz_appserver_chart(df)
