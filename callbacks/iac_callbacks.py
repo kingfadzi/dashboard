@@ -1,4 +1,3 @@
-# iac_callbacks.py
 from dash import Input, Output
 from data.fetch_iac_data import fetch_iac_data
 from viz.viz_iac_chart import viz_iac_chart
@@ -6,8 +5,8 @@ from viz.viz_iac_chart import viz_iac_chart
 def register_iac_callbacks(app):
     @app.callback(
         [
-            Output("iac-card", "style"),      # Output to update the card's visibility
-            Output("iac-bar-chart", "figure"),  # Output for the chart's figure
+            Output("iac-card", "style"),         # Show/hide the card
+            Output("iac-bar-chart", "figure"),   # Chart output
         ],
         [
             Input("host-name-filter", "value"),
@@ -18,33 +17,22 @@ def register_iac_callbacks(app):
             Input("app-id-filter", "value"),
         ],
     )
-    def update_iac(*args):
-        filter_keys = [
-            "host_name",
-            "activity_status",
-            "tc",
-            "main_language",
-            "classification_label",
-            "app_id",
-        ]
-        filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
-        data = fetch_iac_data(filters)
-        fig = viz_iac_chart(data)
-        
-        # Determine whether the figure has any data.
-        if not fig:
-            # No figure returned at all
+    def update_iac(
+        host_name, activity_status, tc, language, classification, app_id
+    ):
+        filters = {
+            "host_name": host_name or None,
+            "activity_status": activity_status or None,
+            "tc": tc or None,
+            "main_language": language or None,
+            "classification_label": classification or None,
+            "app_id": app_id or None,
+        }
+
+        df = fetch_iac_data(filters)
+
+        if df.empty:
             return {"display": "none"}, {"data": []}
-        
-        # Check for data in the figure:
-        if isinstance(fig, dict):
-            chart_data = fig.get("data", [])
-        else:
-            chart_data = fig.data
-        
-        # If there's no data, hide the card.
-        if not chart_data:
-            return {"display": "none"}, {"data": []}
-        
-        # Otherwise, show the card with the chart.
+
+        fig = viz_iac_chart(df)
         return {"display": "block"}, fig
