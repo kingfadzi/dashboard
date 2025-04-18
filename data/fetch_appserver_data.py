@@ -4,7 +4,7 @@ from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 
-def fetch_appserver_iac_data(filters=None):
+def fetch_appserver_data(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = """
