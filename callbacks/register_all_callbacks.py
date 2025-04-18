@@ -13,6 +13,7 @@ from .label_tech_callbacks import register_label_tech_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .appserver_callbacks import register_appserver_callbacks
 from .dev_frameworks_callbacks import register_dev_frameworks_callbacks
+from .dependency_types_callbacks import register_dependency_types_callbacks
 
 def register_all_callbacks(app):
     register_filter_callbacks(app)
@@ -30,3 +31,4 @@ def register_all_callbacks(app):
     register_kpi_callbacks(app)
     register_appserver_callbacks(app)
     register_dev_frameworks_callbacks(app)
+    register_dependency_types_callbacks(app)

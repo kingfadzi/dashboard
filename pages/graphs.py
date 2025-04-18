@@ -242,6 +242,22 @@ layout = dbc.Container(
             className="mb-4",
             id="dev-frameworks-card"
         ),
+        
+        dbc.Card(
+            [
+                dbc.CardHeader(
+                    html.B("Top Dependency Types", className="text-center"),
+                    className="bg-light",
+                ),
+                dcc.Graph(
+                    id="dependency-types-bar-chart",
+                    config={"displayModeBar": False},
+                    style={"height": 300},
+                ),
+            ],
+            className="mb-4",
+            id="dependency-types-card"
+        ),
 
 
         # Placeholder for the Label Tech Charts (rendered conditionally by the callback)
