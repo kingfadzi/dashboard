@@ -9,16 +9,17 @@ def fetch_appserver_data(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                framework AS iac_type,
-                COUNT(DISTINCT repo_id) AS repo_count
-            FROM iac_components
-            WHERE subcategory = 'Application Servers'
+                ic.framework AS iac_type,
+                COUNT(DISTINCT ic.repo_id) AS repo_count
+            FROM iac_components ic
+            JOIN combined_repo_metrics crm ON crm.repo_id = ic.repo_id
+            WHERE ic.subcategory = 'Application Servers'
         """
 
         if condition_string:
             base_query += f" AND {condition_string}"
 
-        base_query += " GROUP BY framework ORDER BY repo_count DESC"
+        base_query += " GROUP BY ic.framework ORDER BY repo_count DESC"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)

@@ -9,15 +9,16 @@ def fetch_iac_data(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                framework AS iac_type,
-                COUNT(DISTINCT repo_id) AS repo_count
-            FROM iac_components
+                ic.framework AS iac_type,
+                COUNT(DISTINCT ic.repo_id) AS repo_count
+            FROM iac_components ic
+            JOIN combined_repo_metrics crm ON crm.repo_id = ic.repo_id
         """
 
         if condition_string:
             base_query += f" WHERE {condition_string}"
 
-        base_query += " GROUP BY framework ORDER BY repo_count DESC LIMIT 20"
+        base_query += " GROUP BY ic.framework ORDER BY repo_count DESC LIMIT 20"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)

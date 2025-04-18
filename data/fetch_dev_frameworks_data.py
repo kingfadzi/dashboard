@@ -9,12 +9,21 @@ def fetch_dev_frameworks_data(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                COALESCE(framework, 'Unclassified') AS framework,
-                COUNT(DISTINCT repo_id) AS repo_count
-            FROM syft_dependencies
-            WHERE (sub_category IS NULL 
-                   OR sub_category NOT ILIKE ANY (ARRAY[
-                       '%utilities%', '%general%']))
+                COALESCE(sd.framework, 'Unclassified') AS framework,
+                COUNT(DISTINCT sd.repo_id) AS repo_count
+            FROM syft_dependencies sd
+            JOIN combined_repo_metrics crm ON crm.repo_id = sd.repo_id
+            WHERE (
+                sd.sub_category IS NULL
+                OR TRIM(sd.sub_category) NOT ILIKE ANY (ARRAY[
+                    '%utility%',
+                    '%utilities%',
+                    '%general%',
+                    '%general purpose%',
+                    '%helper%',
+                    '%misc%'
+                ])
+            )
         """
 
         if condition_string:

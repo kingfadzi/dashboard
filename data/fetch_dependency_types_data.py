@@ -9,12 +9,13 @@ def fetch_dependency_types_data(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                COALESCE(sub_category, 'Unclassified') AS sub_category,
-                COUNT(DISTINCT repo_id) AS repo_count
-            FROM syft_dependencies
+                COALESCE(sd.sub_category, 'Unclassified') AS sub_category,
+                COUNT(DISTINCT sd.repo_id) AS repo_count
+            FROM syft_dependencies sd
+            JOIN combined_repo_metrics crm ON crm.repo_id = sd.repo_id
             WHERE (
-                sub_category IS NULL
-                OR TRIM(sub_category) NOT ILIKE ANY (ARRAY[
+                sd.sub_category IS NULL
+                OR TRIM(sd.sub_category) NOT ILIKE ANY (ARRAY[
                     '%utility%',
                     '%utilities%',
                     '%general%',
