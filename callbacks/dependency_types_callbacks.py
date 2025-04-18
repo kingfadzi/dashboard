@@ -4,7 +4,10 @@ from viz.viz_dependency_types_chart import viz_dependency_types_chart
 
 def register_dependency_types_callbacks(app):
     @app.callback(
-        Output("dependency-types-bar-chart", "figure"),
+        [
+            Output("dependency-types-bar-chart", "figure"),
+            Output("dependency-types-card-container", "style"),
+        ],
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
@@ -22,4 +25,7 @@ def register_dependency_types_callbacks(app):
         df = fetch_dependency_types_data(filters)
         print("[DependencyTypes] Rows:", len(df))
 
-        return viz_dependency_types_chart(df)
+        figure = viz_dependency_types_chart(df)
+        style = {"display": "block"} if not df.empty else {"display": "none"}
+
+        return figure, style
