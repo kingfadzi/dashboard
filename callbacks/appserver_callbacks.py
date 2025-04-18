@@ -4,7 +4,10 @@ from viz.viz_appserver_chart import viz_appserver_chart
 
 def register_appserver_callbacks(app):
     @app.callback(
-        Output("appserver-bar-chart", "figure"),
+        [
+            Output("appserver-bar-chart", "figure"),
+            Output("appserver-card", "style")
+        ],
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
@@ -18,12 +21,11 @@ def register_appserver_callbacks(app):
             "main_language": langs
         }
 
-        print("[AppServer] Incoming filters:", filters)
-
+        print("[AppServer] Filters:", filters)
         df = fetch_appserver_data(filters)
+        print("[AppServer] Rows:", len(df))
 
-        print("[AppServer] Returned DataFrame:")
-        print(df.head(10))
-        print("[AppServer] Total rows:", len(df))
+        figure = viz_appserver_chart(df)
+        card_style = {} if not df.empty else {"display": "none"}
 
-        return viz_appserver_chart(df)
+        return figure, card_style
