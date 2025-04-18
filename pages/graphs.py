@@ -211,20 +211,46 @@ layout = dbc.Container(
             className="mb-4",
         ),
         
-        dbc.Card(
+        dbc.Row(
             [
-                dbc.CardHeader(
-                    html.B("Application Server Usage", className="text-center"),
-                    className="bg-light",
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Application Server Usage", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="appserver-bar-chart",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
+                        id="appserver-card"
+                    ),
+                    width=6,
                 ),
-                dcc.Graph(
-                    id="appserver-bar-chart",
-                    config={"displayModeBar": False},
-                    style={"height": 300},
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                html.B("Top Developer Frameworks", className="text-center"),
+                                className="bg-light",
+                            ),
+                            dcc.Graph(
+                                id="dev-frameworks-bar-chart",
+                                config={"displayModeBar": False},
+                                style={"height": 300},
+                            ),
+                        ],
+                        className="mb-4",
+                        id="dev-frameworks-card"
+                    ),
+                    width=6,
                 ),
             ],
             className="mb-4",
-            id="appserver-card"
         ),
 
 
