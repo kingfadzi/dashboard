@@ -8,15 +8,13 @@ def register_appserver_callbacks(app):
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
-            Input("tech-filter", "value"),
             Input("language-filter", "value"),
         ]
     )
-    def update_appserver_chart(hosts, activity, techs, langs):
+    def update_appserver_chart(hosts, activity, langs):
         filters = {
             "host_name": hosts,
             "activity_status": activity,
-            "tech": techs,
             "main_language": langs
         }
 
