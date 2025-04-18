@@ -9,7 +9,7 @@ from .language_contributors_callbacks import register_language_contributors_call
 from .vulnerability_callbacks import register_vulnerability_callbacks
 from .multi_language_usage_callbacks import register_multi_language_usage_callbacks
 from .last_commit_callbacks import register_last_commit_callbacks
-from .label_tech_callbacks import register_label_tech_callbacks
+#from .label_tech_callbacks import register_label_tech_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .appserver_callbacks import register_appserver_callbacks
 from .dev_frameworks_callbacks import register_dev_frameworks_callbacks
@@ -27,7 +27,7 @@ def register_all_callbacks(app):
     register_vulnerability_callbacks(app)
     register_multi_language_usage_callbacks(app)
     register_last_commit_callbacks(app)
-    register_label_tech_callbacks(app)
+    #register_label_tech_callbacks(app)
     register_kpi_callbacks(app)
     register_appserver_callbacks(app)
     register_dev_frameworks_callbacks(app)
