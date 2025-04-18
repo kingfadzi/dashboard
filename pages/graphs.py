@@ -228,20 +228,20 @@ layout = dbc.Container(
         ),
 
         dbc.Card(
-            [
-                dbc.CardHeader(
-                    html.B("Top Developer Frameworks", className="text-center"),
-                    className="bg-light",
-                ),
-                dcc.Graph(
-                    id="dev-frameworks-bar-chart",
-                    config={"displayModeBar": False},
-                    style={"height": 300},
-                ),
-            ],
-            className="mb-4",
-            id="dev-frameworks-card"
-        ),
+        [
+            dbc.CardHeader(
+                html.B("Top Developer Frameworks", className="text-center"),
+                className="bg-light",
+            ),
+            dcc.Graph(
+                id="dev-frameworks-bar-chart",
+                config={"displayModeBar": False},
+                style={"height": 300},
+            ),
+        ],
+        className="mb-4",
+        id="dev-frameworks-card"  # <- this ID is already correct
+    ),
         
       html.Div(
     id="dependency-types-card-container",

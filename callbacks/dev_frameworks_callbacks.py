@@ -4,7 +4,10 @@ from viz.viz_dev_frameworks_chart import viz_dev_frameworks_chart
 
 def register_dev_frameworks_callbacks(app):
     @app.callback(
-        Output("dev-frameworks-bar-chart", "figure"),
+        [
+            Output("dev-frameworks-bar-chart", "figure"),
+            Output("dev-frameworks-card", "style"),
+        ],
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
@@ -22,4 +25,7 @@ def register_dev_frameworks_callbacks(app):
         df = fetch_dev_frameworks_data(filters)
         print("[DevFrameworks] Rows returned:", len(df))
 
-        return viz_dev_frameworks_chart(df)
+        figure = viz_dev_frameworks_chart(df)
+        style = {"display": "block"} if not df.empty else {"display": "none"}
+
+        return figure, style
