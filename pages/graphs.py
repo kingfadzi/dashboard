@@ -260,8 +260,6 @@ layout = dbc.Container(
         ),
 
 
-        # Placeholder for the Label Tech Charts (rendered conditionally by the callback)
-        html.Div(id="label-tech-layout"),
     ],
     fluid=True,
 )
