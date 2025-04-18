@@ -1,6 +1,6 @@
 import plotly.express as px
 
-def viz_dev_frameworks_chart(df):
+def dev_frameworks_chart(df):
     if df.empty:
         return px.bar(title="No Developer Framework Data Found")
 
