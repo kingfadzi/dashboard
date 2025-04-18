@@ -11,6 +11,7 @@ from .vulnerability_callbacks import register_vulnerability_callbacks
 from .multi_language_usage_callbacks import register_multi_language_usage_callbacks
 from .last_commit_callbacks import register_last_commit_callbacks
 from .label_tech_callbacks import register_label_tech_callbacks
+from .app_servers_callback import register_appserver_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 
 def register_all_callbacks(app):
@@ -27,4 +28,5 @@ def register_all_callbacks(app):
     register_last_commit_callbacks(app)
     register_label_tech_callbacks(app)
     register_kpi_callbacks(app)
+    register_appserver_callbacks(app)
     
