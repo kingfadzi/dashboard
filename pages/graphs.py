@@ -210,6 +210,23 @@ layout = dbc.Container(
             ],
             className="mb-4",
         ),
+        
+        dbc.Card(
+            [
+                dbc.CardHeader(
+                    html.B("Application Server Usage", className="text-center"),
+                    className="bg-light",
+                ),
+                dcc.Graph(
+                    id="appserver-bar-chart",
+                    config={"displayModeBar": False},
+                    style={"height": 300},
+                ),
+            ],
+            className="mb-4",
+            id="appserver-card"
+        ),
+
 
         # Placeholder for the Label Tech Charts (rendered conditionally by the callback)
         html.Div(id="label-tech-layout"),
