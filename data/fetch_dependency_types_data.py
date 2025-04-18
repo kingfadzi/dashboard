@@ -12,10 +12,16 @@ def fetch_dependency_types_data(filters=None):
                 COALESCE(sub_category, 'Unclassified') AS sub_category,
                 COUNT(DISTINCT repo_id) AS repo_count
             FROM syft_dependencies
+            WHERE (
+                sub_category IS NULL
+                OR sub_category NOT ILIKE ANY (ARRAY[
+                    '%utilities%', '%general%'
+                ])
+            )
         """
 
         if condition_string:
-            base_query += f" WHERE {condition_string}"
+            base_query += f" AND {condition_string}"
 
         base_query += " GROUP BY sub_category ORDER BY repo_count DESC LIMIT 20"
 
