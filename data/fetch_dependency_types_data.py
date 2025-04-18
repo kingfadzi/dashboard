@@ -12,13 +12,12 @@ def fetch_dependency_types_data(filters=None):
                 COALESCE(sub_category, 'Unclassified') AS sub_category,
                 COUNT(DISTINCT repo_id) AS repo_count
             FROM syft_dependencies
-            GROUP BY sub_category
-            ORDER BY repo_count DESC
-            LIMIT 20
         """
 
         if condition_string:
-            base_query = base_query.replace("GROUP BY", f"AND {condition_string} GROUP BY")
+            base_query += f" WHERE {condition_string}"
+
+        base_query += " GROUP BY sub_category ORDER BY repo_count DESC LIMIT 20"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
