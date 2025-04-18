@@ -23,7 +23,7 @@ def register_dependency_types_callbacks(app):
 
         print("[DependencyTypes] Filters:", filters)
         df = fetch_dependency_types_data(filters)
-        print("[DependencyTypes] Rows:", len(df))
+        print("[DependencyTypes] Rows returned:", len(df))
 
         figure = viz_dependency_types_chart(df)
         style = {"display": "block"} if not df.empty else {"display": "none"}
