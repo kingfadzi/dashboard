@@ -14,8 +14,13 @@ def fetch_dependency_types_data(filters=None):
             FROM syft_dependencies
             WHERE (
                 sub_category IS NULL
-                OR sub_category NOT ILIKE ANY (ARRAY[
-                    '%utilities%', '%general%'
+                OR TRIM(sub_category) NOT ILIKE ANY (ARRAY[
+                    '%utility%',
+                    '%utilities%',
+                    '%general%',
+                    '%general purpose%',
+                    '%helper%',
+                    '%misc%'
                 ])
             )
         """
