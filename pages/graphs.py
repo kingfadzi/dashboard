@@ -243,6 +243,9 @@ layout = dbc.Container(
             id="dev-frameworks-card"
         ),
         
+      html.Div(
+    id="dependency-types-card-container",
+    children=[
         dbc.Card(
             [
                 dbc.CardHeader(
@@ -257,8 +260,9 @@ layout = dbc.Container(
             ],
             className="mb-4",
             id="dependency-types-card"
-        ),
-
+        )
+    ]
+),
 
     ],
     fluid=True,
