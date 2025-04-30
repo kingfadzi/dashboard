@@ -55,7 +55,7 @@ df = pd.DataFrame([{
     "business_owner_brid": "brid456"
 } for i in range(row_count)])
 
-# Logical column groups
+# Logical column groups (excluding repo_id which will always be prepended)
 column_groups = {
     "Code Metrics": [
         "source_code_file_count", "total_blank", "total_comment", "total_lines_of_code"
@@ -68,7 +68,7 @@ column_groups = {
         "cat_correctness", "cat_maintainability", "cat_performance", "cat_portability", "cat_security"
     ],
     "Repository Info": [
-        "repo_id", "main_language", "all_languages", "classification_label", "app_id",
+        "main_language", "all_languages", "classification_label", "app_id",
         "repo_size_bytes", "component_id", "component_name", "web_url", "transaction_cycle"
     ],
     "App Metadata": [
@@ -107,7 +107,7 @@ app.layout = html.Div([
     Input("column-group-tabs", "value")
 )
 def update_columns(tab_name):
-    cols = column_groups[tab_name]
+    cols = ["repo_id"] + column_groups[tab_name]
     return [{"name": c, "id": c} for c in cols], df[cols].to_dict("records")
 
 
