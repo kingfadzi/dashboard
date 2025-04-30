@@ -42,4 +42,4 @@ def update_columns(tab_name):
     return [{"name": c, "id": c} for c in cols], df[cols].to_dict("records")
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
