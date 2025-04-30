@@ -1,5 +1,8 @@
 import pandas as pd
-from dash import Dash, dcc, html, dash_table, Input, Output
+from dash import Dash, dcc, html, dash_table, Input, Output, State
+from dash.exceptions import PreventUpdate
+import io
+import base64
 
 # Simulate data
 row_count = 20
@@ -55,7 +58,7 @@ df = pd.DataFrame([{
     "business_owner_brid": "brid456"
 } for i in range(row_count)])
 
-# Logical column groups (excluding repo_id which will always be prepended)
+# Logical column groups
 column_groups = {
     "Code Metrics": [
         "source_code_file_count", "total_blank", "total_comment", "total_lines_of_code"
@@ -82,7 +85,7 @@ column_groups = {
 }
 
 app = Dash(__name__)
-app.title = "Wide Table Viewer"
+app.title = "Repository Catalog Viewer"
 
 app.layout = html.Div([
     html.H3("Repository Catalog Viewer"),
@@ -91,6 +94,8 @@ app.layout = html.Div([
         value="Code Metrics",
         children=[dcc.Tab(label=group, value=group) for group in column_groups]
     ),
+    html.Button("Export CSV", id="export-btn", n_clicks=0),
+    dcc.Download(id="download-csv"),
     dash_table.DataTable(
         id="wide-table",
         data=[],
@@ -110,6 +115,20 @@ def update_columns(tab_name):
     cols = ["repo_id"] + column_groups[tab_name]
     return [{"name": c, "id": c} for c in cols], df[cols].to_dict("records")
 
+@app.callback(
+    Output("download-csv", "data"),
+    Input("export-btn", "n_clicks"),
+    State("column-group-tabs", "value"),
+    prevent_initial_call=True
+)
+def export_csv(n_clicks, tab_name):
+    cols = ["repo_id"] + column_groups[tab_name]
+    export_df = df[cols]
+    csv_buffer = io.StringIO()
+    export_df.to_csv(csv_buffer, index=False)
+    csv_bytes = csv_buffer.getvalue().encode()
+    b64 = base64.b64encode(csv_bytes).decode()
+    return dict(content=csv_buffer.getvalue(), filename=f"{tab_name.lower().replace(' ', '_')}.csv")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
