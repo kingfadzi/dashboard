@@ -9,18 +9,19 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
     def query_data(condition_string, param_dict, page_current, page_size):
         base_query = """
             SELECT
-                repo_id,
-                web_url,
-                tc,
-                app_id,
-                main_language,
-                total_commits,
-                number_of_contributors,
-                last_commit_date
-            FROM combined_repo_metrics
+                hr.repo_id,
+                hr.browse_url,
+                hr.transaction_cycle,
+                hr.app_id,
+                hr.main_language,
+                rm.total_commits,
+                rm.number_of_contributors,
+                rm.last_commit_date
+            FROM harvested_repositories hr
+            LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
         """
 
-        count_query = "SELECT COUNT(*) FROM combined_repo_metrics"
+        count_query = "SELECT COUNT(*) FROM harvested_repositories hr"
 
         if condition_string:
             base_query += f" WHERE {condition_string}"
@@ -28,8 +29,8 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
 
         base_query += """
             ORDER BY 
-                last_commit_date DESC NULLS LAST,
-                number_of_contributors DESC
+                rm.last_commit_date DESC NULLS LAST,
+                rm.number_of_contributors DESC
             LIMIT :limit
             OFFSET :offset
         """

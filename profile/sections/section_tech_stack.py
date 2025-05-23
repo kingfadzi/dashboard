@@ -2,27 +2,51 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import profile.helpers as helpers
 
+
 def render(profile_data):
-    build_tool = profile_data.get('Build Tool', '-')
-    runtime_version = profile_data.get('Runtime Version', '-')
-    frameworks = profile_data.get('Frameworks', [])
-    iac_frameworks = profile_data.get('IaC Frameworks', [])
+    build_envs = profile_data.get("Build Environment", [])
+    frameworks = profile_data.get("Frameworks", [])
+    iac_frameworks = profile_data.get("IaC Frameworks", [])
+
+    # === Build Tool Table Rows ===
+    build_tool_rows = []
+    if build_envs:
+        header = html.Thead(html.Tr([
+            html.Th("Build Tool"),
+            html.Th("Variant"),
+            html.Th("Tool Version"),
+            html.Th("Runtime Version")
+        ]))
+
+        body = html.Tbody([
+            html.Tr([
+                html.Td(env.get("Build Tool", "-")),
+                html.Td(env.get("Variant", "-")),
+                html.Td(env.get("Tool Version", "-")),
+                html.Td(env.get("Runtime Version", "-")),
+            ])
+            for env in build_envs
+        ])
+
+        build_tool_table = dbc.Table([header, body], bordered=True, hover=True, size="sm", responsive=True)
+    else:
+        build_tool_table = html.Small("No build environments detected.", className="text-muted")
 
     return dbc.Card(
         dbc.CardBody([
             html.H4('Technology Stack', className='card-title mb-4'),
 
-            # Build Tool and Runtime Version
-            dbc.Row([
-                dbc.Col(html.Small('Build Tool:', className='text-muted'), width="auto"),
-                dbc.Col(html.Span(build_tool, style={
-                    "fontWeight": "bold", "fontSize": "0.9rem"
-                }), width="auto"),
-                dbc.Col(html.Small('Runtime Version:', className='text-muted ms-4'), width="auto"),
-                dbc.Col(html.Span(runtime_version, style={
-                    "fontWeight": "bold", "fontSize": "0.9rem"
-                }), width="auto"),
-            ], align="center", className="mb-4"),
+            # === Build Tools & Runtimes Table ===
+            html.Div([
+                html.Small("Build Tools & Runtimes", className="text-muted d-block mb-2"),
+                build_tool_table
+            ], style={
+                "marginBottom": "2rem",
+                "padding": "1rem",
+                "borderLeft": "4px solid #5dade2",
+                "backgroundColor": "#f8f9fa",
+                "borderRadius": "6px"
+            }),
 
             # === STACKED TECH LAYERS ===
             html.Div([
