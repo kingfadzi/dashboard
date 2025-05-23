@@ -26,7 +26,7 @@ def fetch_heatmap_data(filters=None):
                     WHEN number_of_contributors BETWEEN 21 AND 50 THEN '21-50'
                     ELSE '51+'
                 END AS contributor_bucket
-            FROM combined_repo_metrics
+            FROM repo_metrics
         """
         if condition_string:
             base_query += f" WHERE {condition_string}"
