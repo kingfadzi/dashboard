@@ -1,4 +1,4 @@
-def build_filter_conditions(filters, alias=None):
+def build_filter_conditions(filters, alias=None, field_alias_map=None):
     if not filters:
         return None, {}
 
@@ -11,12 +11,19 @@ def build_filter_conditions(filters, alias=None):
         if not values:
             continue
 
-        col = f"{alias}.{field}" if alias else field
+        # Dynamically assign table alias per field
+        if field_alias_map and field in field_alias_map:
+            col = f"{field_alias_map[field]}.{field}"
+        elif alias:
+            col = f"{alias}.{field}"
+        else:
+            col = field
+
         values = values if isinstance(values, list) else [values]
 
         if field == "app_id":
             or_clauses = []
-            repo_slug_col = f"{alias}.repo_slug" if alias else "repo_slug"
+            repo_slug_col = f"{field_alias_map.get('repo_slug', alias)}.repo_slug" if field_alias_map else "repo_slug"
             for val in values:
                 placeholder = f"p{placeholder_counter}"
                 placeholder_counter += 1

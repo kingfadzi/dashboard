@@ -4,6 +4,32 @@ from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 
+
+def format_repo_age(days: int) -> str:
+    if pd.isna(days):
+        return "Unknown"
+    days = int(days)
+    if days < 30:
+        return f"{days} days"
+    elif days < 365:
+        weeks = days // 7
+        return f"{weeks} weeks"
+    else:
+        years = days / 365
+        return f"{years:.1f} years"
+
+
+def build_count_query(base_table: str, joins: dict, filters: dict, field_alias_map: dict) -> str:
+    query = f"SELECT COUNT(*) FROM {base_table}"
+    required_joins = {
+        alias: join_sql for alias, join_sql in joins.items()
+        if any(field_alias_map.get(f) == alias for f in filters or {})
+    }
+    for join_sql in required_joins.values():
+        query += f" {join_sql}"
+    return query
+
+
 def fetch_table_data(filters=None, page_current=0, page_size=10):
     @cache.memoize()
     def query_data(condition_string, param_dict, page_current, page_size):
@@ -13,15 +39,42 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
                 hr.browse_url,
                 hr.transaction_cycle,
                 hr.app_id,
-                hr.main_language,
+                hr.scope,
+                hr.all_languages,
+                hr.classification_label,
                 rm.total_commits,
+                rm.activity_status,
+                rm.repo_age_days,
                 rm.number_of_contributors,
                 rm.last_commit_date
             FROM harvested_repositories hr
             LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
         """
 
-        count_query = "SELECT COUNT(*) FROM harvested_repositories hr"
+        # Use helper to conditionally build count query
+        field_alias_map = {
+            "activity_status": "rm",
+            "total_commits": "rm",
+            "repo_age_days": "rm",
+            "number_of_contributors": "rm",
+            "last_commit_date": "rm",
+            "transaction_cycle": "hr",
+            "app_id": "hr",
+            "all_languages": "hr",
+            "classification_label": "hr",
+            "name": "hr",
+            "scope": "hr",
+            "repo_slug": "hr"
+        }
+
+        count_query = build_count_query(
+            base_table="harvested_repositories hr",
+            joins={"rm": "LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id"},
+            filters=filters,
+            field_alias_map=field_alias_map
+        )
+
+        condition_string, param_dict = build_filter_conditions(filters, field_alias_map=field_alias_map)
 
         if condition_string:
             base_query += f" WHERE {condition_string}"
@@ -41,11 +94,9 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
             "offset": page_current * page_size
         })
 
-        # Execute paginated data query
         stmt = text(base_query)
         df = pd.read_sql(stmt, engine, params=param_dict)
 
-        # Execute count query
         count_stmt = text(count_query)
         total_count = pd.read_sql(count_stmt, engine, params=param_dict).iloc[0, 0]
 
@@ -62,7 +113,21 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
                 lambda repo_id: f"<a href='/repo?repo_id={repo_id}' style='text-decoration: none; color: #007bff;'>{repo_id}</a>"
             )
 
+        if "repo_age_days" in df.columns:
+            df["repo_age_days"] = df["repo_age_days"].apply(format_repo_age)
+
         return df, total_count
 
-    condition_string, param_dict = build_filter_conditions(filters)
-    return query_data(condition_string, param_dict, page_current, page_size)
+    return query_data(*build_filter_conditions(filters, field_alias_map={
+        "activity_status": "rm",
+        "total_commits": "rm",
+        "repo_age_days": "rm",
+        "number_of_contributors": "rm",
+        "last_commit_date": "rm",
+        "transaction_cycle": "hr",
+        "app_id": "hr",
+        "all_languages": "hr",
+        "classification_label": "hr",
+        "name": "hr",
+        "repo_slug": "hr"
+    }), page_current=page_current, page_size=page_size)

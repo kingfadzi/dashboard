@@ -1,5 +1,4 @@
-# filter_callbacks.py
-from dash import Input, Output, State
+from dash import Input, Output
 from data.fetch_dropdown_options import fetch_dropdown_options
 
 def register_filter_callbacks(app):
@@ -22,12 +21,3 @@ def register_filter_callbacks(app):
             [{"label": lang, "value": lang} for lang in options["languages"]],
             [{"label": label, "value": label} for label in options["classification_labels"]],
         )
-    
-    @app.callback(
-        Output("filter-panel", "is_open"),
-        Input("filter-toggle-btn", "n_clicks"),
-        State("filter-panel", "is_open"),
-        prevent_initial_call=True,
-    )
-    def toggle_filters(n_clicks, is_open):
-        return not is_open
