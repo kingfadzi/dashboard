@@ -65,13 +65,14 @@ navbar = dbc.Navbar(
                 className="d-flex align-items-center justify-content-center",
             ),
 
-            # View toggle
+            # View toggle buttons
             dbc.Col(
                 dbc.ButtonGroup(
                     [
-                        dbc.Button("Graph", id="global-toggle-graph", color="light"),
-                        dbc.Button("Table", id="global-toggle-table", color="light"),
+                        dbc.Button("Graph", id="global-toggle-graph", n_clicks=0),
+                        dbc.Button("Table", id="global-toggle-table", n_clicks=0),
                     ],
+                    id="view-toggle-group",
                     size="sm",
                     className="d-flex"
                 ),
@@ -88,21 +89,23 @@ navbar = dbc.Navbar(
     style={"background": "linear-gradient(145deg, #0d6efd, #0b5ed7)"}
 )
 
-# Layout
+# App layout
 app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
         dcc.Store(id="view-mode", data="graph"),  # Global view mode store
         navbar,
-        html.Div(filter_layout(), className="my-2 px-2"),  # Filter row at the top
+        html.Div(filter_layout(), className="my-2 px-2"),  # Filters at the top
         html.Div(dash.page_container, className="px-4 pb-4"),
     ],
     fluid=True,
 )
 
-# Global view mode toggle callback
+# View toggle callback with color highlighting
 @app.callback(
     Output("view-mode", "data"),
+    Output("global-toggle-graph", "color"),
+    Output("global-toggle-table", "color"),
     Input("global-toggle-graph", "n_clicks"),
     Input("global-toggle-table", "n_clicks"),
     State("view-mode", "data"),
@@ -110,9 +113,13 @@ app.layout = dbc.Container(
 def update_view_mode(n_graph, n_table, current):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return current
-    triggered = ctx.triggered[0]["prop_id"].split(".")[0]
-    return "graph" if "graph" in triggered else "table"
+        return current, "primary", "outline-success" if current == "graph" else ("outline-primary", "success")
+
+    triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if "graph" in triggered_id:
+        return "graph", "primary", "outline-success"
+    else:
+        return "table", "outline-primary", "success"
 
 # Register callbacks
 register_all_callbacks(app)
