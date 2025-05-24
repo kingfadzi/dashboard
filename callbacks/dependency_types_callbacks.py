@@ -5,7 +5,7 @@ from viz.viz_dependency_types_chart import viz_package_type_distribution_chart
 def register_package_type_callbacks(app):
     @app.callback(
         [
-            Output("package-type-pie-chart", "figure"),
+            Output("package-type-bar-chart", "figure"),
             Output("package-type-card-container", "style"),
         ],
         [

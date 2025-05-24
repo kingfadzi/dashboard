@@ -254,7 +254,7 @@ layout = dbc.Container(
                     className="bg-light",
                 ),
                 dcc.Graph(
-                    id="package-type-pie-chart",
+                    id="package-type-bar-chart",
                     config={"displayModeBar": False},
                     style={"height": 300},
                 ),
