@@ -1,22 +1,23 @@
 import plotly.express as px
 
-def viz_dependency_types_chart(df):
+def viz_package_type_distribution_chart(df):
     if df.empty:
-        return px.bar(title="No Dependency Type Data Found")
+        return px.pie(names=[], values=[], title="No Package Type Data Found")
 
-    df["sub_category"] = df["sub_category"].fillna("Unclassified").replace("", "Unclassified")
+    df["package_type"] = df["package_type"].fillna("Unknown").replace("", "Unknown")
 
-    return px.bar(
+    return px.pie(
         df,
-        x="sub_category",
-        y="repo_count",
-        labels={"sub_category": "Dependency Type", "repo_count": "Repository Count"},
-        color="sub_category"
+        names="package_type",
+        values="package_count",
+        title="Package Type Distribution (Syft Dependencies)",
+        hole=0.3  # donut chart style
+    ).update_traces(
+        textposition="inside",
+        textinfo="percent+label"
     ).update_layout(
-        xaxis=dict(categoryorder="total descending"),
         template="plotly_white",
-        title={"text": "Top Dependency Types", "x": 0.5},
-        xaxis_title=None,
-        dragmode=False,
-        showlegend=False
+        title={"x": 0.5},
+        showlegend=True,
+        dragmode=False
     )

@@ -242,28 +242,29 @@ layout = dbc.Container(
     className="mb-4",
     id="dev-frameworks-card"  # <- this ID is already correct
 ),
-        
-      html.Div(
-    id="dependency-types-card-container",
+      
+      
+    html.Div(
+    id="package-type-card-container",
     children=[
         dbc.Card(
             [
                 dbc.CardHeader(
-                    html.B("Top Dependency Types", className="text-center"),
+                    html.B("Package Type Distribution", className="text-center"),
                     className="bg-light",
                 ),
                 dcc.Graph(
-                    id="dependency-types-bar-chart",
+                    id="package-type-pie-chart",
                     config={"displayModeBar": False},
                     style={"height": 300},
                 ),
             ],
             className="mb-4",
-            id="dependency-types-card"
+            id="package-type-card"
         )
     ]
-),
-
+),  
+    
     ],
     fluid=True,
 )
