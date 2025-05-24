@@ -1,4 +1,4 @@
- from dash import Input, Output
+from dash import Input, Output
 from data.fetch_package_type_distribution import fetch_package_type_distribution
 from viz.viz_package_type_distribution_chart import viz_package_type_distribution_chart
 
