@@ -1,5 +1,5 @@
 from dash import Input, Output
-from data.fetch_package_type_distribution import fetch_package_type_distribution
+from data.fetch_dependency_types_data import fetch_package_type_distribution
 from viz.viz_dependency_types_chart import viz_package_type_distribution_chart
 
 def register_package_type_callbacks(app):
