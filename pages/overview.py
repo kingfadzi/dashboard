@@ -34,8 +34,16 @@ def render_overview(view_mode, page_current, page_size,
         "app_id": app_id_input.strip() if app_id_input else None,
     }
 
+    debug_block = html.Pre([
+        f"[DEBUG] View mode: {view_mode}\n",
+        f"[DEBUG] Page: {page_current}, Size: {page_size}\n",
+        f"[DEBUG] Filters: {filters}\n"
+    ], style={"backgroundColor": "#f8f9fa", "padding": "10px", "fontSize": "12px"})
+
     if view_mode == "graph":
-        return chart_layout(filters)
+        return html.Div([debug_block, chart_layout(filters)])
 
     df, total_count = fetch_table_data(filters=filters, page_current=page_current or 0, page_size=page_size or 10)
-    return table_layout(viz_table_data(df), total_count, page_current or 0, page_size or 10)
+    table = table_layout(viz_table_data(df), total_count, page_current or 0, page_size or 10)
+
+    return html.Div([debug_block, table])
