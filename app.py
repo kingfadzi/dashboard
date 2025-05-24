@@ -113,7 +113,10 @@ app.layout = dbc.Container(
 def update_view_mode(n_graph, n_table, current):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return current, ("light", "outline-light") if current == "graph" else ("outline-light", "light")
+        if current == "graph":
+            return current, "light", "outline-light"
+        else:
+            return current, "outline-light", "light"
 
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
     if triggered_id == "global-toggle-graph":
