@@ -7,6 +7,7 @@ import dash
 from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
 import callbacks.repo_profile_callback
+from dash import Dash, dcc, html, Input, Output, State
 
 # Initialize Dash app
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
