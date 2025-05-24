@@ -11,7 +11,7 @@ dash.register_page(__name__, path="/")
 
 layout = dbc.Container(
     [
-        filter_layout(),
+        #filter_layout(),
         # KPI Cards layout
         kpi_layout(),
 
