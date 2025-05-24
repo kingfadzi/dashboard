@@ -7,7 +7,38 @@ dash.register_page(__name__, path="/table")
 
 layout = dbc.Container(
     [
-        filter_layout(),
+
+        dcc.Location(id="url", refresh=False),
+
+        # Compact header row with inline switch link
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div("Filters", className="text-muted small fw-bold mb-0"),
+                    width="auto",
+                ),
+                dbc.Col(
+                    html.A(
+                        id="switch-to-graphs-link",
+                        children="Switch to Graphs View",
+                        href="/graphs",  # Will be overridden by callback
+                        className="text-primary small fw-normal text-decoration-none",
+                        target="_self",
+                    ),
+                    width="auto",
+                    className="text-end",
+                ),
+            ],
+            justify="between",
+            className="align-items-center g-0",
+            style={"margin": "0px", "padding": "0px"},
+        ),
+
+        # Filter layout (no top spacing)
+        html.Div(
+            filter_layout(),
+            style={"marginTop": "0px", "paddingTop": "0px"},
+        ),
 
         dbc.Card(
             [
@@ -35,8 +66,6 @@ layout = dbc.Container(
                         page_action="custom",
                         page_current=0,
                         page_size=10,
-                        #sort_action="native",
-                        #filter_action="custom",
                         tooltip_duration=None,
                         tooltip_data=[],
                         style_table={"overflowX": "auto"},
@@ -70,4 +99,5 @@ layout = dbc.Container(
         ),
     ],
     fluid=True,
+    style={"marginTop": "0px", "paddingTop": "0px"},
 )
