@@ -13,7 +13,7 @@ from .last_commit_callbacks import register_last_commit_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .appserver_callbacks import register_appserver_callbacks
 from .dev_frameworks_callbacks import register_dev_frameworks_callbacks
-from .dependency_types_callbacks import register_dependency_types_callbacks
+from .dependency_types_callbacks import register_package_type_callbacks
 
 def register_all_callbacks(app):
     register_filter_callbacks(app)
