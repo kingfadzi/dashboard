@@ -5,3 +5,17 @@
     text-overflow: ellipsis !important;
     max-width: 250px !important;
 }
+/* Custom hover effects */
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Active state enhancement */
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
