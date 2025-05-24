@@ -31,4 +31,4 @@ def register_all_callbacks(app):
     register_kpi_callbacks(app)
     register_appserver_callbacks(app)
     register_dev_frameworks_callbacks(app)
-    register_dependency_types_callbacks(app)
+    register_package_type_callbacks(app)
