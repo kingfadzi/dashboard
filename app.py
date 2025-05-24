@@ -69,8 +69,8 @@ navbar = dbc.Navbar(
             dbc.Col(
                 dbc.ButtonGroup(
                     [
-                        dbc.Button("Graph", id="global-toggle-graph", n_clicks=0),
-                        dbc.Button("Table", id="global-toggle-table", n_clicks=0),
+                        dbc.Button("Graph", id="global-toggle-graph", n_clicks=0, color="light"),
+                        dbc.Button("Table", id="global-toggle-table", n_clicks=0, color="outline-light"),
                     ],
                     id="view-toggle-group",
                     size="sm",
@@ -101,7 +101,7 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
-# View toggle callback with color highlighting
+# View toggle callback with neutral styling
 @app.callback(
     Output("view-mode", "data"),
     Output("global-toggle-graph", "color"),
@@ -113,13 +113,13 @@ app.layout = dbc.Container(
 def update_view_mode(n_graph, n_table, current):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return current, "primary", "outline-success" if current == "graph" else ("outline-primary", "success")
+        return current, ("light", "outline-light") if current == "graph" else ("outline-light", "light")
 
     triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
-    if "graph" in triggered_id:
-        return "graph", "primary", "outline-success"
+    if triggered_id == "global-toggle-graph":
+        return "graph", "light", "outline-light"
     else:
-        return "table", "outline-primary", "success"
+        return "table", "outline-light", "light"
 
 # Register callbacks
 register_all_callbacks(app)
