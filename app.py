@@ -19,20 +19,93 @@ pio.templates.default = "plotly_white"
 cache.init_app(server)
 
 # Navbar using clean Bootstrap tabs
-navbar = dbc.NavbarSimple(
-    brand="Tech Debt Dashboard",
-    brand_href="/",
+# Enhanced Navbar with icons, hover effects, and modern styling
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            # Brand with icon
+            dbc.NavbarBrand(
+                html.Span(
+                    [
+                        html.I(className="bi bi-speedometer2 me-2"),  # Dashboard icon
+                        "Tech Debt Dashboard",
+                    ],
+                    className="d-flex align-items-center"
+                ),
+                href="/",
+                className="fs-4 fw-bold text-white pe-5"
+            ),
+            
+            # Navigation items with icons and pills
+            dbc.Nav(
+                [
+                    dbc.NavLink(
+                        [
+                            html.I(className="bi bi-eye me-2"),  # Icon
+                            "Overview"
+                        ],
+                        href="/",
+                        active="exact",
+                        className="rounded-pill px-3 mx-1 transition-all"
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(className="bi bi-bar-chart-line me-2"),
+                            "Code Insights"
+                        ],
+                        href="/code-insights",
+                        active="exact",
+                        className="rounded-pill px-3 mx-1 transition-all"
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(className="bi bi-gear-wide-connected me-2"),
+                            "Build Info"
+                        ],
+                        href="/build-info",
+                        active="exact",
+                        className="rounded-pill px-3 mx-1 transition-all"
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(className="bi bi-diagram-3 me-2"),
+                            "Dependencies"
+                        ],
+                        href="/dependencies",
+                        active="exact",
+                        className="rounded-pill px-3 mx-1 transition-all"
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(className="bi bi-shield-exclamation me-2"),
+                            "Vulnerabilities"
+                        ],
+                        href="/vulnerabilities",
+                        active="exact",
+                        className="rounded-pill px-3 mx-1 transition-all"
+                    ),
+                ],
+                navbar=True,
+                className="mx-auto"  # Center align nav items
+            ),
+            
+            # Settings button aligned to right
+            dbc.Button(
+                html.I(className="bi bi-funnel"),
+                color="light",
+                className="rounded-pill px-3",
+                id="filter-button",
+            )
+        ],
+        fluid=True,
+    ),
     color="primary",
     dark=True,
-    className="mb-4 shadow-sm",
-    children=[
-        dbc.NavItem(dbc.NavLink("Overview", href="/", active="exact")),
-        dbc.NavItem(dbc.NavLink("Code Insights", href="/code-insights", active="exact")),
-        dbc.NavItem(dbc.NavLink("Build Info", href="/build-info", active="exact")),
-        dbc.NavItem(dbc.NavLink("Dependencies", href="/dependencies", active="exact")),
-        dbc.NavItem(dbc.NavLink("Vulnerabilities", href="/vulnerabilities", active="exact")),
-    ]
+    sticky="top",
+    className="shadow gradient-bg",
+    style={"background": "linear-gradient(145deg, #0d6efd, #0b5ed7)"}
 )
+
 
 # Layout
 app.layout = dbc.Container(
