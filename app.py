@@ -9,7 +9,13 @@ from callbacks.table_callbacks import register_table_callbacks
 import callbacks.repo_profile_callback  # ensures side-effect callbacks load
 
 # Initialize Dash app
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(
+    __name__,
+    use_pages=True,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    suppress_callback_exceptions=True
+)
+
 server = app.server
 
 # Set Plotly theme
