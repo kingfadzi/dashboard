@@ -9,19 +9,20 @@ def fetch_cloc_by_language(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                main_language,
-                SUM(total_blank) AS blank_lines,
-                SUM(total_comment) AS comment_lines,
-                SUM(total_lines_of_code) AS total_lines_of_code,
-                SUM(source_code_file_count) AS source_code_file_count
-            FROM combined_repo_metrics
-            WHERE main_language != 'SUM'
+                language AS main_language,
+                SUM(blank) AS blank_lines,
+                SUM(comment) AS comment_lines,
+                SUM(code) AS total_lines_of_code,
+                COUNT(*) AS source_code_file_count
+            FROM cloc_metrics
+            WHERE language IS NOT NULL AND language != 'SUM'
         """
+
         if condition_string:
-            base_query += f" AND {condition_string}"
+            base_query += f" AND repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
 
         base_query += """
-            GROUP BY main_language
+            GROUP BY language
             ORDER BY total_lines_of_code DESC
             LIMIT 20
         """
@@ -32,9 +33,7 @@ def fetch_cloc_by_language(filters=None):
         numeric_columns = ["blank_lines", "comment_lines", "total_lines_of_code", "source_code_file_count"]
         for column in numeric_columns:
             if column in df.columns:
-                df[column] = df[column].apply(
-                    lambda x: int(x) if pd.notnull(x) else None
-                )
+                df[column] = df[column].apply(lambda x: int(x) if pd.notnull(x) else None)
 
         return df
 

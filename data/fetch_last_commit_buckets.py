@@ -21,7 +21,7 @@ def fetch_last_commit_buckets(filters=None):
                     ELSE '24+ months'
                 END AS commit_bucket,
                 COUNT(DISTINCT repo_id) AS repo_count
-            FROM combined_repo_metrics
+            FROM repo_metrics
         """
         if condition_string:
             sql += f" WHERE {condition_string}"

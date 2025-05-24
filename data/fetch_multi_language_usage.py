@@ -8,6 +8,14 @@ def fetch_multi_language_usage(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = """
+        WITH language_counts AS (
+            SELECT
+                repo_id,
+                COUNT(DISTINCT language) AS language_count
+            FROM go_enry_analysis
+            WHERE percent_usage > 0
+            GROUP BY repo_id
+        )
         SELECT
             CASE
                 WHEN language_count = 1 THEN '1'
@@ -15,11 +23,12 @@ def fetch_multi_language_usage(filters=None):
                 WHEN language_count BETWEEN 6 AND 10 THEN '6-10'
                 ELSE '10+'
             END AS language_bucket,
-            COUNT(DISTINCT repo_id) AS repo_count
-        FROM combined_repo_metrics
+            COUNT(*) AS repo_count
+        FROM language_counts
         """
         if condition_string:
-            sql += f" WHERE {condition_string}"
+            sql += f" WHERE repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
+
         sql += """
         GROUP BY language_bucket
         ORDER BY repo_count DESC

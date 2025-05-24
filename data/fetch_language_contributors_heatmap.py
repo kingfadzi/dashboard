@@ -12,7 +12,7 @@ def fetch_language_contributors_heatmap(filters=None):
                 SELECT 
                     cm.main_language,
                     COUNT(DISTINCT cm.repo_id) AS total_repos
-                FROM combined_repo_metrics cm
+                FROM harvested_repositories cm
                 WHERE cm.main_language != 'SUM'
                 GROUP BY cm.main_language
                 ORDER BY total_repos DESC
@@ -31,7 +31,7 @@ def fetch_language_contributors_heatmap(filters=None):
                     ELSE '500+'
                 END AS contributor_bucket,
                 COUNT(DISTINCT cm.repo_id) AS repo_count
-            FROM combined_repo_metrics cm
+            FROM harvested_repositories cm
             INNER JOIN top_languages tl ON cm.main_language = tl.main_language
         """
 

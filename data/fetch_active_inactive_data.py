@@ -12,7 +12,7 @@ def fetch_active_inactive_data(filters=None):
             activity_status,
             host_name,
             COUNT(*) AS repo_count
-        FROM combined_repo_metrics 
+        FROM harvested_repositories 
         """
         if condition_string:
             sql += f" WHERE {condition_string}"

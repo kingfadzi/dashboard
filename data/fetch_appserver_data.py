@@ -12,7 +12,7 @@ def fetch_appserver_data(filters=None):
                 ic.framework AS iac_type,
                 COUNT(DISTINCT ic.repo_id) AS repo_count
             FROM iac_components ic
-            JOIN combined_repo_metrics crm ON crm.repo_id = ic.repo_id
+            JOIN harvested_repositories crm ON crm.repo_id = ic.repo_id
             WHERE ic.subcategory = 'Application Servers'
         """
 
