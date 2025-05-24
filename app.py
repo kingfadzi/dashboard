@@ -1,16 +1,13 @@
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
 import plotly.io as pio
-from data.cache_instance import cache  # No need for CACHE_AVAILABLE
+from data.cache_instance import cache
 from layouts.layout_filters import filter_layout
 import dash
 from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
 import callbacks.repo_profile_callback
-from dash import dcc, html
-import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-
 
 # Initialize Dash app
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -19,22 +16,20 @@ server = app.server
 # Set Plotly theme
 pio.templates.default = "plotly_white"
 
-# Initialize caching (handled inside cache_instance.py)
+# Initialize caching
 cache.init_app(server)
 
-# Navbar setup
-
+# Updated Navbar
 navbar = dbc.Navbar(
     dbc.Container([
-        dcc.Link("Dashboard", href="/", className="navbar-brand text-white fw-bold"),
+        dcc.Link("Tech Debt Dashboard", href="/", className="navbar-brand text-white fw-bold"),
 
         dbc.Nav([
-            dbc.NavItem(
-                dcc.Link("Graphs", href="/", className="nav-link", id="nav-link-graphs")
-            ),
-            dbc.NavItem(
-                dcc.Link("Table", href="/table", className="nav-link", id="nav-link-table")
-            ),
+            dbc.NavItem(dcc.Link("Overview", href="/", className="nav-link", id="nav-link-overview")),
+            dbc.NavItem(dcc.Link("Code Insights", href="/code-insights", className="nav-link", id="nav-link-code")),
+            dbc.NavItem(dcc.Link("Build Info", href="/build-info", className="nav-link", id="nav-link-build")),
+            dbc.NavItem(dcc.Link("Dependencies", href="/dependencies", className="nav-link", id="nav-link-deps")),
+            dbc.NavItem(dcc.Link("Vulnerabilities", href="/vulnerabilities", className="nav-link", id="nav-link-vuln")),
         ], className="ms-auto", pills=True),
     ]),
     color="primary",
@@ -42,8 +37,7 @@ navbar = dbc.Navbar(
     className="mb-4 shadow-sm"
 )
 
-
-# Define app layout
+# App layout
 app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
@@ -61,19 +55,26 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+# Active tab highlighting
 @app.callback(
-    Output("nav-link-graphs", "className"),
-    Output("nav-link-table", "className"),
+    Output("nav-link-overview", "className"),
+    Output("nav-link-code", "className"),
+    Output("nav-link-build", "className"),
+    Output("nav-link-deps", "className"),
+    Output("nav-link-vuln", "className"),
     Input("url", "pathname"),
 )
 def highlight_active_tab(pathname):
+    def active(link): return "nav-link active" if pathname == link else "nav-link"
     return (
-        "nav-link active" if pathname == "/" else "nav-link",
-        "nav-link active" if pathname == "/table" else "nav-link",
+        active("/"),
+        active("/code-insights"),
+        active("/build-info"),
+        active("/dependencies"),
+        active("/vulnerabilities"),
     )
 
-
-# Register all callbacks
+# Register callbacks
 register_all_callbacks(app)
 register_table_callbacks(app)
 
