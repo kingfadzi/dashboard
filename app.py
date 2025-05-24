@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html
+from dash import Dash, dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.io as pio
 from data.cache_instance import cache
@@ -6,8 +6,7 @@ from layouts.layout_filters import filter_layout
 import dash
 from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
-import callbacks.repo_profile_callback
-from dash import Dash, dcc, html, Input, Output, State
+import callbacks.repo_profile_callback  # ensures side-effect callbacks load
 
 # Initialize Dash app
 app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -19,7 +18,7 @@ pio.templates.default = "plotly_white"
 # Initialize caching
 cache.init_app(server)
 
-# Navbar with graph/table toggle instead of filter button
+# Navbar with graph/table toggle
 navbar = dbc.Navbar(
     dbc.Container(
         dbc.Row([
@@ -66,7 +65,7 @@ navbar = dbc.Navbar(
                 className="d-flex align-items-center justify-content-center",
             ),
 
-            # View mode toggle (graph/table)
+            # View toggle
             dbc.Col(
                 dbc.ButtonGroup(
                     [
@@ -93,22 +92,15 @@ navbar = dbc.Navbar(
 app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
-        dcc.Store(id="view-mode", data="graph"),  # Global toggle store
+        dcc.Store(id="view-mode", data="graph"),  # Global view mode store
         navbar,
-        dbc.Offcanvas(
-            filter_layout(),
-            id="filter-panel",
-            title="Filters",
-            is_open=True,
-            placement="start",
-            backdrop=True,
-        ),
+        html.Div(filter_layout(), className="my-2 px-2"),  # Filter row at the top
         html.Div(dash.page_container, className="px-4 pb-4"),
     ],
     fluid=True,
 )
 
-# View toggle callback
+# Global view mode toggle callback
 @app.callback(
     Output("view-mode", "data"),
     Input("global-toggle-graph", "n_clicks"),
