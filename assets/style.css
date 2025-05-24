@@ -1,0 +1,7 @@
+/* Dash dropdown text truncation */
+.VirtualizedSelectOption {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 250px !important;
+}

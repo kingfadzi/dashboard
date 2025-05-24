@@ -9,7 +9,7 @@ def fetch_classification_data(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
         SELECT classification_label, COUNT(*) AS repo_count
-        FROM combined_repo_metrics
+        FROM harvested_repositories
         """
         if condition_string:
             sql += f" WHERE {condition_string}"
