@@ -4,32 +4,21 @@ from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 
-def fetch_dependency_types_data(filters=None):
+def fetch_package_type_distribution(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                COALESCE(sd.sub_category, 'Unclassified') AS sub_category,
-                COUNT(DISTINCT sd.repo_id) AS repo_count
+                sd.package_type,
+                COUNT(*) AS package_count
             FROM syft_dependencies sd
             JOIN harvested_repositories crm ON crm.repo_id = sd.repo_id
-            WHERE (
-                sd.sub_category IS NULL
-                OR TRIM(sd.sub_category) NOT ILIKE ANY (ARRAY[
-                    '%utility%',
-                    '%utilities%',
-                    '%general%',
-                    '%general purpose%',
-                    '%helper%',
-                    '%misc%'
-                ])
-            )
         """
 
         if condition_string:
-            base_query += f" AND {condition_string}"
+            base_query += f" WHERE {condition_string}"
 
-        base_query += " GROUP BY sub_category ORDER BY repo_count DESC LIMIT 20"
+        base_query += " GROUP BY sd.package_type ORDER BY package_count DESC"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
