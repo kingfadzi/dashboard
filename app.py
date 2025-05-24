@@ -18,94 +18,90 @@ pio.templates.default = "plotly_white"
 # Initialize caching
 cache.init_app(server)
 
-# Navbar using clean Bootstrap tabs
-# Enhanced Navbar with icons, hover effects, and modern styling
+# Navbar with full horizontal & vertical centering
 navbar = dbc.Navbar(
     dbc.Container(
         [
-            # Brand with icon
-            dbc.NavbarBrand(
-                html.Span(
-                    [
-                        html.I(className="bi bi-speedometer2 me-2"),  # Dashboard icon
-                        "Tech Debt Dashboard",
-                    ],
+            dbc.Row([
+                # Brand column
+                dbc.Col(
+                    dbc.NavbarBrand(
+                        html.Span(
+                            [
+                                html.I(className="bi bi-speedometer2 me-2"),
+                                "Tech Debt Dashboard",
+                            ],
+                            className="d-flex align-items-center justify-content-center"
+                        ),
+                        href="/",
+                        className="fs-4 fw-bold text-white text-center"
+                    ),
+                    width="auto",
                     className="d-flex align-items-center"
                 ),
-                href="/",
-                className="fs-4 fw-bold text-white pe-5"
-            ),
-            
-            # Navigation items with icons and pills
-            dbc.Nav(
-                [
-                    dbc.NavLink(
+
+                # Centered navigation items
+                dbc.Col(
+                    dbc.Nav(
                         [
-                            html.I(className="bi bi-eye me-2"),  # Icon
-                            "Overview"
+                            dbc.NavLink(
+                                [html.I(className="bi bi-eye me-2"), "Overview"],
+                                href="/",
+                                active="exact",
+                                className="rounded-pill px-3 mx-1 text-center"
+                            ),
+                            dbc.NavLink(
+                                [html.I(className="bi bi-bar-chart-line me-2"), "Code Insights"],
+                                href="/code-insights",
+                                active="exact",
+                                className="rounded-pill px-3 mx-1 text-center"
+                            ),
+                            dbc.NavLink(
+                                [html.I(className="bi bi-gear-wide-connected me-2"), "Build Info"],
+                                href="/build-info",
+                                active="exact",
+                                className="rounded-pill px-3 mx-1 text-center"
+                            ),
+                            dbc.NavLink(
+                                [html.I(className="bi bi-diagram-3 me-2"), "Dependencies"],
+                                href="/dependencies",
+                                active="exact",
+                                className="rounded-pill px-3 mx-1 text-center"
+                            ),
+                            dbc.NavLink(
+                                [html.I(className="bi bi-shield-exclamation me-2"), "Vulnerabilities"],
+                                href="/vulnerabilities",
+                                active="exact",
+                                className="rounded-pill px-3 mx-1 text-center"
+                            ),
                         ],
-                        href="/",
-                        active="exact",
-                        className="rounded-pill px-3 mx-1 transition-all"
+                        pills=True,
+                        className="justify-content-center w-100"
                     ),
-                    dbc.NavLink(
-                        [
-                            html.I(className="bi bi-bar-chart-line me-2"),
-                            "Code Insights"
-                        ],
-                        href="/code-insights",
-                        active="exact",
-                        className="rounded-pill px-3 mx-1 transition-all"
+                    className="d-flex align-items-center justify-content-center",
+                ),
+
+                # Filter button column
+                dbc.Col(
+                    dbc.Button(
+                        html.I(className="bi bi-funnel"),
+                        color="light",
+                        className="rounded-pill px-3",
+                        id="filter-button",
                     ),
-                    dbc.NavLink(
-                        [
-                            html.I(className="bi bi-gear-wide-connected me-2"),
-                            "Build Info"
-                        ],
-                        href="/build-info",
-                        active="exact",
-                        className="rounded-pill px-3 mx-1 transition-all"
-                    ),
-                    dbc.NavLink(
-                        [
-                            html.I(className="bi bi-diagram-3 me-2"),
-                            "Dependencies"
-                        ],
-                        href="/dependencies",
-                        active="exact",
-                        className="rounded-pill px-3 mx-1 transition-all"
-                    ),
-                    dbc.NavLink(
-                        [
-                            html.I(className="bi bi-shield-exclamation me-2"),
-                            "Vulnerabilities"
-                        ],
-                        href="/vulnerabilities",
-                        active="exact",
-                        className="rounded-pill px-3 mx-1 transition-all"
-                    ),
-                ],
-                navbar=True,
-                className="mx-auto"  # Center align nav items
-            ),
-            
-            # Settings button aligned to right
-            dbc.Button(
-                html.I(className="bi bi-funnel"),
-                color="light",
-                className="rounded-pill px-3",
-                id="filter-button",
-            )
+                    width="auto",
+                    className="d-flex align-items-center justify-content-end"
+                ),
+            ], align="center", className="w-100"),
         ],
         fluid=True,
     ),
     color="primary",
     dark=True,
     sticky="top",
-    className="shadow gradient-bg",
+    className="shadow",
     style={"background": "linear-gradient(145deg, #0d6efd, #0b5ed7)"}
 )
-
 
 # Layout
 app.layout = dbc.Container(
