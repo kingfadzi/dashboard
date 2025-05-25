@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from layouts.layout_filters import filter_layout
 
 # Register page
- dash.register_page(__name__, path="/code-insights")
+dash.register_page(__name__, path="/code-insights")
 
 layout = dbc.Container([
     html.H2("Code Insights"),

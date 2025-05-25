@@ -1,5 +1,3 @@
-# pages/graphs.py
-
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -194,6 +192,21 @@ layout = dbc.Container(
                     ],
                     className="mb-4",
                     id="dependency-types-card",
+                )
+            ],
+        ),
+
+        # ✅ Added: Package Type Distribution Card (referenced by callback)
+        html.Div(
+            id="package-type-card-container",
+            style={"display": "none"},  # Initially hidden; shown via callback
+            children=[
+                dbc.Card(
+                    [
+                        dbc.CardHeader(html.B("Package Type Distribution", className="text-center"), className="bg-light"),
+                        dcc.Graph(id="package-type-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
+                    ],
+                    className="mb-4",
                 )
             ],
         ),
