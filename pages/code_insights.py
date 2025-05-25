@@ -9,10 +9,22 @@ dash.register_page(__name__, path="/code-insights")
 layout = dbc.Container([
     html.H2("Code Insights"),
     filter_layout(),
+
+    # Language Insights
     dbc.Row([
         dbc.Col(dcc.Loading(dcc.Graph(id="role-distribution-chart")), width=12),
     ]),
     dbc.Row([
         dbc.Col(dcc.Loading(dcc.Graph(id="normalized-weight-chart")), width=12),
+    ]),
+
+    # Gitlog Insights
+    dbc.Row([
+        dbc.Col(dcc.Loading(dcc.Graph(id="avg-file-size-chart")), width=6),
+        dbc.Col(dcc.Loading(dcc.Graph(id="contributor-dominance-chart")), width=6),
+    ]),
+    dbc.Row([
+        dbc.Col(dcc.Loading(dcc.Graph(id="branch-sprawl-chart")), width=6),
+        dbc.Col(dcc.Loading(dcc.Graph(id="repo-age-chart")), width=6),
     ]),
 ], fluid=True)

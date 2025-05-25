@@ -1,4 +1,5 @@
 from .code_insights_callbacks import register_code_insights_callbacks
+from .code_insights_gitlog_callbacks import register_code_insights_gitlog_callbacks
 from .filter_callbacks import register_filter_callbacks
 from .active_inactive_callbacks import register_active_inactive_callbacks
 from .classification_callbacks import register_classification_callbacks
@@ -36,3 +37,4 @@ def register_all_callbacks(app):
     register_filter_value_callbacks(app)
     register_switch_view_callbacks(app)
     register_code_insights_callbacks(app)
+    register_code_insights_gitlog_callbacks(app)

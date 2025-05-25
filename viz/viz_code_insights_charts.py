@@ -2,6 +2,13 @@ import plotly.express as px
 import pandas as pd
 from dash import dcc
 
+from viz.viz_code_insights_gitlog import (
+    render_avg_file_size_chart,
+    render_contributor_dominance_chart,
+    render_branch_sprawl_chart,
+    render_repo_age_chart,
+)
+
 def render_role_distribution_chart(df: pd.DataFrame):
     top_langs = df.groupby("language")["repo_count"].sum().nlargest(20).index
     df_filtered = df[df["language"].isin(top_langs)]
