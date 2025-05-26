@@ -28,7 +28,7 @@ def toggle_modal(n_open, n_close, is_open):
     Input("code-insights-table", "page_size"),
     Input("code-insights-table", "sort_by"),
     Input("code-insights-modal", "is_open"),
-    State("default-filter-store", "data"),
+    Input("default-filter-store", "data"),
 )
 def load_table_data(page_current, page_size, sort_by, is_open, filters):
     if not is_open:
