@@ -16,9 +16,9 @@ def load_default_filters():
         "host_name": parse(config.get("DEFAULT_HOST_NAME")),
         "activity_status": parse(config.get("DEFAULT_ACTIVITY_STATUS")),
         "transaction_cycle": parse(config.get("DEFAULT_TRANSACTION_CYCLE")),
-        "language": parse(config.get("DEFAULT_LANGUAGE")),
+        "main_language": parse(config.get("DEFAULT_LANGUAGE")),
         "classification": parse(config.get("DEFAULT_CLASSIFICATION")),
     }
 
-    print("✅ Loaded DEFAULT_FILTERS from .env:", filters)
+    print("Loaded DEFAULT_FILTERS from .env:", filters)
     return filters
