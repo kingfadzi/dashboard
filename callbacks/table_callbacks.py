@@ -34,7 +34,7 @@ def register_table_callbacks(app):
         filters = {
             "host_name": host_names or [],
             "activity_status": statuses or [],
-            "tc": tcs or [],
+            "transaction_cycle": tcs or [],
             "main_language": languages or [],
             "classification_label": classifications or [],
             "app_id": app_id_input.strip() if app_id_input else None,
@@ -47,7 +47,7 @@ def register_table_callbacks(app):
         for row in table_data:
             row_tooltip = {}
             for key, value in row.items():
-                if key in ["tc", "app_id"]:
+                if key in ["transaction_cycle", "app_id"]:
                     row_tooltip[key] = {"value": str(value), "type": "text"}
                 else:
                     row_tooltip[key] = {"value": "", "type": "text"}

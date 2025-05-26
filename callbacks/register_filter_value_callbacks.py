@@ -20,7 +20,7 @@ def register_filter_value_callbacks(app):
         return [
             query.get("host_name", [None])[0],
             query.get("activity_status", [None])[0],
-            query.get("tc", [None])[0],
+            query.get("transaction_cycle", [None])[0],
             query.get("main_language", [None])[0],
             query.get("classification_label", [None])[0],
         ]

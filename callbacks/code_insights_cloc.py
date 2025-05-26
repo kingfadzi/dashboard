@@ -27,7 +27,7 @@ def register_code_insights_cloc_callbacks(app):
         filters = {
             "host_name": hosts,
             "app_id": apps,
-            "tc": tcs,
+            "transaction_cycle": tcs,
             "main_language": languages,
             "classification_label": classifications,
             "activity_status": activity
@@ -48,7 +48,7 @@ def register_code_insights_cloc_callbacks(app):
         filters = {
             "host_name": hosts,
             "app_id": apps,
-            "tc": tcs,
+            "transaction_cycle": tcs,
             "main_language": languages,
             "classification_label": classifications,
             "activity_status": activity
@@ -69,7 +69,7 @@ def register_code_insights_cloc_callbacks(app):
         filters = {
             "host_name": hosts,
             "app_id": apps,
-            "tc": tcs,
+            "transaction_cycle": tcs,
             "main_language": languages,
             "classification_label": classifications,
             "activity_status": activity
@@ -90,7 +90,7 @@ def register_code_insights_cloc_callbacks(app):
         filters = {
             "host_name": hosts,
             "app_id": apps,
-            "tc": tcs,
+            "transaction_cycle": tcs,
             "main_language": languages,
             "classification_label": classifications,
             "activity_status": activity

@@ -19,7 +19,7 @@ def register_switch_view_callbacks(app):
         query = {}
         if sanitize(host): query["host_name"] = sanitize(host)
         if sanitize(status): query["activity_status"] = sanitize(status)
-        if sanitize(tc): query["tc"] = sanitize(tc)
+        if sanitize(tc): query["transaction_cycle"] = sanitize(tc)
         if sanitize(language): query["main_language"] = sanitize(language)
         if sanitize(classification): query["classification_label"] = sanitize(classification)
         return "/table?" + urlencode(query) if query else "/table"
@@ -36,7 +36,7 @@ def register_switch_view_callbacks(app):
         query = {}
         if sanitize(host): query["host_name"] = sanitize(host)
         if sanitize(status): query["activity_status"] = sanitize(status)
-        if sanitize(tc): query["tc"] = sanitize(tc)
+        if sanitize(tc): query["transaction_cycle"] = sanitize(tc)
         if sanitize(language): query["main_language"] = sanitize(language)
         if sanitize(classification): query["classification_label"] = sanitize(classification)
         return "/graphs?" + urlencode(query) if query else "/graphs"

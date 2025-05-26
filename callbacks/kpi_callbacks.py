@@ -36,7 +36,7 @@ def register_kpi_callbacks(app):
         filter_keys = [
             "host_name",
             "activity_status",
-            "tc",
+            "transaction_cycle",
             "main_language",
             "classification_label",
             "app_id",

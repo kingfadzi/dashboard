@@ -28,7 +28,7 @@ def register_build_info_callbacks(app):
         Input("activity-status-filter", "value"),
     ]
 
-    filter_keys = ["host_name", "app_id", "tc", "main_language", "classification_label", "activity_status"]
+    filter_keys = ["host_name", "app_id", "transaction_cycle", "main_language", "classification_label", "activity_status"]
 
     @app.callback(Output("detection-coverage-chart", "figure"), filter_inputs)
     def update_detection_chart(*vals):
