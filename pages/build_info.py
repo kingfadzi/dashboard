@@ -3,7 +3,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from layouts.layout_filters import filter_layout
 
-dash.register_page(__name__, path="/build-info")
+dash.register_page(__name__, path="/build-info", name="Build Info")
 
 layout = dbc.Container([
     html.H2("Build Info"),
