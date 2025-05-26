@@ -1,5 +1,7 @@
 from dash.dependencies import Input, Output
 from data.fetch_kpi_data import fetch_kpi_data
+from dash.dependencies import Input, Output
+from data.fetch_kpi_data import fetch_kpi_data
 
 def register_kpi_callbacks(app):
     @app.callback(
@@ -16,8 +18,10 @@ def register_kpi_callbacks(app):
             Output("kpi-ccn-subtext", "children"),
             Output("kpi-avg-repo-size", "children"),
             Output("kpi-avg-repo-size-subtext", "children"),
-            Output("kpi-dockerfiles", "children"),
-            Output("kpi-dockerfiles-subtext", "children"),
+            Output("kpi-branches", "children"),
+            Output("kpi-branches-subtext", "children"),
+            Output("kpi-repo-age", "children"),
+            Output("kpi-repo-age-subtext", "children"),
         ],
         [
             Input("host-name-filter", "value"),
@@ -38,57 +42,56 @@ def register_kpi_callbacks(app):
             "app_id",
         ]
         filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
-
         kpi_data = fetch_kpi_data(filters)
 
         # Total Repos
         total_repos = kpi_data.get("total_repos", "0")
         total_repos_subtext = f"Total={total_repos}"
 
-        # Avg Commits
-        avg_commits_data = kpi_data.get("avg_commits", {})
-        avg_commits = avg_commits_data.get("value", "0")
-        avg_commits_subtext = f"Min={avg_commits_data.get('min', '0')} | Max={avg_commits_data.get('max', '0')}"
+        # Commits
+        commits_data = kpi_data.get("commits", {})
+        avg_commits = commits_data.get("median", "0")
+        avg_commits_subtext = f"IQR={commits_data.get('iqr', '0')} | Outliers={commits_data.get('outlier_count', 0)}"
 
-        # Avg Contributors
-        avg_contributors_data = kpi_data.get("avg_contributors", {})
-        avg_contributors = avg_contributors_data.get("value", "0")
-        avg_contributors_subtext = f"Min={avg_contributors_data.get('min', '0')} | Max={avg_contributors_data.get('max', '0')}"
+        # Contributors
+        contributors_data = kpi_data.get("contributors", {})
+        avg_contributors = contributors_data.get("median", "0")
+        avg_contributors_subtext = f"IQR={contributors_data.get('iqr', '0')} | Outliers={contributors_data.get('outlier_count', 0)}"
 
-        # Avg Lines of Code
-        avg_loc_data = kpi_data.get("avg_loc", {})
-        avg_loc = avg_loc_data.get("value", "0")
-        avg_loc_subtext = f"Min={avg_loc_data.get('min', '0')} | Max={avg_loc_data.get('max', '0')}"
+        # LOC
+        loc_data = kpi_data.get("loc", {})
+        avg_loc = loc_data.get("median", "0")
+        avg_loc_subtext = f"IQR={loc_data.get('iqr', '0')} | Outliers={loc_data.get('outlier_count', 0)}"
 
-        # Avg CCN (without tokens)
-        avg_ccn_data = kpi_data.get("avg_ccn", {})
-        avg_ccn = avg_ccn_data.get("value", "0")
-        formatted_function_count = avg_ccn_data.get("function_count", "0")
-        formatted_total_ccn = avg_ccn_data.get("total_cyclomatic_complexity", "0")
+        # CCN
+        ccn_data = kpi_data.get("avg_ccn", {})
+        avg_ccn = ccn_data.get("median", "0")
+        formatted_function_count = ccn_data.get("function_count", "0")
+        formatted_total_ccn = ccn_data.get("total_cyclomatic_complexity", "0")
         avg_ccn_subtext = f"Fn={formatted_function_count} | Total CCN={formatted_total_ccn}"
 
-        # Avg Repo Size
-        avg_repo_size_data = kpi_data.get("avg_repo_size", {})
-        avg_repo_size = avg_repo_size_data.get("value", "0")
-        avg_repo_size_subtext = f"Min={avg_repo_size_data.get('min', '0')} | Max={avg_repo_size_data.get('max', '0')}"
+        # Repo Size
+        size_data = kpi_data.get("repo_size", {})
+        avg_repo_size = size_data.get("median", "0")
+        avg_repo_size_subtext = f"IQR={size_data.get('iqr', '0')} | Outliers={size_data.get('outlier_count', 0)}"
 
-        # Dockerfiles
-        dockerfiles = kpi_data.get("dockerfiles", "0")
-        dockerfiles_subtext = f"Total={dockerfiles}"
+        # Branches
+        branches_data = kpi_data.get("branches", {})
+        branches = branches_data.get("median", "0")
+        branches_subtext = f"IQR={branches_data.get('iqr', '0')} | Outliers={branches_data.get('outlier_count', 0)}"
+
+        # Repo Age
+        age_data = kpi_data.get("repo_age_days", {})
+        repo_age = age_data.get("median", "0")
+        repo_age_subtext = f"IQR={age_data.get('iqr', '0')} | Outliers={age_data.get('outlier_count', 0)}"
 
         return (
-            total_repos,
-            total_repos_subtext,
-            avg_commits,
-            avg_commits_subtext,
-            avg_contributors,
-            avg_contributors_subtext,
-            avg_loc,
-            avg_loc_subtext,
-            avg_ccn,
-            avg_ccn_subtext,
-            avg_repo_size,
-            avg_repo_size_subtext,
-            dockerfiles,
-            dockerfiles_subtext,
+            total_repos, total_repos_subtext,
+            avg_commits, avg_commits_subtext,
+            avg_contributors, avg_contributors_subtext,
+            avg_loc, avg_loc_subtext,
+            avg_ccn, avg_ccn_subtext,
+            avg_repo_size, avg_repo_size_subtext,
+            branches, branches_subtext,
+            repo_age, repo_age_subtext
         )
