@@ -1,7 +1,6 @@
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
-from layouts.layout_filters import filter_layout
 
 # Register page
 dash.register_page(__name__, path="/code-insights", name="Code Insights")
@@ -17,8 +16,18 @@ def card(title, graph_id, height=300):
         className="mb-4",
     )
 
+# Header row with compact "Table" button
+header_with_button = dbc.Row([
+    dbc.Col(html.H2("Code Insights"), width="auto"),
+    dbc.Col(
+        dbc.Button("Table", id="code-insights-modal-open", color="secondary", size="sm", className="ms-auto"),
+        width="auto",
+        className="d-flex align-items-center justify-content-end"
+    ),
+], className="mb-2")
+
 layout = dbc.Container([
-    html.H2("Code Insights"),
+    header_with_button,
 
     # Language Insights
     card("Language Role Distribution", "role-distribution-chart"),
@@ -53,4 +62,37 @@ layout = dbc.Container([
         dbc.Col(card("Total Logical Lines of Code", "total-nloc-chart"), width=6),
         dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
     ]),
+
+    # Modal at the bottom
+    dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle("Code Insights Table")),
+            dbc.ModalBody([
+                dbc.Alert(id="code-insights-total", color="info", className="py-2 px-3", is_open=False),
+                dcc.Loading(
+                    dash_table.DataTable(
+                        id="code-insights-table",
+                        columns=[],
+                        data=[],
+                        page_current=0,
+                        page_size=10,
+                        page_action="custom",
+                        sort_action="custom",
+                        sort_mode="single",
+                        sort_by=[],
+                        style_table={"overflowX": "auto"},
+                        style_cell={"textAlign": "left", "padding": "5px"},
+                        export_format="csv"
+                    )
+                )
+            ]),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="code-insights-modal-close", className="ms-auto", n_clicks=0)
+            ),
+        ],
+        id="code-insights-modal",
+        size="xl",
+        is_open=False,
+        scrollable=True
+    )
 ], fluid=True, style={"marginTop": "0px", "paddingTop": "0px"})

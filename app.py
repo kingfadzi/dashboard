@@ -10,6 +10,8 @@ from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
 import callbacks.repo_profile_callback
 from dash.dependencies import Input, Output
+import callbacks.code_insights_modal
+
 
 load_default_filters()
 
