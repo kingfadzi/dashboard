@@ -9,25 +9,20 @@ def fetch_trivy_vulnerabilities(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                CASE
-                    WHEN t.trivy_critical > 0 THEN 'Critical'
-                    WHEN t.trivy_high > 0 THEN 'High'
-                    WHEN t.trivy_medium > 0 THEN 'Medium'
-                    WHEN t.trivy_low > 0 THEN 'Low'
-                    ELSE 'No Vulnerabilities'
-                END AS severity,
-                COUNT(DISTINCT repo_id) AS repo_count
-            FROM combined_repo_metrics t
-            WHERE t.total_trivy_vulns > 0
+                v.severity,
+                COUNT(DISTINCT v.repo_id) AS repo_count
+            FROM trivy_vulnerability v
+            JOIN harvested_repositories hr ON v.repo_id = hr.repo_id
+            WHERE v.severity IS NOT NULL
         """
 
         if condition_string:
             base_query += f" AND {condition_string}"
 
-        base_query += " GROUP BY severity"
+        base_query += " GROUP BY v.severity"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters)
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)

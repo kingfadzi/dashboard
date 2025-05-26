@@ -8,7 +8,7 @@ dash.register_page(__name__, path="/code-insights", name="Code Insights")
 
 layout = dbc.Container([
     html.H2("Code Insights"),
-    filter_layout(),
+    #filter_layout(),
 
     # Language Insights
     dbc.Row([

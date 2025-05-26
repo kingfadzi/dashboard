@@ -7,7 +7,7 @@ dash.register_page(__name__, path="/build-info", name="Build Info")
 
 layout = dbc.Container([
     html.H2("Build Info"),
-    filter_layout(),
+    #filter_layout(),
 
     # First row
     dbc.Row([

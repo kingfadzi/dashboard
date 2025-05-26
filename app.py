@@ -2,12 +2,16 @@ import dash
 from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
 import plotly.io as pio
+
+from config.config import load_default_filters, DEFAULT_FILTERS
 from data.cache_instance import cache
 from layouts.layout_filters import filter_layout
 from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
 import callbacks.repo_profile_callback
 from dash.dependencies import Input, Output
+
+load_default_filters()
 
 # Initialize Dash app
 app = Dash(__name__, use_pages=True,  suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -53,14 +57,8 @@ app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
         navbar,
-        dbc.Offcanvas(
-            filter_layout(),
-            id="filter-panel",
-            title="Filters",
-            is_open=False,
-            placement="start",
-            backdrop=True,
-        ),
+        dcc.Store(id="default-filter-store", data=load_default_filters()),
+        filter_layout(),
         dash.page_container,
     ],
     fluid=True,

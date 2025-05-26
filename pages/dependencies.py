@@ -7,7 +7,7 @@ dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
 layout = dbc.Container([
     html.H2("Dependencies"),
-    filter_layout(),
+    #filter_layout(),
 
     # Detection coverage
     dbc.Row([

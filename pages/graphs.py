@@ -5,7 +5,7 @@ from layouts.layout_kpi import kpi_layout
 from layouts.layout_filters import filter_layout
 
 # Register this page at /graphs
-dash.register_page(__name__, path="/graphs")
+dash.register_page(__name__, path="/graphs", name="Overview" )
 
 layout = dbc.Container(
     [
@@ -38,7 +38,7 @@ layout = dbc.Container(
 
         # Filter layout, stripped of margin/padding
         html.Div(
-            filter_layout(),
+            #filter_layout(),
             style={"marginTop": "0px", "paddingTop": "0px"},
         ),
 
@@ -182,21 +182,7 @@ layout = dbc.Container(
             id="dev-frameworks-card",
         ),
 
-        html.Div(
-            id="dependency-types-card-container",
-            children=[
-                dbc.Card(
-                    [
-                        dbc.CardHeader(html.B("Top Dependency Types", className="text-center"), className="bg-light"),
-                        dcc.Graph(id="dependency-types-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
-                    ],
-                    className="mb-4",
-                    id="dependency-types-card",
-                )
-            ],
-        ),
 
-        # ✅ Added: Package Type Distribution Card (referenced by callback)
         html.Div(
             id="package-type-card-container",
             style={"display": "none"},  # Initially hidden; shown via callback
