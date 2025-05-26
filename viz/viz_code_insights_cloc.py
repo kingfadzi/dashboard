@@ -8,8 +8,12 @@ def render_code_volume_chart(df: pd.DataFrame):
         df,
         x="language",
         y="code_lines",
-        title="Code Volume by Language",
+        #title="Code Volume by Language",
         labels={"language": "Language", "code_lines": "Lines of Code"}
+    )
+    fig.update_layout(
+        xaxis_title=None,
+        title=None
     )
     return dcc.Graph(id="code-volume-chart", figure=fig)
 
@@ -19,8 +23,12 @@ def render_file_count_chart(df: pd.DataFrame):
         df,
         x="language",
         y="total_files",
-        title="File Count by Language",
+        #title="File Count by Language",
         labels={"language": "Language", "total_files": "File Count"}
+    )
+    fig.update_layout(
+        xaxis_title=None,
+        title=None
     )
     return dcc.Graph(id="file-count-chart", figure=fig)
 
@@ -33,8 +41,12 @@ def render_code_composition_chart(df: pd.DataFrame):
         x="language",
         y="lines",
         color="type",
-        title="Code vs Comment Composition",
+        #title="Code vs Comment Composition",
         labels={"language": "Language", "lines": "Line Count", "type": "Segment"}
+    )
+    fig.update_layout(
+        xaxis_title=None,
+        title=None
     )
     return dcc.Graph(id="code-composition-chart", figure=fig)
 
@@ -45,7 +57,7 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
         x="files",
         y="code",
         color="language",
-        title="Code vs File Count (Unbalanced Usage)",
+        #title="Code vs File Count (Unbalanced Usage)",
         labels={"files": "File Count", "code": "Lines of Code", "language": "Language"}
     )
     return dcc.Graph(id="code-file-scatter-chart", figure=fig)

@@ -1,7 +1,6 @@
 import dash
 from dash import html, dash_table, dcc
 import dash_bootstrap_components as dbc
-from layouts.layout_filters import filter_layout
 
 dash.register_page(__name__, path="/table")
 
@@ -36,7 +35,7 @@ layout = dbc.Container(
 
         # Filter layout (no top spacing)
         html.Div(
-            filter_layout(),
+
             style={"marginTop": "0px", "paddingTop": "0px"},
         ),
 

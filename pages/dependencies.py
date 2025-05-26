@@ -28,21 +28,20 @@ layout = dbc.Container([
     ]),
 
     dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="dependency-volume-chart")), width=12),
+        dbc.Col(dcc.Loading(dcc.Graph(id="xeol-top-products-chart")), width=12),
     ]),
     # Xeol Charts
 
     dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="xeol-top-products-chart")), width=6),
+        dbc.Col(dcc.Loading(dcc.Graph(id="dependency-volume-chart")), width=6),
+
         dbc.Col(dcc.Loading(dcc.Graph(id="xeol-exposure-chart")), width=6),
     ]),
     # IaC Insights
     dbc.Row([
         dbc.Col(dcc.Loading(dcc.Graph(id="iac-framework-usage-chart")), width=6),
+        dbc.Col(dcc.Loading(dcc.Graph(id="iac-adoption-chart")), width=6),
+    ]),
 
-    ]),
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="iac-adoption-chart")), width=12),
-    ]),
 
 ], fluid=True)

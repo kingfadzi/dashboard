@@ -15,7 +15,7 @@ REPO_FILTER_FIELD_ALIAS_MAP = {
     "total_lines_of_code": "rm",
     "name": "hr",
     "repo_slug": "hr",
-    "activity_status": "rm",
+    "activity_status": "hr",
 }
 
 def build_repo_filter_conditions(filters):

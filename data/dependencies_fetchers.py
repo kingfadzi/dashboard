@@ -3,6 +3,8 @@ from sqlalchemy import text
 from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
+from data.sql_filter_utils import build_repo_filter_conditions
+
 
 # 1. Syft Dependency Coverage
 def fetch_dependency_detection_coverage(filters=None):
@@ -17,7 +19,7 @@ def fetch_dependency_detection_coverage(filters=None):
                          ELSE 'Dependencies Detected'
                     END AS status
                 FROM harvested_repositories hr
-                LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id
+                LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id  
                 {where_clause}
                 GROUP BY hr.repo_id, sd.repo_id
             ) sub
@@ -27,7 +29,7 @@ def fetch_dependency_detection_coverage(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 
@@ -45,6 +47,7 @@ def fetch_iac_detection_coverage(filters=None):
                     END AS status
                 FROM harvested_repositories hr
                 LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id
+                LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
                 {where_clause}
                 GROUP BY hr.repo_id, ic.repo_id
             ) sub
@@ -54,7 +57,7 @@ def fetch_iac_detection_coverage(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 
@@ -81,7 +84,7 @@ def fetch_xeol_detection_coverage(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
@@ -99,7 +102,7 @@ def fetch_package_type_distribution(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
@@ -118,7 +121,7 @@ def fetch_top_packages(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
@@ -138,7 +141,7 @@ def fetch_framework_distribution(filters=None):
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
@@ -175,7 +178,7 @@ def fetch_dependency_volume_buckets(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 
@@ -195,7 +198,7 @@ def fetch_xeol_top_products(filters=None):
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
@@ -232,7 +235,7 @@ def fetch_xeol_exposure_by_bucket_and_artifact_type(filters=None):
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 
@@ -251,7 +254,7 @@ def fetch_iac_framework_usage(filters=None):
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
@@ -271,7 +274,7 @@ def fetch_iac_adoption_by_framework_count(filters=None):
                         ELSE '5+'
                     END AS framework_bucket
                 FROM harvested_repositories hr
-                LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id
+                LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id           
                 {where_clause}
                 GROUP BY hr.repo_id
             ) sub
@@ -289,7 +292,9 @@ def fetch_iac_adoption_by_framework_count(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+
 
 

@@ -2,14 +2,13 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import profile.helpers as helpers
 
-
 def render(profile_data):
+    # Correct keys based on your payload
     build_envs = profile_data.get("Build Environment", [])
-    frameworks = profile_data.get("Frameworks", [])
-    iac_frameworks = profile_data.get("IaC Frameworks", [])
+    frameworks = profile_data.get("Identified Frameworks", [])
+    iac_frameworks = profile_data.get("Infrastructure Frameworks", [])
 
     # === Build Tool Table Rows ===
-    build_tool_rows = []
     if build_envs:
         header = html.Thead(html.Tr([
             html.Th("Build Tool"),
@@ -17,7 +16,6 @@ def render(profile_data):
             html.Th("Tool Version"),
             html.Th("Runtime Version")
         ]))
-
         body = html.Tbody([
             html.Tr([
                 html.Td(env.get("Build Tool", "-")),
@@ -27,7 +25,6 @@ def render(profile_data):
             ])
             for env in build_envs
         ])
-
         build_tool_table = dbc.Table([header, body], bordered=True, hover=True, size="sm", responsive=True)
     else:
         build_tool_table = html.Small("No build environments detected.", className="text-muted")
@@ -50,11 +47,11 @@ def render(profile_data):
 
             # === STACKED TECH LAYERS ===
             html.Div([
-                # Languages Layer
+                # Languages Layer (corrected key)
                 html.Div([
                     html.Small("Languages", className="text-muted d-block mb-1"),
                     dcc.Graph(
-                        figure=helpers.create_language_bar(profile_data.get('Language Percentages', {})),
+                        figure=helpers.create_language_bar(profile_data.get("Language Distribution", {})),
                         config={'displayModeBar': False}
                     )
                 ], style={
