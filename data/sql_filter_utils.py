@@ -16,6 +16,8 @@ REPO_FILTER_FIELD_ALIAS_MAP = {
     "name": "hr",
     "repo_slug": "hr",
     "activity_status": "hr",
+    "browser_url": "hr",
+    "classification_label": "hr",
 }
 
 def build_repo_filter_conditions(filters):

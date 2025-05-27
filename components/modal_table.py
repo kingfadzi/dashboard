@@ -22,8 +22,8 @@ def modal_table():
                             sort_action="native",
                             sort_mode="single",
 
-                            # CSV export & tooltips
-                            export_format="csv",
+                            # disable built-in export
+                            export_format="none",
                             markdown_options={"html": True},
                             tooltip_duration=None,
                             tooltip_data=[],
@@ -58,6 +58,15 @@ def modal_table():
                             ],
                         )
                     ),
+                    html.Div(
+                        dbc.Button(
+                            "Download CSV (up to 500)",
+                            id="download-all-btn",
+                            color="link"
+                        ),
+                        className="mt-2"
+                    ),
+                    dcc.Download(id="download-all"),
                 ]
             ),
             dbc.ModalFooter(
