@@ -108,7 +108,12 @@ def register_modal_table_callbacks(
               hr.classification_label,
               hr.main_language,
               hr.all_languages,
-              hr.activity_status
+              hr.activity_status,
+              rm.repo_age_days,
+              rm.last_commit_date,
+              rm.number_of_contributors,
+              rm.total_commits,
+              rm.repo_size_bytes
             FROM harvested_repositories hr
             LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
             WHERE TRUE {extra}
@@ -138,7 +143,7 @@ def register_modal_table_callbacks(
         )
 
         # Drop helper and unused columns
-        df = df.drop(columns=["repo_slug", "browse_url", "host_name", "raw_repo_id"])
+        df = df.drop(columns=["repo_slug", "browse_url", "host_name", "raw_repo_id", "main_language"])
 
         # Prepare DataTable outputs with markdown presentation
         data = df.to_dict("records")
