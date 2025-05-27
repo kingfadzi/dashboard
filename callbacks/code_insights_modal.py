@@ -10,20 +10,28 @@ from data.sql_filter_utils import build_repo_filter_conditions
     Output("default-filter-store", "data"),
     Input("main_language-filter", "value"),
     Input("activity-status-filter", "value"),
-    Input("tc-filter", "value"),
-    Input("classification-filter", "value"),
+    Input("tc-filter", "value"),  # transaction_cycle
+    Input("classification-filter", "value"),  # classification_label
     Input("app-id-filter", "value"),
     Input("host-name-filter", "value"),
 )
 def update_filter_store(main_lang, status, tc, classification, app_id, host_name):
-    return {
-        "main_language": main_lang,
-        "activity_status": status,
-        "transaction_cycle": transaction_cycle,
-        "classification_label": classification_label,
-        "app_id": app_id,
-        "host_name": host_name,
-    }
+    filters = {}
+    if main_lang:
+        filters["main_language"] = main_lang
+    if status:
+        filters["activity_status"] = status
+    if tc:
+        filters["transaction_cycle"] = tc
+    if classification:
+        filters["classification_label"] = classification
+    if app_id:
+        filters["app_id"] = app_id
+    if host_name:
+        filters["host_name"] = host_name
+
+    print("Updated filter store:", filters)
+    return filters
 
 @callback(
     Output("filters-applied-trigger", "data"),
@@ -62,8 +70,9 @@ def toggle_modal(n_open, n_close, is_open):
 def load_table_data(is_open, _, filters, page_current, page_size, sort_by):
     print("Modal open:", is_open)
     print("Current filters:", filters)
-    if not is_open or filters is None or not isinstance(filters, dict):
-        print("Preventing update due to missing or invalid filters.")
+
+    if not is_open or not filters or not isinstance(filters, dict) or not filters.keys():
+        print("Preventing update due to missing or empty filters.")
         raise PreventUpdate
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
