@@ -8,7 +8,7 @@ def fetch_role_distribution(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT sub.language, language_role, COUNT(DISTINCT sub.repo_id) AS repo_count
+            SELECT sub.language, sub.language_role, COUNT(DISTINCT sub.repo_id) AS repo_count
             FROM (
                 SELECT
                     a.repo_id,
@@ -21,9 +21,11 @@ def fetch_role_distribution(filters=None):
                     ORDER BY repo_id, percent_usage DESC
                 ) b ON a.repo_id = b.repo_id
                 JOIN harvested_repositories hr ON a.repo_id = hr.repo_id
-                {f'WHERE {condition_string}' if condition_string else ''}
+                JOIN languages l ON a.language = l.name
+                WHERE l.type = 'programming'
+                {f'AND {condition_string}' if condition_string else ''}
             ) sub
-            GROUP BY sub.language, language_role
+            GROUP BY sub.language, sub.language_role
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
@@ -33,33 +35,24 @@ def fetch_role_distribution(filters=None):
     )
     return query_data(condition_string, param_dict)
 
-
-    condition_string, param_dict = build_filter_conditions(
-        filters,
-        alias="hr",
-        field_alias_map={"repo_slug": "hr"}
-    )
-    return query_data(condition_string, param_dict)
-
 def fetch_normalized_weight(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
         base_query = f"""
             SELECT ga.language, ROUND(AVG(ga.percent_usage)::numeric, 2) AS avg_percent_usage
             FROM go_enry_analysis ga
             JOIN harvested_repositories hr ON ga.repo_id = hr.repo_id
-            {where_clause}
+            JOIN languages l ON ga.language = l.name
+            WHERE l.type = 'programming'
+            {f'AND {condition_string}' if condition_string else ''}
             GROUP BY ga.language
             ORDER BY avg_percent_usage DESC
             LIMIT 20
         """
-        sql = text(base_query.format(where_clause=where_clause))
+        sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(
-        filters,
-        alias="hr",
-        field_alias_map={"repo_slug": "hr"}
+        filters, alias="hr", field_alias_map={"repo_slug": "hr"}
     )
     return query_data(condition_string, param_dict)

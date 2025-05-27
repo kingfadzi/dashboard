@@ -9,11 +9,13 @@ def fetch_code_volume_by_language(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT language, SUM(code) AS code_lines
-            FROM cloc_metrics
-            JOIN harvested_repositories hr ON cloc_metrics.repo_id = hr.repo_id
-            {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY language
+            SELECT cloc.language, SUM(cloc.code) AS code_lines
+            FROM cloc_metrics cloc
+            JOIN harvested_repositories hr ON cloc.repo_id = hr.repo_id
+            JOIN languages ON cloc.language = languages.name
+            WHERE languages.type = 'programming'
+            {f'AND {condition_string}' if condition_string else ''}
+            GROUP BY cloc.language
             ORDER BY code_lines DESC
             LIMIT 20
         """
@@ -28,11 +30,13 @@ def fetch_file_count_by_language(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT language, SUM(files) AS total_files
-            FROM cloc_metrics
-            JOIN harvested_repositories hr ON cloc_metrics.repo_id = hr.repo_id
-            {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY language
+            SELECT cloc.language, SUM(cloc.files) AS total_files
+            FROM cloc_metrics cloc
+            JOIN harvested_repositories hr ON cloc.repo_id = hr.repo_id
+            JOIN languages ON cloc.language = languages.name
+            WHERE languages.type = 'programming'
+            {f'AND {condition_string}' if condition_string else ''}
+            GROUP BY cloc.language
             ORDER BY total_files DESC
             LIMIT 20
         """
@@ -47,14 +51,16 @@ def fetch_code_composition_by_language(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT cloc_metrics.language,
-               SUM(cloc_metrics.code) AS code,
-               SUM(cloc_metrics.comment) AS comment,
-               SUM(cloc_metrics.blank) AS blank
-            FROM cloc_metrics
-            JOIN harvested_repositories hr ON cloc_metrics.repo_id = hr.repo_id
-            {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY language
+            SELECT cloc.language,
+                   SUM(cloc.code) AS code,
+                   SUM(cloc.comment) AS comment,
+                   SUM(cloc.blank) AS blank
+            FROM cloc_metrics cloc
+            JOIN harvested_repositories hr ON cloc.repo_id = hr.repo_id
+            JOIN languages ON cloc.language = languages.name
+            WHERE languages.type = 'programming'
+            {f'AND {condition_string}' if condition_string else ''}
+            GROUP BY cloc.language
             ORDER BY code DESC
             LIMIT 20
         """
@@ -69,12 +75,14 @@ def fetch_code_file_scatter(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT language, SUM(code) AS code, SUM(files) AS files
-            FROM cloc_metrics
-            JOIN harvested_repositories hr ON cloc_metrics.repo_id = hr.repo_id
-            {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY language
-            HAVING SUM(code) > 0 AND SUM(files) > 0
+            SELECT cloc.language, SUM(cloc.code) AS code, SUM(cloc.files) AS files
+            FROM cloc_metrics cloc
+            JOIN harvested_repositories hr ON cloc.repo_id = hr.repo_id
+            JOIN languages ON cloc.language = languages.name
+            WHERE languages.type = 'programming'
+            {f'AND {condition_string}' if condition_string else ''}
+            GROUP BY cloc.language
+            HAVING SUM(cloc.code) > 0 AND SUM(cloc.files) > 0
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)

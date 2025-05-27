@@ -14,14 +14,16 @@ def fetch_language_data(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                main_language, 
+                hr.main_language, 
                 COUNT(*) AS repo_count
-            FROM harvested_repositories
+            FROM harvested_repositories hr
+            JOIN languages l ON hr.main_language = l.name
+            WHERE l.type = 'programming'
         """
         if condition_string:
-            base_query += f" WHERE {condition_string}"
+            base_query += f" AND {condition_string}"
 
-        base_query += " GROUP BY main_language"
+        base_query += " GROUP BY hr.main_language"
 
         logger.debug("Executing language data query:")
         logger.debug(base_query)

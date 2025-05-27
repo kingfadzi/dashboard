@@ -40,6 +40,7 @@ def fetch_kpi_data(filters=None):
     sql = """
     SELECT
         hr.repo_id,
+        hr.main_language,
         rm.total_commits,
         rm.number_of_contributors,
         rm.active_branch_count,
@@ -52,9 +53,11 @@ def fetch_kpi_data(filters=None):
     FROM harvested_repositories hr
     LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
     LEFT JOIN lizard_summary ls ON hr.repo_id = ls.repo_id
+    JOIN languages l ON hr.main_language = l.name
+    WHERE l.type = 'programming'
     """
     if condition_string:
-        sql += f" WHERE {condition_string}"
+        sql += f" AND {condition_string}"
 
     df = pd.read_sql(text(sql), engine, params=param_dict)
     if df.empty:
@@ -87,7 +90,7 @@ def fetch_kpi_data(filters=None):
 
         if filtered.empty:
             filtered = series
-            outlier_count = 0  # fallback disables outlier count
+            outlier_count = 0
 
         print(f"{column}: using {len(filtered)} of {len(series)} rows (excluded {outlier_count})")
 
