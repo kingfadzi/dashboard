@@ -5,14 +5,12 @@ import plotly.graph_objects as go
 def render_detection_coverage_chart(df):
     fig = go.Figure()
 
-    # Determine the order of legend items
     statuses = df["detection_status"].unique()
     tools = sorted(df["tool"].unique())
 
     for status in statuses:
         filtered = df[df["detection_status"] == status]
         visible = "legendonly" if status == "No Modules Detected" else True
-
         fig.add_trace(go.Bar(
             x=filtered["tool"],
             y=filtered["repo_count"],
@@ -22,14 +20,12 @@ def render_detection_coverage_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        title="Detection Coverage by Tool",
-        xaxis_title="Tool",
+        height=400,
+        xaxis_title=None,
         yaxis_title="Repository Count",
-        height=400
+        title=None
     )
-
     return fig
-
 
 # 2. Module Count Buckets
 def render_module_count_chart(df):
@@ -37,9 +33,10 @@ def render_module_count_chart(df):
         df,
         x="module_bucket",
         y="repo_count",
-        title="Module Count per Repository",
         labels={"module_bucket": "Module Count Range", "repo_count": "Repository Count"},
+        height=400
     )
+    fig.update_layout(title=None)
     return fig
 
 # 3. Repos per Tool and Variant
@@ -50,16 +47,12 @@ def render_repos_per_tool_variant_chart(df):
         y="repo_count",
         color="tool",
         barmode="group",
-        title="Repos per Build Variant",
-        labels={
-            "variant": "Build Tool Variant",
-            "tool": "Language Tool",
-            "repo_count": "Repository Count",
-        },
+        labels={"variant": "Build Tool Variant", "tool": "Language Tool", "repo_count": "Repository Count"},
+        height=400
     )
     fig.update_xaxes(tickangle=45)
+    fig.update_layout(title=None)
     return fig
-
 
 # 4. Status by Tool
 def render_status_by_tool_chart(df):
@@ -69,9 +62,10 @@ def render_status_by_tool_chart(df):
         y="repo_count",
         color="status",
         barmode="stack",
-        title="Build Detection Status by Tool",
         labels={"tool": "Language (tool)", "status": "Status", "repo_count": "Repository Count"},
+        height=400
     )
+    fig.update_layout(title=None)
     return fig
 
 # 5. Runtime Versions by Tool
@@ -83,19 +77,12 @@ def render_runtime_versions_chart(df):
         y="repo_count",
         color="variant",
         barmode="stack",
-        title="Runtime Versions by Build Variant",
-        labels={
-            "runtime_version": "Runtime Version",
-            "variant": "Build Tool Variant",
-            "repo_count": "Repository Count",
-        },
+        labels={"runtime_version": "Runtime Version", "variant": "Build Tool Variant", "repo_count": "Repository Count"},
+        height=400
     )
     fig.update_xaxes(tickangle=45)
-    fig.update_layout(height=400)
+    fig.update_layout(title=None)
     return fig
-
-
-
 
 # 6. Runtime Fragmentation by Tool
 def render_runtime_fragmentation_chart(df):
@@ -103,9 +90,10 @@ def render_runtime_fragmentation_chart(df):
         df,
         x="tool",
         y="version_count",
-        title="Runtime Version Fragmentation by Tool",
         labels={"tool": "Language (tool)", "version_count": "Distinct Runtime Versions"},
+        height=400
     )
+    fig.update_layout(title=None)
     return fig
 
 # 7. Confidence Distribution
@@ -114,8 +102,9 @@ def render_confidence_distribution_chart(df):
         df,
         x="confidence",
         y="repo_count",
-        title="Detection Confidence Distribution",
         labels={"confidence": "Confidence Level", "repo_count": "Repository Count"},
+        height=400
     )
     fig.update_xaxes(categoryorder="array", categoryarray=["high", "medium", "low", "unknown"])
+    fig.update_layout(title=None)
     return fig

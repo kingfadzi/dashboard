@@ -16,7 +16,7 @@ def viz_dev_frameworks_chart(df):
     ).update_layout(
         xaxis=dict(categoryorder="total descending"),
         template="plotly_white",
-        title={"text": "Top Developer Frameworks", "x": 0.5},
+        title=None,
         xaxis_title=None,
         dragmode=False,
         showlegend=False

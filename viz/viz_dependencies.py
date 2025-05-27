@@ -6,7 +6,6 @@ def render_dependency_detection_chart(df):
         x="status",
         y="repo_count",
         color="status",
-        title="Dependency Detection Coverage",
         labels={"status": "", "repo_count": "Repository Count"},
     )
     fig.update_layout(
@@ -30,7 +29,6 @@ def render_iac_detection_chart(df):
         x="status",
         y="repo_count",
         color="status",
-        title="IaC Component Detection Coverage",
         labels={"status": "", "repo_count": "Repository Count"},
     )
     fig.update_layout(
@@ -54,7 +52,6 @@ def render_xeol_detection_chart(df):
         x="status",
         y="repo_count",
         color="status",
-        title="EOL Artifact Detection Coverage",
         labels={"status": "", "repo_count": "Repository Count"},
     )
     fig.update_layout(
@@ -80,12 +77,11 @@ def render_package_type_distribution_chart(df):
         y="package_type",
         x="repo_count",
         orientation="h",
-        title="Package Type Distribution",
         labels={"package_type": "", "repo_count": "Repository Count"},
     )
     fig.update_layout(
         height=400,
-        xaxis_title="",
+        xaxis_title="Repository Count",
         legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10))
     )
     return fig
@@ -95,7 +91,6 @@ def render_top_packages_chart(df):
         df,
         x="package_name",
         y="count",
-        title="Top Packages Across Repositories",
         labels={"package_name": "Package", "count": "Occurrences"},
     )
     fig.update_layout(
@@ -112,12 +107,11 @@ def render_framework_distribution_chart(df):
         y="framework",
         x="repo_count",
         orientation="h",
-        title="Framework Usage Distribution",
         labels={"framework": "", "repo_count": "Repository Count"},
     )
     fig.update_layout(
         height=400,
-        xaxis_title="",
+        xaxis_title="Repository Count",
         legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10))
     )
     return fig
@@ -127,13 +121,18 @@ def render_dependency_volume_chart(df):
         df,
         x="dep_bucket",
         y="repo_count",
-        title="Dependency Volume per Repository",
         labels={"dep_bucket": "Dependency Count", "repo_count": "Repository Count"},
     )
     fig.update_layout(
         height=400,
-        xaxis_title="",
-        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10))
+        xaxis_title="Dependency Count",
+        legend=dict(
+            orientation="h",
+            y=1.02,
+            x=0.5,
+            xanchor="center",
+            font=dict(size=10)
+        )
     )
     return fig
 
@@ -145,7 +144,6 @@ def render_xeol_top_products_chart(df):
         y="product_name",
         x="repo_count",
         orientation="h",
-        title="Top Products with EOL Risk",
         labels={"product_name": "", "repo_count": "Repository Count"},
     )
     fig.update_layout(height=400)
@@ -159,7 +157,6 @@ def render_xeol_exposure_bucketed_chart(df):
         y="repo_count",
         color="artifact_type",
         barmode="stack",
-        title="EOL Exposure per Repo (Bucketed by Artifact Type)",
         labels={
             "bucket": "EOL Artifact Count",
             "repo_count": "Repository Count",
@@ -199,7 +196,6 @@ def render_iac_adoption_by_framework_count_chart(df):
         df,
         x="framework_bucket",
         y="repo_count",
-        title="IaC Adoption by Framework Count",
         labels={
             "framework_bucket": "Frameworks Used per Repo",
             "repo_count": "Repository Count",

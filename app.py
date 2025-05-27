@@ -67,7 +67,7 @@ app.layout = dbc.Container(
         dcc.Location(id="url", refresh=False),
         navbar,
         dcc.Store(id="default-filter-store", data=DEFAULT_FILTERS),
-        dbc.Collapse(filter_layout(), id="filter-collapse", is_open=True),
+        dbc.Collapse(filter_layout(), id="filter-collapse", is_open=False),
         dash.page_container,
     ],
     fluid=True,

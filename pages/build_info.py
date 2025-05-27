@@ -8,8 +8,8 @@ from config.config import DEFAULT_FILTERS
 
 dash.register_page(__name__, path="/build-info", name="Build Info")
 
-# Reusable card helper
-def card(title, graph_id, height=300):
+# Reusable card helper with uniform height and static chart config
+def card(title, graph_id, height=400):
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -17,7 +17,7 @@ def card(title, graph_id, height=300):
                 dcc.Loading(
                     dcc.Graph(
                         id=graph_id,
-                        config={"displayModeBar": False},
+                        config={"staticPlot": True},
                         style={"height": f"{height}px"}
                     )
                 ),

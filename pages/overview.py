@@ -89,10 +89,29 @@ layout = dbc.Container(
         ),
 
         # Primary Language in Multilingual Repos card
-        dbc.Card(
+
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Primary Language in Multilingual Repos", className="text-center"), className="bg-light"),
-                dcc.Graph(id="repos-by-language-bar", config={"displayModeBar": False}, style={"height": 300}),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Primary Language in Multilingual Repos", className="text-center"), className="bg-light"),
+                            dcc.Graph(id="repos-by-language-bar", config={"displayModeBar": False}, style={"height": 300}),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Package Type Distribution", className="text-center"), className="bg-light"),
+                            dcc.Graph(id="package-type-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=6,
+                ),
             ],
             className="mb-4",
         ),
@@ -128,7 +147,7 @@ layout = dbc.Container(
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Infrastructure as Code Usage", className="text-center"), className="bg-light"),
-                dcc.Graph(id="iac-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
+                dcc.Graph(id="iac-bar-chart", config={"displayModeBar": False}, style={"height": 450}),
             ],
             className="mb-4",
             id="iac-card",
@@ -190,20 +209,7 @@ layout = dbc.Container(
             id="dev-frameworks-card",
         ),
 
-        # Hidden package-type container
-        html.Div(
-            id="package-type-card-container",
-            style={"display": "none"},
-            children=[
-                dbc.Card(
-                    [
-                        dbc.CardHeader(html.B("Package Type Distribution", className="text-center"), className="bg-light"),
-                        dcc.Graph(id="package-type-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
-                    ],
-                    className="mb-4",
-                )
-            ],
-        ),
+
     ],
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},

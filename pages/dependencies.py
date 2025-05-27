@@ -1,5 +1,3 @@
-# pages/dependencies.py
-
 import dash
 from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
@@ -8,8 +6,8 @@ from config.config import DEFAULT_FILTERS
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
-# Reusable card helper
-def card(title, graph_id, height=300):
+# Reusable card helper with fixed height
+def card(title, graph_id, height=400):
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -17,7 +15,7 @@ def card(title, graph_id, height=300):
                 dcc.Loading(
                     dcc.Graph(
                         id=graph_id,
-                        config={"displayModeBar": False},
+                        config={"staticPlot": True},
                         style={"height": f"{height}px"}
                     )
                 ),
@@ -62,7 +60,7 @@ layout = dbc.Container(
             [
                 dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
                 dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=4),
-                dbc.Col(card("Xeol Detection Coverage", "xeol-detection-chart"), width=4),
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
             ],
             className="mb-4",
         ),
@@ -84,7 +82,7 @@ layout = dbc.Container(
 
         # Xeol charts
         dbc.Row(
-            [dbc.Col(card("Xeol Top Products", "xeol-top-products-chart"), width=12)],
+            [dbc.Col(card("EOL Top Products", "xeol-top-products-chart"), width=12)],
             className="mb-4",
         ),
 
@@ -92,7 +90,7 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
-                dbc.Col(card("Xeol Exposure", "xeol-exposure-chart"), width=6),
+                dbc.Col(card("EOL Exposure", "xeol-exposure-chart", height=450), width=6),
             ],
             className="mb-4",
         ),

@@ -4,21 +4,24 @@ from viz.viz_dependency_types_chart import viz_package_type_distribution_chart
 
 def register_dependency_types_callbacks(app):
     @app.callback(
-        [
-            Output("package-type-bar-chart", "figure"),
-            Output("package-type-card-container", "style"),
-        ],
+        Output("package-type-bar-chart", "figure"),
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
             Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
         ]
     )
-    def update_package_type_chart(hosts, activity, langs):
+    def update_package_type_chart(hosts, activity, tc, langs, classification, app_id):
         filters = {
             "host_name": hosts,
             "activity_status": activity,
-            "main_language": langs
+            "transaction_cycle": tc,
+            "main_language": langs,
+            "classification_label": classification,
+            "app_id": app_id,
         }
 
         print("[PackageType] Filters:", filters)
@@ -26,6 +29,4 @@ def register_dependency_types_callbacks(app):
         print("[PackageType] Rows returned:", len(df))
 
         figure = viz_package_type_distribution_chart(df)
-        style = {"display": "block"} if not df.empty else {"display": "none"}
-
-        return figure, style
+        return figure
