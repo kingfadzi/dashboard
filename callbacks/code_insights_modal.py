@@ -33,7 +33,9 @@ def load_table_data(is_open, trigger, filters, page_current, page_size, sort_by)
     print("Modal open:", is_open)
     print("Filter trigger:", trigger)
     print("Current filters:", filters)
-    if not is_open:
+
+    if not is_open or filters is None or not isinstance(filters, dict):
+        print("Preventing update due to missing or invalid filters.")
         raise PreventUpdate
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
@@ -84,4 +86,3 @@ def sync_filters_applied_trigger(filters):
     if not filters:
         raise PreventUpdate
     return {"updated": True}
-
