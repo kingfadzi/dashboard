@@ -16,7 +16,6 @@ def card(title, graph_id, height=300):
         className="mb-4",
     )
 
-# Header row with compact "Table" button
 header_with_button = dbc.Row([
     dbc.Col(html.H2("Code Insights"), width="auto"),
     dbc.Col(
@@ -63,7 +62,7 @@ layout = dbc.Container([
         dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
     ]),
 
-    # Modal at the bottom
+    # Modal for table drilldown
     dbc.Modal(
         [
             dbc.ModalHeader(dbc.ModalTitle("Code Insights Table")),
@@ -80,9 +79,9 @@ layout = dbc.Container([
                         sort_action="custom",
                         sort_mode="single",
                         sort_by=[],
+                        export_format="csv",
                         style_table={"overflowX": "auto"},
                         style_cell={"textAlign": "left", "padding": "5px"},
-                        export_format="csv"
                     )
                 )
             ]),
@@ -94,5 +93,9 @@ layout = dbc.Container([
         size="xl",
         is_open=False,
         scrollable=True
-    )
+    ),
+
+    dcc.Store(id="default-filter-store"),
+    dcc.Store(id="filters-applied-trigger"),
+
 ], fluid=True, style={"marginTop": "0px", "paddingTop": "0px"})

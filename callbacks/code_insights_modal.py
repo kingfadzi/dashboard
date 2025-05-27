@@ -2,10 +2,8 @@ import pandas as pd
 from dash import Input, Output, State, callback
 from dash.exceptions import PreventUpdate
 from sqlalchemy import text
-from data.cache_instance import cache
 from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
-
 
 @callback(
     Output("code-insights-modal", "is_open"),
@@ -18,39 +16,33 @@ def toggle_modal(n_open, n_close, is_open):
         return not is_open
     raise PreventUpdate
 
-
 @callback(
     Output("code-insights-table", "data"),
     Output("code-insights-table", "columns"),
     Output("code-insights-total", "children"),
     Output("code-insights-total", "is_open"),
     Input("code-insights-modal", "is_open"),
-    Input("default-filter-store", "data"),
-    Input("code-insights-table", "page_current"),
-    Input("code-insights-table", "page_size"),
-    Input("code-insights-table", "sort_by"),
+    Input("filters-applied-trigger", "data"),
+    State("default-filter-store", "data"),
+    State("code-insights-table", "page_current"),
+    State("code-insights-table", "page_size"),
+    State("code-insights-table", "sort_by"),
 )
-def load_table_data(is_open, filters, page_current, page_size, sort_by):
+def load_table_data(is_open, _, filters, page_current, page_size, sort_by):
     if not is_open:
         raise PreventUpdate
 
-    # Build WHERE clause and parameters
     condition_string, param_dict = build_repo_filter_conditions(filters)
     extra_where = f" AND {condition_string}" if condition_string else ""
 
-    # Sorting logic
-    if sort_by:
-        sort_col = sort_by[0]["column_id"]
-        sort_dir = sort_by[0]["direction"].upper()
-        order_clause = f"ORDER BY {sort_col} {sort_dir}"
-    else:
-        order_clause = "ORDER BY hr.repo_id DESC"
+    order_clause = (
+        f"ORDER BY {sort_by[0]['column_id']} {sort_by[0]['direction'].upper()}"
+        if sort_by else "ORDER BY hr.repo_id DESC"
+    )
 
-    # Pagination
     param_dict["limit"] = page_size
     param_dict["offset"] = page_current * page_size
 
-    # Main query
     stmt = text(f"""
         SELECT hr.repo_id, hr.repo_slug, hr.app_id, hr.classification_label,
                hr.main_language, hr.all_languages, hr.activity_status
@@ -62,7 +54,6 @@ def load_table_data(is_open, filters, page_current, page_size, sort_by):
     """)
     df = pd.read_sql(stmt, engine, params=param_dict)
 
-    # Count query
     count_stmt = text(f"""
         SELECT COUNT(*) AS total
         FROM harvested_repositories hr
@@ -71,6 +62,14 @@ def load_table_data(is_open, filters, page_current, page_size, sort_by):
     """)
     total = pd.read_sql(count_stmt, engine, params=param_dict).iloc[0]["total"]
 
-    # Format and return
     columns = [{"name": col, "id": col} for col in df.columns]
     return df.to_dict("records"), columns, f"{total:,} repositories matched.", True
+
+@callback(
+    Output("filters-applied-trigger", "data"),
+    Input("default-filter-store", "data"),
+)
+def sync_filters_applied_trigger(filters):
+    if not filters:
+        raise PreventUpdate
+    return {"updated": True}
