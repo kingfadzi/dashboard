@@ -4,6 +4,7 @@ from .code_insights_cloc import register_code_insights_cloc_callbacks
 from .code_insights_gitlog_callbacks import register_code_insights_gitlog_callbacks
 from .code_insights_lizard_callbacks import register_code_insights_lizard_callbacks
 from .dependencies_callbacks import register_dependencies_callbacks
+from .modal_table_callbacks import register_modal_table_callbacks
 from .register_filter_callbacks import register_filter_callbacks
 from .active_inactive_callbacks import register_active_inactive_callbacks
 from .classification_callbacks import register_classification_callbacks
@@ -46,3 +47,4 @@ def register_all_callbacks(app):
     register_build_info_callbacks(app)
     register_dependencies_callbacks(app)
     register_filter_value_callbacks(app)
+    register_modal_table_callbacks(app)

@@ -4,12 +4,12 @@ import dash_bootstrap_components as dbc
 import plotly.io as pio
 from dash.dependencies import Input, Output, State
 
+from callbacks.modal_table_callbacks import register_modal_table_callbacks
 from data.cache_instance import cache
 from layouts.layout_filters import filter_layout  # Original name preserved
 from callbacks.register_all_callbacks import register_all_callbacks
 from callbacks.table_callbacks import register_table_callbacks
 import callbacks.repo_profile_callback
-import callbacks.code_insights_modal
 from config.config import DEFAULT_FILTERS
 from callbacks.register_filter_callbacks import register_filter_callbacks
 
@@ -72,6 +72,7 @@ app.layout = dbc.Container(
     ],
     fluid=True,
 )
+
 
 
 # Highlight active tab in navbar
