@@ -10,7 +10,7 @@ def register_filter_callbacks(app):
             Output("language-filter", "options"),
             Output("classification-filter", "options"),
         ],
-        Input("url", "pathname"),
+        Input("_pages_location", "pathname"),
     )
     def populate_dropdown_options(pathname):
         print(f"[populate_dropdown_options] triggered with pathname: {pathname}")

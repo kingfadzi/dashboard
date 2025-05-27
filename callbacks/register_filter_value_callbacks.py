@@ -12,14 +12,14 @@ def register_filter_value_callbacks(app):
             Output("host-name-filter",         "value"),
         ],
         [
-            Input("url",                      "pathname"),            # ① page load / navigation
+            Input("_pages_location",           "pathname"),
             Input("activity-status-filter",  "options"),
             Input("tc-filter",               "options"),
             Input("language-filter",         "options"),
             Input("classification-filter",   "options"),
             Input("host-name-filter",        "options"),
         ],
-        State("default-filter-store",      "data"),                  # ② read defaults, but not trigger
+        State("default-filter-store",      "data"),
         prevent_initial_call=False
     )
     def set_filter_defaults(pathname,
