@@ -1,24 +1,22 @@
-from dotenv import dotenv_values
+# config/config.py
 import os
+from dotenv import dotenv_values
 
-DEFAULT_FILTERS = {}
-
-def load_default_filters():
+def _load_default_filters():
     env_file = os.getenv("ENV_FILE", ".env")
-    config = dotenv_values(env_file)
+    cfg = dotenv_values(env_file)
 
-    def parse(val):
-        if not val:
-            return []
-        return [v.strip() for v in val.split(",")]
+    def parse(v):
+        return [x.strip() for x in v.split(",") if x.strip()] if v else []
 
-    filters = {
-        "host_name": parse(config.get("DEFAULT_HOST_NAME")),
-        "activity_status": parse(config.get("DEFAULT_ACTIVITY_STATUS")),
-        "transaction_cycle": parse(config.get("DEFAULT_TRANSACTION_CYCLE")),
-        "main_language": parse(config.get("DEFAULT_LANGUAGE")),
-        "classification": parse(config.get("DEFAULT_CLASSIFICATION")),
+    return {
+        "host_name":         parse(cfg.get("DEFAULT_HOST_NAME")),
+        "activity_status":   parse(cfg.get("DEFAULT_ACTIVITY_STATUS")),
+        "transaction_cycle": parse(cfg.get("DEFAULT_TRANSACTION_CYCLE")),
+        "main_language":     parse(cfg.get("DEFAULT_LANGUAGE")),
+        "classification_label": parse(cfg.get("DEFAULT_CLASSIFICATION")),
+        "app_id":            cfg.get("DEFAULT_APP_ID", ""),
     }
 
-    print("Loaded DEFAULT_FILTERS from .env:", filters)
-    return filters
+# Exported for imports
+DEFAULT_FILTERS = _load_default_filters()
