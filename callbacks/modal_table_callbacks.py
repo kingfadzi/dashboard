@@ -97,6 +97,10 @@ def register_modal_table_callbacks(
         extra = f" AND {where_clause}" if where_clause else ""
 
         # Fetch all matching rows
+
+
+
+
         stmt = text(f"""
             SELECT
               hr.repo_id,
