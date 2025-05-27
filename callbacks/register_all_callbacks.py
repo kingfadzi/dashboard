@@ -18,7 +18,7 @@ from .multi_language_usage_callbacks import register_multi_language_usage_callba
 from .last_commit_callbacks import register_last_commit_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .appserver_callbacks import register_appserver_callbacks
-from .dev_frameworks_callbacks import register_dev_frameworks_callbacks
+#from .dev_frameworks_callbacks import register_dev_frameworks_callbacks
 from .dependency_types_callbacks import register_dependency_types_callbacks
 from .switch_view_callbacks import register_switch_view_callbacks
 
@@ -36,7 +36,7 @@ def register_all_callbacks(app):
     register_last_commit_callbacks(app)
     register_kpi_callbacks(app)
     register_appserver_callbacks(app)
-    register_dev_frameworks_callbacks(app)
+    #register_dev_frameworks_callbacks(app)
     register_dependency_types_callbacks(app)
     register_switch_view_callbacks(app)
     register_code_insights_callbacks(app)

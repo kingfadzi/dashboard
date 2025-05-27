@@ -1,50 +1,49 @@
+# pages/overview.py
+
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
 from layouts.layout_kpi import kpi_layout
 from layouts.layout_filters import filter_layout
+from config.config import DEFAULT_FILTERS
 
-# Register this page at /graphs
-dash.register_page(__name__, path="/graphs", name="Overview" )
+# Register this page
+dash.register_page(__name__, path="/overview", name="Overview")
 
 layout = dbc.Container(
     [
 
         dcc.Location(id="url", refresh=False),
 
-        # Compact filter row with inline 'Switch to Table View' link
+        # Header row with H2 and matching Table button
         dbc.Row(
             [
+                dbc.Col(html.H2("Overview"), width="auto"),
                 dbc.Col(
-                    html.Div("Filters", className="text-muted small fw-bold mb-0"),
-                    width="auto",
-                ),
-                dbc.Col(
-                    html.A(
-                        id="switch-to-table-link",
-                        children="Switch to Table View",
-                        href="/table",  # Will be overridden by callback
-                        className="text-primary small fw-normal text-decoration-none",
-                        target="_self",
+                    dbc.Button(
+                        "Table",
+                        id="code-insights-modal-open",
+                        color="secondary",
+                        size="sm",
+                        className="ms-auto",
                     ),
                     width="auto",
-                    className="text-end",
+                    className="d-flex align-items-center justify-content-end",
                 ),
             ],
-            justify="between",
-            className="align-items-center g-0",
-            style={"margin": "0px", "padding": "0px"},
+            className="mb-2",
         ),
 
-        # Filter layout, stripped of margin/padding
+        # Filter layout placeholder (uncomment to enable)
         html.Div(
-            #filter_layout(),
+            # filter_layout(),
             style={"marginTop": "0px", "paddingTop": "0px"},
         ),
 
         # KPI Cards
         kpi_layout(),
 
+        # First row of charts
         dbc.Row(
             [
                 dbc.Col(
@@ -71,6 +70,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Total Lines of Code card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Total Lines of Code", className="text-center"), className="bg-light"),
@@ -79,6 +79,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Code Contribution Activity card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Code Contribution Activity", className="text-center"), className="bg-light"),
@@ -87,6 +88,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Primary Language in Multilingual Repos card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Primary Language in Multilingual Repos", className="text-center"), className="bg-light"),
@@ -95,6 +97,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Second row of charts
         dbc.Row(
             [
                 dbc.Col(
@@ -121,6 +124,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Infrastructure as Code Usage card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Infrastructure as Code Usage", className="text-center"), className="bg-light"),
@@ -130,6 +134,7 @@ layout = dbc.Container(
             id="iac-card",
         ),
 
+        # Code Contribution by Language card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Code Contribution by Language", className="text-center"), className="bg-light"),
@@ -138,6 +143,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Third row of charts
         dbc.Row(
             [
                 dbc.Col(
@@ -164,6 +170,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Application Server Usage card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Application Server Usage", className="text-center"), className="bg-light"),
@@ -173,6 +180,7 @@ layout = dbc.Container(
             id="appserver-card",
         ),
 
+        # Top Developer Frameworks card
         dbc.Card(
             [
                 dbc.CardHeader(html.B("Top Developer Frameworks", className="text-center"), className="bg-light"),
@@ -182,10 +190,10 @@ layout = dbc.Container(
             id="dev-frameworks-card",
         ),
 
-
+        # Hidden package-type container
         html.Div(
             id="package-type-card-container",
-            style={"display": "none"},  # Initially hidden; shown via callback
+            style={"display": "none"},
             children=[
                 dbc.Card(
                     [
@@ -200,3 +208,44 @@ layout = dbc.Container(
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},
 )
+
+# Shared Table Modal (reuses code_insights_modal callbacks)
+layout.children.append(
+    dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle("Repository Table")),
+            dbc.ModalBody(
+                [
+                    dbc.Alert(id="code-insights-total", color="info", is_open=False),
+                    dcc.Loading(
+                        dash_table.DataTable(
+                            id="code-insights-table",
+                            columns=[],
+                            data=[],
+                            page_current=0,
+                            page_size=10,
+                            page_action="custom",
+                            sort_action="custom",
+                            sort_mode="single",
+                            sort_by=[],
+                            export_format="csv",
+                            style_table={"overflowX": "auto"},
+                            style_cell={"textAlign": "left", "padding": "5px"},
+                        )
+                    ),
+                ]
+            ),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="code-insights-modal-close", className="ms-auto", n_clicks=0)
+            ),
+        ],
+        id="code-insights-modal",
+        size="xl",
+        is_open=False,
+        scrollable=True,
+    )
+)
+
+# Shared filter stores
+layout.children.append(dcc.Store(id="default-filter-store", data=DEFAULT_FILTERS))
+layout.children.append(dcc.Store(id="filters-applied-trigger", data=None))

@@ -1,47 +1,150 @@
+# pages/dependencies.py
+
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 import dash_bootstrap_components as dbc
 from layouts.layout_filters import filter_layout
+from config.config import DEFAULT_FILTERS
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
-layout = dbc.Container([
-    html.H2("Dependencies"),
-    #filter_layout(),
+# Reusable card helper
+def card(title, graph_id, height=300):
+    return dbc.Card(
+        [
+            dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
+            dbc.CardBody(
+                dcc.Loading(
+                    dcc.Graph(
+                        id=graph_id,
+                        config={"displayModeBar": False},
+                        style={"height": f"{height}px"}
+                    )
+                ),
+                className="p-0"
+            ),
+        ],
+        className="mb-4",
+    )
 
-    # Detection coverage
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="dep-detection-chart")), width=4),
-        dbc.Col(dcc.Loading(dcc.Graph(id="iac-detection-chart")), width=4),
-        dbc.Col(dcc.Loading(dcc.Graph(id="xeol-detection-chart")), width=4),
-    ]),
+# Header with title and Table button
+header_with_button = dbc.Row(
+    [
+        dbc.Col(html.H2("Dependencies"), width="auto"),
+        dbc.Col(
+            dbc.Button(
+                "Table",
+                id="code-insights-modal-open",
+                color="secondary",
+                size="sm",
+                className="ms-auto",
+            ),
+            width="auto",
+            className="d-flex align-items-center justify-content-end",
+        ),
+    ],
+    className="mb-2",
+)
 
-    html.Hr(),
+layout = dbc.Container(
+    [
+        dcc.Location(id="url", refresh=False),
+        header_with_button,
 
-    # New Syft dependency insights
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="package-type-distribution-chart")), width=6),
-        dbc.Col(dcc.Loading(dcc.Graph(id="framework-distribution-chart")), width=6),
-    ]),
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="top-packages-chart")), width=12),
-    ]),
+        # Optional filters
+        html.Div(
+            # filter_layout(),
+            style={"marginTop": "0px", "paddingTop": "0px"},
+        ),
 
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="xeol-top-products-chart")), width=12),
-    ]),
-    # Xeol Charts
+        # Detection coverage cards
+        dbc.Row(
+            [
+                dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
+                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=4),
+                dbc.Col(card("Xeol Detection Coverage", "xeol-detection-chart"), width=4),
+            ],
+            className="mb-4",
+        ),
 
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="dependency-volume-chart")), width=6),
+        html.Hr(),
 
-        dbc.Col(dcc.Loading(dcc.Graph(id="xeol-exposure-chart")), width=6),
-    ]),
-    # IaC Insights
-    dbc.Row([
-        dbc.Col(dcc.Loading(dcc.Graph(id="iac-framework-usage-chart")), width=6),
-        dbc.Col(dcc.Loading(dcc.Graph(id="iac-adoption-chart")), width=6),
-    ]),
+        # Syft dependency insights
+        dbc.Row(
+            [
+                dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=6),
+                dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=6),
+            ],
+            className="mb-4",
+        ),
+        dbc.Row(
+            [dbc.Col(card("Top Packages", "top-packages-chart"), width=12)],
+            className="mb-4",
+        ),
 
+        # Xeol charts
+        dbc.Row(
+            [dbc.Col(card("Xeol Top Products", "xeol-top-products-chart"), width=12)],
+            className="mb-4",
+        ),
 
-], fluid=True)
+        # Volume & exposure
+        dbc.Row(
+            [
+                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
+                dbc.Col(card("Xeol Exposure", "xeol-exposure-chart"), width=6),
+            ],
+            className="mb-4",
+        ),
+
+        # IaC insights
+        dbc.Row(
+            [
+                dbc.Col(card("IaC Framework Usage", "iac-framework-usage-chart"), width=6),
+                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
+            ],
+            className="mb-4",
+        ),
+
+        # Shared Table Modal
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Repository Table")),
+                dbc.ModalBody(
+                    [
+                        dbc.Alert(id="code-insights-total", color="info", is_open=False),
+                        dcc.Loading(
+                            dash_table.DataTable(
+                                id="code-insights-table",
+                                columns=[],
+                                data=[],
+                                page_current=0,
+                                page_size=10,
+                                page_action="custom",
+                                sort_action="custom",
+                                sort_mode="single",
+                                sort_by=[],
+                                export_format="csv",
+                                style_table={"overflowX": "auto"},
+                                style_cell={"textAlign": "left", "padding": "5px"},
+                            )
+                        ),
+                    ]
+                ),
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="code-insights-modal-close", className="ms-auto")
+                ),
+            ],
+            id="code-insights-modal",
+            size="xl",
+            is_open=False,
+            scrollable=True,
+        ),
+
+        # Shared stores
+        dcc.Store(id="default-filter-store", data=DEFAULT_FILTERS),
+        dcc.Store(id="filters-applied-trigger", data=None),
+    ],
+    fluid=True,
+    style={"marginTop": "0px", "paddingTop": "0px"},
+)
