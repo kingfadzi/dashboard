@@ -8,7 +8,7 @@ from data.sql_filter_utils import build_repo_filter_conditions
 
 @callback(
     Output("default-filter-store", "data"),
-    Input("main_language-filter", "value"),
+    Input("language-filter", "value"),  # corrected input ID
     Input("activity-status-filter", "value"),
     Input("tc-filter", "value"),  # transaction_cycle
     Input("classification-filter", "value"),  # classification_label
