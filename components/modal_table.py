@@ -13,23 +13,39 @@ def modal_table():
                     dcc.Loading(
                         dash_table.DataTable(
                             id="modal-table",
-                            columns=[],
-                            data=[],
+                            columns=[
+                                {
+                                    "name": "Repo ID",
+                                    "id": "repo_id",
+                                    "presentation": "markdown",
+                                },
+                                {
+                                    "name": "App ID",
+                                    "id": "app_id",
+                                    "presentation": "markdown",
+                                },
+                                # add any additional columns here…
+                            ],
+                            data=[],  # to be populated in your callback
 
-                            # native pagination & sorting
+                            # Pagination & sorting
                             page_action="native",
                             page_size=10,
                             sort_action="native",
                             sort_mode="single",
 
-                            # disable built-in export
+                            # Disable built-in export
                             export_format="none",
                             markdown_options={"html": True},
                             tooltip_duration=None,
                             tooltip_data=[],
 
-                            # styling
-                            style_table={"overflowX": "auto"},
+                            # Styling: fill modal width
+                            style_table={
+                                "overflowX": "auto",
+                                "width": "100%",
+                                "minWidth": "100%",
+                            },
                             style_header={
                                 "backgroundColor": "#e9ecef",
                                 "fontWeight": "bold",
@@ -40,10 +56,10 @@ def modal_table():
                                 "textAlign": "left",
                                 "padding": "10px",
                                 "borderBottom": "1px solid #dee2e6",
-                                "maxWidth": "180px",
+                                "minWidth": "120px",
+                                "whiteSpace": "nowrap",
                                 "overflow": "hidden",
                                 "textOverflow": "ellipsis",
-                                "whiteSpace": "nowrap",
                                 "fontFamily": "system-ui, sans-serif",
                                 "fontSize": "14px",
                             },
@@ -60,7 +76,7 @@ def modal_table():
                     ),
                     html.Div(
                         dbc.Button(
-                            "Download CSV (up to 500)",
+                            "Downloadx CSV (up to 500)",
                             id="download-all-btn",
                             color="link"
                         ),
@@ -74,7 +90,7 @@ def modal_table():
             ),
         ],
         id="modal",
-        size="xl",
+        fullscreen=True,    # span full viewport width
         is_open=False,
         scrollable=True,
     )
