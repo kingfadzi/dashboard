@@ -13,6 +13,7 @@ from data.sql_filter_utils import build_repo_filter_conditions
 )
 def toggle_modal(n_open, n_close, is_open):
     if n_open or n_close:
+        print("Toggling modal:", not is_open)
         return not is_open
     raise PreventUpdate
 
@@ -28,11 +29,17 @@ def toggle_modal(n_open, n_close, is_open):
     State("code-insights-table", "page_size"),
     State("code-insights-table", "sort_by"),
 )
-def load_table_data(is_open, _, filters, page_current, page_size, sort_by):
+def load_table_data(is_open, trigger, filters, page_current, page_size, sort_by):
+    print("Modal open:", is_open)
+    print("Filter trigger:", trigger)
+    print("Current filters:", filters)
     if not is_open:
         raise PreventUpdate
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
+    print("Condition string:", condition_string)
+    print("SQL params:", param_dict)
+
     extra_where = f" AND {condition_string}" if condition_string else ""
 
     order_clause = (
@@ -52,7 +59,9 @@ def load_table_data(is_open, _, filters, page_current, page_size, sort_by):
         {order_clause}
         LIMIT :limit OFFSET :offset
     """)
+    print("Executing query:", stmt)
     df = pd.read_sql(stmt, engine, params=param_dict)
+    print("Fetched rows:", len(df))
 
     count_stmt = text(f"""
         SELECT COUNT(*) AS total
@@ -61,6 +70,7 @@ def load_table_data(is_open, _, filters, page_current, page_size, sort_by):
         WHERE TRUE {extra_where}
     """)
     total = pd.read_sql(count_stmt, engine, params=param_dict).iloc[0]["total"]
+    print("Total matching rows:", total)
 
     columns = [{"name": col, "id": col} for col in df.columns]
     return df.to_dict("records"), columns, f"{total:,} repositories matched.", True
@@ -70,6 +80,8 @@ def load_table_data(is_open, _, filters, page_current, page_size, sort_by):
     Input("default-filter-store", "data"),
 )
 def sync_filters_applied_trigger(filters):
+    print("Filter store updated:", filters)
     if not filters:
         raise PreventUpdate
     return {"updated": True}
+
