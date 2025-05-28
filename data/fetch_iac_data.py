@@ -59,5 +59,5 @@ def fetch_iac_server_orchestration_usage(filters=None):
 
         return pd.read_sql(text(sql), engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
