@@ -1,7 +1,7 @@
 import pandas as pd
 from dash import Input, Output, State, callback, ctx, dcc
 from dash.exceptions import PreventUpdate
-from dash_ag_grid import AgGrid, GridOptionsBuilder
+from dash_ag_grid import AgGrid
 from sqlalchemy import text
 from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
@@ -39,6 +39,29 @@ def build_repo_modal_query(extra_clause: str = "", limit: int = None):
     if limit:
         query += f" LIMIT {limit}"
     return text(query)
+
+
+def build_column_defs(df: pd.DataFrame):
+    def default_def(col):
+        return {
+            "headerName": col.replace("_", " ").title(),
+            "field": col,
+            "sortable": True,
+            "filter": True,
+            "resizable": True,
+            "wrapText": True,
+            "autoHeight": True,
+        }
+
+    column_defs = [default_def(col) for col in df.columns]
+
+    for col in column_defs:
+        if col["field"] in ["repo_link", "app_link"]:
+            col["cellRenderer"] = "markdown"
+        if col["field"] in ["Total LOC", "Total Commits", "Contributors"]:
+            col["type"] = ["numericColumn", "rightAligned"]
+
+    return column_defs
 
 
 def register_modal_table_callbacks(
@@ -88,16 +111,8 @@ def register_modal_table_callbacks(
             "Total LOC", "Total Commits", "Contributors"
         ]]
 
-        # AG Grid config
-        gb = GridOptionsBuilder.from_dataframe(df)
-        gb.configure_default_column(resizable=True, sortable=True, filter=True, wrapText=True, autoHeight=True)
-        gb.configure_column("repo_link", headerName="Repo ID", cellRenderer="markdown")
-        gb.configure_column("app_link", headerName="App ID", cellRenderer="markdown")
-
-        for col in ["Total LOC", "Total Commits", "Contributors"]:
-            gb.configure_column(col, type=["numericColumn", "rightAligned"])
-
-        return df.to_dict("records"), gb.build()["columnDefs"], f"{len(df):,} repositories matched.", True
+        column_defs = build_column_defs(df)
+        return df.to_dict("records"), column_defs, f"{len(df):,} repositories matched.", True
 
     @app.callback(
         Output(download_id, "data"),
@@ -114,7 +129,6 @@ def register_modal_table_callbacks(
         df = pd.read_sql(stmt, engine, params=params)
         df = df.drop(columns=["repo_slug", "browse_url"], errors="ignore")
         return dcc.send_data_frame(df.to_csv, filename="repositories.csv", index=False)
-
 
     @app.callback(
         Output(modal_id, "is_open"),
