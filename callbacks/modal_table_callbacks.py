@@ -1,7 +1,7 @@
 import pandas as pd
 from dash import Input, Output, State, callback, ctx, dcc
 from dash.exceptions import PreventUpdate
-from dash_ag_grid import AgGrid 
+from dash_ag_grid import AgGrid, GridOptionsBuilder
 from sqlalchemy import text
 from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
@@ -48,7 +48,10 @@ def register_modal_table_callbacks(
         trigger_store_id="filters-applied-trigger",
         total_id="modal-total",
         download_id="download-all",
-        download_btn_id="download-all-btn"
+        download_btn_id="download-all-btn",
+        modal_id="modal",
+        open_btn_id="modal-open",
+        close_btn_id="modal-close"
 ):
     @app.callback(
         Output(table_id, "rowData"),
@@ -111,3 +114,14 @@ def register_modal_table_callbacks(
         df = pd.read_sql(stmt, engine, params=params)
         df = df.drop(columns=["repo_slug", "browse_url"], errors="ignore")
         return dcc.send_data_frame(df.to_csv, filename="repositories.csv", index=False)
+
+
+    @app.callback(
+        Output(modal_id, "is_open"),
+        [Input(open_btn_id, "n_clicks"), Input(close_btn_id, "n_clicks")],
+        State(modal_id, "is_open"),
+    )
+    def toggle_modal(n1, n2, is_open):
+        if n1 or n2:
+            return not is_open
+        return is_open
