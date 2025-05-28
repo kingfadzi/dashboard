@@ -41,7 +41,7 @@ def build_repo_modal_query(extra_clause: str = "", limit: int = None):
     return text(query)
 
 
-def register_modal_table_callbacks_aggrid(
+def register_modal_table_callbacks(
         app,
         table_id="modal-table",
         filter_store_id="default-filter-store",
