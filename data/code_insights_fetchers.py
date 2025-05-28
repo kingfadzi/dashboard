@@ -43,8 +43,10 @@ def fetch_normalized_weight(filters=None):
             FROM go_enry_analysis ga
             JOIN harvested_repositories hr ON ga.repo_id = hr.repo_id
             JOIN languages l ON ga.language = l.name
-            WHERE l.type = 'programming' and ga.percent_usage > 0
-            {f'AND {condition_string}' if condition_string else ''}
+            WHERE l.type = 'programming'
+              AND ga.percent_usage IS NOT NULL
+              AND ga.percent_usage > 0
+              {f'AND {condition_string}' if condition_string else ''}
             GROUP BY ga.language
             ORDER BY avg_percent_usage DESC
             LIMIT 20
@@ -56,3 +58,4 @@ def fetch_normalized_weight(filters=None):
         filters, alias="hr", field_alias_map={"repo_slug": "hr"}
     )
     return query_data(condition_string, param_dict)
+
