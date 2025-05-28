@@ -38,6 +38,9 @@ layout = dbc.Container(
         # Language Insights
         card("Language Role Distribution",      "role-distribution-chart"),
         card("Normalized Language Weight (Top 20)", "normalized-weight-chart"),
+      
+        card("Markup/Data Language Usage", "markup-language-usage-chart"),
+])
 
         # Gitlog Insights
         dbc.Row(
