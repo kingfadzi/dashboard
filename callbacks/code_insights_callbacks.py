@@ -1,9 +1,11 @@
 from dash import Input, Output
 
+from data.fetch_markup_language import fetch_markup_language_usage
+
 from data.code_insights_fetchers import (
     fetch_role_distribution,
-    fetch_normalized_weight,
-    fetch_markup_language_usage,
+    fetch_normalized_weight
+    
 )
 from viz.viz_code_insights_charts import (
     render_role_distribution_chart,
