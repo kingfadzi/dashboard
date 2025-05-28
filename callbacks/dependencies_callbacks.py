@@ -23,7 +23,7 @@ from viz.viz_dependencies import render_iac_adoption_by_framework_count_chart
 
 from dash import Input, Output
 from data.fetch_spring_versions import fetch_spring_framework_versions
-from visualizations.viz_spring_versions import render_spring_version_chart
+from viz.viz_spring_versions import render_spring_version_chart
 
 def register_dependencies_callbacks(app):
     filter_inputs = [
