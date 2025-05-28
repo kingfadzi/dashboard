@@ -13,7 +13,7 @@ def fetch_spring_framework_versions(filters=None):
                 COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            WHERE sd.framework = :framework
+            WHERE sd.framework ILIKE :framework
             {f"AND {condition_string}" if condition_string else ""}
             GROUP BY sd.version
             ORDER BY repo_count DESC
