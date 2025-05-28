@@ -33,12 +33,20 @@ header_with_button = dbc.Row(
 layout = dbc.Container(
     [
         header_with_button,
-        filter_layout(),
 
         # Language Insights
         card("Language Role Distribution", "role-distribution-chart"),
         card("Normalized Language Weight (Top 20)", "normalized-weight-chart"),
-        card("Markup/Data Language Usage", "markup-language-usage-chart"),
+        dbc.Card(
+            [
+                dbc.CardHeader(html.B("Markup/Data Language Usage", className="text-center"), className="bg-light"),
+                dbc.CardBody(
+                    dcc.Loading(id="markup-language-usage-chart", type="default"),
+                    className="p-0",
+                ),
+            ],
+            className="mb-4",
+        ),
 
         # Gitlog Insights
         dbc.Row(

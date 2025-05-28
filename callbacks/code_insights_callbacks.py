@@ -58,7 +58,7 @@ def register_code_insights_callbacks(app):
         return render_normalized_weight_chart(df).figure
 
     @app.callback(
-        Output("markup-language-usage-chart", "figure"),
+        Output("markup-language-usage-chart", "children"),
         Input("host-name-filter", "value"),
         Input("app-id-filter", "value"),
         Input("tc-filter", "value"),
