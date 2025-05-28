@@ -1,7 +1,7 @@
 import pandas as pd
 from dash import Input, Output, State, callback, ctx, dcc
 from dash.exceptions import PreventUpdate
-from dash_ag_grid import GridOptionsBuilder
+from dash_ag_grid import AgGrid 
 from sqlalchemy import text
 from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
