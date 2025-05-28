@@ -6,8 +6,8 @@ from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
 
 
-def build_repo_modal_query(extra_clause: str = ""):
-    return text(f"""
+def build_repo_modal_query(extra_clause: str = "", limit: int = None):
+    query = f"""
         SELECT
           hr.repo_id,
           hr.repo_slug,
@@ -34,7 +34,10 @@ def build_repo_modal_query(extra_clause: str = ""):
         ) cm ON hr.repo_id = cm.repo_id
         WHERE TRUE {extra_clause}
         ORDER BY rm.last_commit_date DESC
-    """)
+    """
+    if limit:
+        query += f" LIMIT {limit}"
+    return text(query)
 
 
 def register_modal_table_callbacks(
@@ -128,12 +131,10 @@ def register_modal_table_callbacks(
             axis=1
         )
 
-        # Truncate all_languages to 5
         df["all_languages"] = df["all_languages"].apply(
             lambda langs: ", ".join(langs.split(", ")[:5]) + "..." if langs and len(langs.split(", ")) > 5 else langs
         )
 
-        # Format bytes
         def format_bytes(b):
             if b is None:
                 return "0 B"
@@ -146,23 +147,18 @@ def register_modal_table_callbacks(
         df["repo_size"] = df["repo_size_bytes"].apply(format_bytes)
         df.drop(columns=["repo_size_bytes"], inplace=True)
 
-        # Format date
         df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%b %d, %Y")
 
-        # Format repo age
         df["repo_age_days"] = df["repo_age_days"].apply(
             lambda d: f"{int(d)//365} yr" if d >= 365 else f"{int(d)//30} mo" if d >= 30 else f"{int(d)} d"
         )
 
-        # Format numbers
         df["total_commits"] = df["total_commits"].apply(lambda x: f"{int(x):,}" if pd.notnull(x) else "")
         df["number_of_contributors"] = df["number_of_contributors"].apply(lambda x: f"{int(x):,}" if pd.notnull(x) else "")
         df["total_loc"] = df["total_loc"].apply(lambda x: f"{int(x):,}" if pd.notnull(x) else "")
 
-        # Drop unused
         df = df.drop(columns=["repo_slug", "browse_url", "host_name", "raw_repo_id", "main_language"])
 
-        # Rename columns
         column_name_map = {
             "classification_label": "Classification",
             "repo_age_days": "Age",
@@ -196,7 +192,7 @@ def register_modal_table_callbacks(
 
         where_clause, params = build_repo_filter_conditions(filters)
         extra = f" AND {where_clause}" if where_clause else ""
-        stmt = build_repo_modal_query(extra + " LIMIT 500")
+        stmt = build_repo_modal_query(extra, limit=500)
         df = pd.read_sql(stmt, engine, params=params)
         df = df.drop(columns=["repo_slug", "browse_url"], errors="ignore")
         return dcc.send_data_frame(df.to_csv, filename="repositories.csv", index=False)
