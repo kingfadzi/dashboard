@@ -1,10 +1,9 @@
-# pages/code_insights.py
-
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from config.config import DEFAULT_FILTERS
 from components.modal_table import modal_table
+from layouts.layout_filters import filter_layout
 
 dash.register_page(__name__, path="/code-insights", name="Code Insights")
 
@@ -34,38 +33,37 @@ header_with_button = dbc.Row(
 layout = dbc.Container(
     [
         header_with_button,
+        filter_layout(),
 
         # Language Insights
-        card("Language Role Distribution",      "role-distribution-chart"),
+        card("Language Role Distribution", "role-distribution-chart"),
         card("Normalized Language Weight (Top 20)", "normalized-weight-chart"),
-      
         card("Markup/Data Language Usage", "markup-language-usage-chart"),
-])
 
         # Gitlog Insights
         dbc.Row(
             [
                 dbc.Col(card("Average File Size (code_size / file_count)", "avg-file-size-chart"), width=6),
-                dbc.Col(card("Contributor Dominance",                    "contributor-dominance-chart"), width=6),
+                dbc.Col(card("Contributor Dominance", "contributor-dominance-chart"), width=6),
             ]
         ),
         dbc.Row(
             [
-                dbc.Col(card("Branch Sprawl",               "branch-sprawl-chart"), width=6),
-                dbc.Col(card("Repository Age Buckets",      "repo-age-chart"),        width=6),
+                dbc.Col(card("Branch Sprawl", "branch-sprawl-chart"), width=6),
+                dbc.Col(card("Repository Age Buckets", "repo-age-chart"), width=6),
             ]
         ),
 
         # Cloc Insights
         dbc.Row(
             [
-                dbc.Col(card("Code Volume",       "code-volume-chart"), width=6),
-                dbc.Col(card("File Count",        "file-count-chart"),  width=6),
+                dbc.Col(card("Code Volume", "code-volume-chart"), width=6),
+                dbc.Col(card("File Count", "file-count-chart"), width=6),
             ]
         ),
         dbc.Row(
             [
-                dbc.Col(card("Code Composition",  "code-composition-chart"), width=6),
+                dbc.Col(card("Code Composition", "code-composition-chart"), width=6),
                 dbc.Col(card("File Size Scatter", "code-file-scatter-chart"), width=6),
             ]
         ),
@@ -73,14 +71,14 @@ layout = dbc.Container(
         # Lizard Insights
         dbc.Row(
             [
-                dbc.Col(card("Total Cyclomatic Complexity",       "total-ccn-chart"),             width=6),
+                dbc.Col(card("Total Cyclomatic Complexity", "total-ccn-chart"), width=6),
                 dbc.Col(card("Function Count (Modularity vs Monoliths)", "function-count-chart"), width=6),
             ]
         ),
         dbc.Row(
             [
-                dbc.Col(card("Total Logical Lines of Code",      "total-nloc-chart"),     width=6),
-                dbc.Col(card("Complexity vs Function Count",     "ccn-vs-function-count-chart"), width=6),
+                dbc.Col(card("Total Logical Lines of Code", "total-nloc-chart"), width=6),
+                dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
             ]
         ),
 
