@@ -44,11 +44,10 @@ def fetch_normalized_weight(filters=None):
             JOIN harvested_repositories hr ON ga.repo_id = hr.repo_id
             JOIN languages l ON ga.language = l.name
             WHERE l.type = 'programming'
-              AND ga.percent_usage IS NOT NULL
+              AND ga.percent_usage <> 'NaN'
               AND ga.percent_usage > 0
               {f'AND {condition_string}' if condition_string else ''}
             GROUP BY ga.language
-            HAVING COUNT(ga.percent_usage) > 0
             ORDER BY avg_percent_usage DESC
             LIMIT 20
         """
