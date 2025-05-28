@@ -48,6 +48,7 @@ def fetch_normalized_weight(filters=None):
               AND ga.percent_usage > 0
               {f'AND {condition_string}' if condition_string else ''}
             GROUP BY ga.language
+            HAVING COUNT(ga.percent_usage) > 0
             ORDER BY avg_percent_usage DESC
             LIMIT 20
         """
