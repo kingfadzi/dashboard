@@ -105,6 +105,12 @@ layout = dbc.Container(
             ],
             className="mb-4",
         ),
+        dbc.Row(
+            [
+                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=12),
+            ],
+            className="mb-4",
+        ),
 
         # Shared modal + table
         modal_table(),

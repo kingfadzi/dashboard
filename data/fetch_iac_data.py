@@ -34,3 +34,30 @@ def fetch_iac_data(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+@cache.memoize()
+def fetch_iac_server_orchestration_usage(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = f"""
+            SELECT 
+                ic.framework,
+                COUNT(DISTINCT ic.repo_id) AS repo_count
+            FROM iac_components ic
+            JOIN harvested_repositories hr ON ic.repo_id = hr.repo_id
+            WHERE ic.sub_category ILIKE ANY (
+                ARRAY['application servers', 'kubernetes orchestration']
+            )
+            {f"AND {condition_string}" if condition_string else ""}
+            GROUP BY ic.framework
+            ORDER BY repo_count DESC
+        """
+
+        logger.debug("Executing IaC server/orchestration query:")
+        logger.debug(sql)
+        logger.debug("With parameters:")
+        logger.debug(param_dict)
+
+        return pd.read_sql(text(sql), engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    return query_data(condition_string, param_dict)

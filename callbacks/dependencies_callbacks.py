@@ -25,6 +25,10 @@ from dash import Input, Output
 from data.fetch_spring_versions import fetch_spring_framework_versions
 from viz.viz_spring_versions import render_spring_version_chart
 
+from data.fetch_iac_data import fetch_iac_server_orchestration_usage
+from viz.viz_iac_server_orchestration import render_iac_server_orchestration_chart
+
+
 def register_dependencies_callbacks(app):
     filter_inputs = [
         Input("host-name-filter", "value"),
@@ -134,3 +138,27 @@ def register_dependencies_callbacks(app):
             render_spring_version_chart(df_core, "Spring Core Versions"),
             render_spring_version_chart(df_boot, "Spring Boot Core Versions")
         )
+      
+
+    @app.callback(
+        Output("iac-server-orchestration-chart", "figure"),
+        [
+            Input("host-name-filter", "value"),
+            Input("app-id-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("activity-status-filter", "value"),
+        ]
+    )
+    def update_chart(hosts, apps, tcs, langs, classifications, activity):
+        filters = {
+            "host_name": hosts,
+            "app_id": apps,
+            "transaction_cycle": tcs,
+            "main_language": langs,
+            "classification_label": classifications,
+            "activity_status": activity,
+        }
+        df = fetch_iac_server_orchestration_usage(filters)
+        return render_iac_server_orchestration_chart(df)
