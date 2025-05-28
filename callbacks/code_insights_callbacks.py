@@ -2,7 +2,7 @@ from dash import Input, Output
 
 from data.fetch_markup_language import fetch_markup_language_usage
 
-from data.code_insights_fetchers import (
+from data.code_insights_enry_fetchers import (
     fetch_role_distribution,
     fetch_normalized_weight
     
