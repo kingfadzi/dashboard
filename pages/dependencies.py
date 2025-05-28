@@ -1,5 +1,3 @@
-# pages/dependencies.py
-
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -75,6 +73,15 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # 🔽 Spring framework version insights
+        dbc.Row(
+            [
+                dbc.Col(card("Spring Core Version Usage", "spring-core-version-chart"), width=6),
+                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=6),
+            ],
+            className="mb-4",
+        ),
+
         # Xeol charts
         dbc.Row(
             [dbc.Col(card("EOL Top Products", "xeol-top-products-chart"), width=12)],
@@ -85,7 +92,7 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
-                dbc.Col(card("EOL Exposure",      "xeol-exposure-chart", height=450),   width=6),
+                dbc.Col(card("EOL Exposure",      "xeol-exposure-chart", height=450), width=6),
             ],
             className="mb-4",
         ),

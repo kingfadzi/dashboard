@@ -21,6 +21,10 @@ from viz.viz_dependencies import (
 from data.dependencies_fetchers import fetch_iac_adoption_by_framework_count
 from viz.viz_dependencies import render_iac_adoption_by_framework_count_chart
 
+from dash import Input, Output
+from data.fetch_spring_versions import fetch_spring_framework_versions
+from visualizations.viz_spring_versions import render_spring_version_chart
+
 def register_dependencies_callbacks(app):
     filter_inputs = [
         Input("host-name-filter", "value"),
@@ -101,3 +105,32 @@ def register_dependencies_callbacks(app):
         filters = dict(zip(filter_keys, vals))
         df = fetch_iac_adoption_by_framework_count(filters)
         return render_iac_adoption_by_framework_count_chart(df)
+
+    @app.callback(
+        [
+            Output("spring-core-version-chart", "figure"),
+            Output("spring-boot-version-chart", "figure")
+        ],
+        [
+            Input("host-name-filter", "value"),
+            Input("app-id-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("activity-status-filter", "value"),
+        ]
+    )
+    def update_spring_versions(hosts, apps, tcs, langs, classifications, activity):
+        filters = {
+            "host_name": hosts,
+            "app_id": apps,
+            "transaction_cycle": tcs,
+            "main_language": langs,
+            "classification_label": classifications,
+            "activity_status": activity
+        }
+        df_core, df_boot = fetch_spring_framework_versions(filters)
+        return (
+            render_spring_version_chart(df_core, "Spring Core Versions"),
+            render_spring_version_chart(df_boot, "Spring Boot Core Versions")
+        )
