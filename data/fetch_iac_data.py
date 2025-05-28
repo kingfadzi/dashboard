@@ -44,7 +44,7 @@ def fetch_iac_server_orchestration_usage(filters=None):
                 COUNT(DISTINCT ic.repo_id) AS repo_count
             FROM iac_components ic
             JOIN harvested_repositories hr ON ic.repo_id = hr.repo_id
-            WHERE ic.sub_category ILIKE ANY (
+            WHERE ic.subcategory ILIKE ANY (
                 ARRAY['application servers', 'kubernetes orchestration']
             )
             {f"AND {condition_string}" if condition_string else ""}
