@@ -91,7 +91,7 @@ layout = dbc.Container(
         ),
 
         # Shared modal + table
-        modal_table,
+        modal_table(),
 
         # Stores for filters
         dcc.Store(id="default-filter-store", data=DEFAULT_FILTERS),
