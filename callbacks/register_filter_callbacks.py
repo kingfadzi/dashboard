@@ -11,6 +11,8 @@ def register_filter_callbacks(app):
             Output("classification-filter", "options"),
         ],
         Input("_pages_location", "pathname"),
+        allow_duplicate=True,
+        prevent_initial_call=True,
     )
     def populate_dropdown_options(pathname):
         print(f"[populate_dropdown_options] triggered with pathname: {pathname}")

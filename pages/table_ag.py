@@ -3,38 +3,23 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
 
-dash.register_page(__name__, path="/table")
+dash.register_page(__name__, path="/table_ag", name="Build Info – Table View")
 
 layout = dbc.Container(
     [
 
         dcc.Location(id="url", refresh=False),
 
-        # Compact header row with inline switch link
         dbc.Row(
             [
+                dbc.Col(html.H2("X – Table View"), width="auto"),
                 dbc.Col(
-                    html.Div("Filters", className="text-muted small fw-bold mb-0"),
+                    html.Div(id="table-link-container", className="d-flex justify-content-end"),
                     width="auto",
-                ),
-                dbc.Col(
-                    html.A(
-                        id="switch-to-graphs-link",
-                        children="Switch to Graphs View",
-                        href="/graphs",
-                        className="text-primary small fw-normal text-decoration-none",
-                        target="_self",
-                    ),
-                    width="auto",
-                    className="text-end",
                 ),
             ],
-            justify="between",
-            className="align-items-center g-0",
-            style={"margin": "0", "padding": "0"},
+            className="mb-2 align-items-center",
         ),
-
-        html.Div(style={"marginTop": "0", "paddingTop": "0"}),
 
         dbc.Card(
             [
@@ -43,14 +28,10 @@ layout = dbc.Container(
                     dcc.Loading(
                         dag.AgGrid(
                             id="temp-table",
-                            columnDefs=[],  # to be set dynamically
-                            rowData=[],     # to be set dynamically
+                            columnDefs=[], rowData=[],
                             defaultColDef={
-                                "sortable": True,
-                                "filter": True,
-                                "resizable": True,
-                                "flex": 1,
-                                "minWidth": 100,
+                                "sortable": True, "filter": True, "resizable": True,
+                                "flex": 1, "minWidth": 100,
                                 "cellStyle": {
                                     "textAlign": "left",
                                     "padding": "4px",
@@ -71,11 +52,7 @@ layout = dbc.Container(
                                 "sortingOrder": ["asc", "desc", None],
                             },
                             columnSize="sizeToFit",
-                            style={
-                                "width": "100%",
-                                "height": "100%",
-                                "minHeight": "400px",
-                            },
+                            style={"width": "100%", "height": "100%", "minHeight": "400px"},
                         )
                     )
                 ),

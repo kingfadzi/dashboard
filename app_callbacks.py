@@ -8,6 +8,7 @@ from data.fetch_active_inactive_data import fetch_active_inactive_data
 from data.fetch_classification_data import fetch_classification_data
 from data.fetch_language_data import fetch_language_data
 from data.fetch_language_contributors_heatmap import fetch_language_contributors_heatmap
+from utils.redirect_callbacks import generate_redirect_callbacks
 from viz.viz_contributors_commits_size import viz_contributors_commits_size
 from viz.viz_iac_chart import viz_iac_chart
 from viz.viz_active_inactive import viz_active_inactive
@@ -37,7 +38,9 @@ def register_dropdown_callbacks(app):
             Output("language-filter", "options"),
             Output("classification-filter", "options"),
         ],
-        [Input("url", "pathname")]
+        [Input("url", "pathname")],
+        allow_duplicate=True,
+        prevent_initial_call=True,
     )
     def populate_dropdown_options(_):
         options = fetch_dropdown_options()
@@ -128,3 +131,12 @@ def register_callbacks(app):
     )
     def toggle_filters(n_clicks, is_open):
         return not is_open
+
+    generate_redirect_callbacks(
+        app,
+        target_href="/table-overview",
+        button_id="overview-table-btn",
+        output_container_id="overview-table-link-container",
+        reverse_href="/overview",
+        reverse_button_id="back-to-charts-btn-overview",
+    )

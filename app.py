@@ -4,7 +4,6 @@ import dash_bootstrap_components as dbc
 import plotly.io as pio
 from dash.dependencies import Input, Output, State
 
-from callbacks.modal_table_callbacks import register_modal_table_callbacks
 from data.cache_instance import cache
 from layouts.layout_filters import filter_layout  # Original name preserved
 from callbacks.register_all_callbacks import register_all_callbacks
@@ -106,7 +105,7 @@ def toggle_filter_collapse(n_clicks, is_open):
 
 # Register app callbacks
 register_all_callbacks(app)
-register_table_callbacks(app)
+
 
 # Run app
 if __name__ == "__main__":
