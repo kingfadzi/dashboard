@@ -2,13 +2,6 @@ import dash_ag_grid as dag
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-# Define custom renderer for hyperlinks
-html_renderer = """
-function(params) {
-    return {innerHTML: params.value};
-}
-"""
-
 def render_table_card(grid_id: str, title: str = "Repositories Overview"):
     return dbc.Card(
         [
@@ -25,7 +18,6 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                             "resizable": True,
                             "flex": 1,
                             "minWidth": 100,
-                            # REMOVED HtmlRenderer from here
                             "cellStyle": {
                                 "textAlign": "left",
                                 "padding": "4px",
@@ -45,8 +37,6 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                             "suppressMultiSort": False,
                             "sortingOrder": ["asc", "desc", None],
                         },
-                        # Register custom renderer
-                        dashAgGridComponentFunctions=[html_renderer],
                         columnSize="sizeToFit",
                         style={
                             "width": "100%",
