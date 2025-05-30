@@ -11,14 +11,15 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                 dcc.Loading(
                     dag.AgGrid(
                         id=grid_id,
-                        columnDefs=[],  # set via callback
-                        rowData=[],     # set via callback
+                        columnDefs=[],  # to be set by callback
+                        rowData=[],     # to be set by callback
                         defaultColDef={
                             "sortable": True,
                             "filter": True,
                             "resizable": True,
                             "flex": 1,
                             "minWidth": 100,
+                            "cellRenderer": "HtmlRenderer",
                             "cellStyle": {
                                 "textAlign": "left",
                                 "padding": "4px",
