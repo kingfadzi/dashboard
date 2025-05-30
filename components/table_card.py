@@ -11,9 +11,8 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                 dcc.Loading(
                     dag.AgGrid(
                         id=grid_id,
-                        columnDefs=[],  # to be set by callback
-                        rowData=[],     # to be set by callback
-                        dangerously_allow_html=True,
+                        columnDefs=[],  # set via callback
+                        rowData=[],     # set via callback
                         defaultColDef={
                             "sortable": True,
                             "filter": True,
