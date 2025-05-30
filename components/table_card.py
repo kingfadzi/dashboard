@@ -1,3 +1,7 @@
+from dash import dcc, html
+import dash_ag_grid as dag
+import dash_bootstrap_components as dbc
+
 def render_table_card(grid_id: str, title: str = "Repositories Overview"):
     return dbc.Card(
         [
