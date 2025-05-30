@@ -61,9 +61,12 @@ navbar = dbc.Navbar(
 
 
 # App layout
+
 app.layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
+        dcc.Location(id="repo-modal-location", refresh=False),  # ← ADD HERE
+        html.Div(id="repo-modal-container"),                    # ← AND HERE
         navbar,
         dcc.Store(id="default-filter-store", data=DEFAULT_FILTERS),
         dbc.Collapse(filter_layout(), id="filter-collapse", is_open=False),
@@ -71,8 +74,6 @@ app.layout = dbc.Container(
     ],
     fluid=True,
 )
-
-
 
 # Highlight active tab in navbar
 @app.callback(

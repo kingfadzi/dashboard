@@ -23,6 +23,7 @@ from .appserver_callbacks import register_appserver_callbacks
 from .dev_frameworks_callbacks import register_dev_frameworks_callbacks
 from .dependency_types_callbacks import register_dependency_types_callbacks
 from .switch_view_callbacks import register_switch_view_callbacks
+from .repo_modal_callbacks import register_repo_modal_callbacks
 
 def register_all_callbacks(app):
     register_filter_callbacks(app)
@@ -36,3 +37,4 @@ def register_all_callbacks(app):
     register_filter_value_callbacks(app)
     register_kpi_callbacks(app)
     register_overview_callbacks(app)
+    register_repo_modal_callbacks(app)
