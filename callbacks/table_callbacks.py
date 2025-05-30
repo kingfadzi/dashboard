@@ -10,9 +10,9 @@ def get_table_outputs(store_data):
     table_data = viz_table_data(df)
 
     column_defs = [
-        {"headerName": "Repo Name", "field": "repo_id", "cellRenderer": "HtmlRenderer"},
+        {"headerName": "Repo Name", "field": "repo_id", "cellRenderer": "html"},
         {"headerName": "TC", "field": "tc"},
-        {"headerName": "App ID", "field": "app_id", "cellRenderer": "HtmlRenderer"},
+        {"headerName": "App ID", "field": "app_id", "cellRenderer": "html"},
         {"headerName": "Status", "field": "activity_status"},
         {"headerName": "Size", "field": "classification_label"},
         {"headerName": "Age", "field": "repo_age_days"},
