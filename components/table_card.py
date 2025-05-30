@@ -13,6 +13,7 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                         id=grid_id,
                         columnDefs=[],  # to be set by callback
                         rowData=[],     # to be set by callback
+                        dangerously_allow_html=True,
                         defaultColDef={
                             "sortable": True,
                             "filter": True,

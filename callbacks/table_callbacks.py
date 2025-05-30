@@ -10,9 +10,9 @@ def get_table_outputs(store_data):
     table_data = viz_table_data(df)
 
     column_defs = [
-        {"headerName": "Repo Name", "field": "repo_id"},
+        {"headerName": "Repo Name", "field": "repo_id", "cellRenderer": "htmlRenderer"},
         {"headerName": "TC", "field": "tc"},
-        {"headerName": "App ID", "field": "app_id"},
+        {"headerName": "App ID", "field": "app_id", "cellRenderer": "htmlRenderer"},
         {"headerName": "Status", "field": "activity_status"},
         {"headerName": "Size", "field": "classification_label"},
         {"headerName": "Age", "field": "repo_age_days"},
@@ -65,7 +65,7 @@ def register_table_callbacks(app):
             Input("app-id-filter", "value"),
             Input("host-name-filter", "value"),
         ],
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def update_filter_store(activity, tc, lang, classification, app_id, host):
         return {
@@ -75,4 +75,4 @@ def register_table_callbacks(app):
             "classification_label": classification,
             "app_id": app_id,
             "host_name": host,
-    }
+        }
