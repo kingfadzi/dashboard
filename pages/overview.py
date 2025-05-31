@@ -37,23 +37,23 @@ layout = dbc.Container(
         dcc.Location(id="url", refresh=False),
         header_with_button,
 
-        # KPI cards section
+        # KPI cards
         kpi_layout(),
-
-        # New second row: LOC + Heatmap side by side (50:50)
-        dbc.Row(
-            [
-                dbc.Col(card("Total Lines of Code", "cloc-bar-chart", height=400), width=6),
-                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=400), width=6),
-            ],
-            className="mb-4",
-        ),
 
         # Repo status and sizes
         dbc.Row(
             [
                 dbc.Col(card("Repo Status", "active-inactive-bar"), width=6),
                 dbc.Col(card("Repository Sizes", "classification-pie"), width=6),
+            ],
+            className="mb-4",
+        ),
+
+        # LOC + Heatmap side by side (50:50)
+        dbc.Row(
+            [
+                dbc.Col(card("Total Lines of Code", "cloc-bar-chart", height=400), width=6),
+                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=400), width=6),
             ],
             className="mb-4",
         ),
@@ -81,9 +81,11 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # IAC + App Servers side by side
         dbc.Row(
             [
-                dbc.Col(card("Infrastructure as Code Usage", "iac-bar-chart", height=450)),
+                dbc.Col(card("Infrastructure as Code Usage", "iac-bar-chart", height=450), width=6),
+                dbc.Col(card("Application Server Usage", "appserver-bar-chart", height=450), width=6),
             ],
             className="mb-4",
         ),
@@ -92,13 +94,6 @@ layout = dbc.Container(
             [
                 dbc.Col(card("Vulnerabilities by Severity (Shallow scan)", "trivy-vulnerabilities-bar-chart"), width=6),
                 dbc.Col(card("Standards Issues", "semgrep-findings-bar-chart"), width=6),
-            ],
-            className="mb-4",
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(card("Application Server Usage", "appserver-bar-chart")),
             ],
             className="mb-4",
         ),
