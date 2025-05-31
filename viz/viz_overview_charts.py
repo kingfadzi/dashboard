@@ -1,7 +1,7 @@
 import plotly.express as px
 
 from utils.formattting import human_readable_size
-from config import with_safe_colors
+from config.colors import with_safe_colors
 
 @with_safe_colors
 def render_repo_status_chart(filtered_df):
