@@ -1,3 +1,7 @@
+import pandas as pd
+import plotly.express as px
+from dash import dcc
+
 def render_role_distribution_chart(df: pd.DataFrame):
     df["repo_count"] = pd.to_numeric(df["repo_count"], errors="coerce").fillna(0)
     top_langs = df.groupby("language")["repo_count"].sum().nlargest(20).index
