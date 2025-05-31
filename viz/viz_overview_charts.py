@@ -5,13 +5,10 @@ from config.colors import with_safe_colors
 
 @with_safe_colors
 def render_repo_status_chart(filtered_df):
-
     aggregated_df = filtered_df.groupby(
         ["activity_status", "host_name"], as_index=False
     )["repo_count"].sum()
     aggregated_df["activity_status"] = aggregated_df["activity_status"].str.capitalize()
-
-    color_map = {"Active": "green", "Inactive": "red"}
 
     fig = px.bar(
         aggregated_df,
@@ -19,12 +16,8 @@ def render_repo_status_chart(filtered_df):
         y="repo_count",
         color="host_name",
         barmode="stack",
-        color_discrete_sequence=px.colors.qualitative.Plotly,
+        color_discrete_sequence=px.colors.qualitative.Plotly,  # or Safe
     )
-
-    for trace in fig.data:
-        if trace.name in color_map:
-            trace.marker.color = color_map[trace.name]
 
     fig.update_layout(
         dragmode=False,
@@ -34,7 +27,7 @@ def render_repo_status_chart(filtered_df):
     )
 
     return fig
-
+    
 def render_repo_size_chart(filtered_df):
 
     fig = px.bar(
