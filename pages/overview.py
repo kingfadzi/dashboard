@@ -17,7 +17,6 @@ def card(title, graph_id, height=300):
         className="mb-4",
     )
 
-
 header_with_button = dbc.Row(
     [
         dbc.Col(html.H2("Overview"), width="auto"),
@@ -41,33 +40,25 @@ layout = dbc.Container(
         # KPI cards section
         kpi_layout(),
 
+        # Repo status and sizes
         dbc.Row(
             [
-                dbc.Col(html.Div("Repo Status", className="text-center fw-bold")),
-                dbc.Col(html.Div("Repository Sizes", className="text-center fw-bold")),
-            ],
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(dcc.Graph(id="active-inactive-bar", config={"displayModeBar": False}, style={"height": 300}), width=6),
-                dbc.Col(dcc.Graph(id="classification-pie", config={"displayModeBar": False}, style={"height": 300}), width=6),
+                dbc.Col(card("Repo Status", "active-inactive-bar"), width=6),
+                dbc.Col(card("Repository Sizes", "classification-pie"), width=6),
             ],
             className="mb-4",
         ),
 
-        dbc.Card(
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Total Lines of Code", className="text-center"), className="bg-light"),
-                dcc.Graph(id="cloc-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
+                dbc.Col(card("Total Lines of Code", "cloc-bar-chart")),
             ],
             className="mb-4",
         ),
 
-        dbc.Card(
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Code Contribution Activity", className="text-center"), className="bg-light"),
-                dcc.Graph(id="scatter-plot", config={"displayModeBar": False}, style={"height": 300}),
+                dbc.Col(card("Code Contribution Activity", "scatter-plot")),
             ],
             className="mb-4",
         ),
@@ -88,18 +79,16 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        dbc.Card(
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Infrastructure as Code Usage", className="text-center"), className="bg-light"),
-                dcc.Graph(id="iac-bar-chart", config={"displayModeBar": False}, style={"height": 450}),
+                dbc.Col(card("Infrastructure as Code Usage", "iac-bar-chart", height=450)),
             ],
             className="mb-4",
         ),
 
-        dbc.Card(
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Code Contribution by Language", className="text-center"), className="bg-light"),
-                dcc.Graph(id="language-contributors-heatmap", config={"displayModeBar": False}, style={"height": 600}),
+                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=600)),
             ],
             className="mb-4",
         ),
@@ -112,28 +101,17 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        dbc.Card(
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Application Server Usage", className="text-center"), className="bg-light"),
-                dcc.Graph(id="appserver-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
+                dbc.Col(card("Application Server Usage", "appserver-bar-chart")),
             ],
-            id="appserver-card",
             className="mb-4",
         ),
-        dbc.Card(
+
+        dbc.Row(
             [
-                dbc.CardHeader(html.B("Infrastructure as Code Usage", className="text-center"), className="bg-light"),
-                dcc.Graph(id="iac-bar-chart", config={"displayModeBar": False}, style={"height": 450}),
+                dbc.Col(card("Top Developer Frameworks", "dev-frameworks-bar-chart")),
             ],
-            id="iac-card",
-            className="mb-4",
-        ),
-        dbc.Card(
-            [
-                dbc.CardHeader(html.B("Top Developer Frameworks", className="text-center"), className="bg-light"),
-                dcc.Graph(id="dev-frameworks-bar-chart", config={"displayModeBar": False}, style={"height": 300}),
-            ],
-            id="dev-frameworks-card",
             className="mb-4",
         ),
 
@@ -146,4 +124,3 @@ layout = dbc.Container(
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},
 )
-
