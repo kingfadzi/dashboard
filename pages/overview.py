@@ -40,6 +40,16 @@ layout = dbc.Container(
         # KPI cards section
         kpi_layout(),
 
+        # New second row: LOC + Heatmap side by side (50:50)
+        dbc.Row(
+            [
+                dbc.Col(card("Total Lines of Code", "cloc-bar-chart", height=400), width=6),
+                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=400), width=6),
+            ],
+            className="mb-4",
+        ),
+
+        # Repo status and sizes
         dbc.Row(
             [
                 dbc.Col(card("Repo Status", "active-inactive-bar"), width=6),
@@ -74,15 +84,6 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Infrastructure as Code Usage", "iac-bar-chart", height=450)),
-            ],
-            className="mb-4",
-        ),
-
-        # LOC + Heatmap in single row
-        dbc.Row(
-            [
-                dbc.Col(card("Total Lines of Code", "cloc-bar-chart", height=300), width=4, className="d-flex"),
-                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=600), width=8),
             ],
             className="mb-4",
         ),
