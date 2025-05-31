@@ -14,7 +14,7 @@ def card(title, graph_id, height=300):
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
             dcc.Loading(dcc.Graph(id=graph_id, config={"displayModeBar": False}, style={"height": height})),
         ],
-        className="mb-4",
+        className="mb-4 h-100",
     )
 
 header_with_button = dbc.Row(
@@ -40,18 +40,10 @@ layout = dbc.Container(
         # KPI cards section
         kpi_layout(),
 
-        # Repo status and sizes
         dbc.Row(
             [
                 dbc.Col(card("Repo Status", "active-inactive-bar"), width=6),
                 dbc.Col(card("Repository Sizes", "classification-pie"), width=6),
-            ],
-            className="mb-4",
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(card("Total Lines of Code", "cloc-bar-chart")),
             ],
             className="mb-4",
         ),
@@ -86,9 +78,11 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # LOC + Heatmap in single row
         dbc.Row(
             [
-                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=600)),
+                dbc.Col(card("Total Lines of Code", "cloc-bar-chart", height=300), width=4, className="d-flex"),
+                dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=600), width=8),
             ],
             className="mb-4",
         ),
