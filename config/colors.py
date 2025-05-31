@@ -10,15 +10,14 @@ def with_safe_colors(chart_func):
 
         if isinstance(result, Figure):
             fig = result
-            graph_id = None
+            graph_id = f"{chart_func.__name__}-graph"
             config = {}
         elif isinstance(result, dcc.Graph):
             fig = result.figure
-            graph_id = result.id
+            graph_id = result.id or f"{chart_func.__name__}-graph"
             config = result.config if hasattr(result, "config") else {}
         else:
             raise TypeError("Expected chart function to return a plotly Figure or dcc.Graph")
-
 
         if not hasattr(fig.layout, "colorway") or not fig.layout.colorway:
             fig.update_layout(colorway=DEFAULT_COLOR_SEQUENCE)
