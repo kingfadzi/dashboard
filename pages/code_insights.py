@@ -35,25 +35,18 @@ header_with_button = dbc.Row(
 
 layout = dbc.Container(
     [
-
         dcc.Location(id="url", refresh=False),
 
         header_with_button,
 
         # Charts
         card("Language Role Distribution", "role-distribution-chart"),
-        card("Normalized Language Weight (Top 20)", "normalized-weight-chart"),
 
-        dbc.Card(
-            [
-                dbc.CardHeader(html.B("Markup/Data Language Usage", className="text-center"), className="bg-light"),
-                dbc.CardBody(
-                    dcc.Loading(id="markup-language-usage-chart", type="default"),
-                    className="p-0",
-                ),
-            ],
-            className="mb-4",
-        ),
+        # Normalized + Markup side by side
+        dbc.Row([
+            dbc.Col(card("Normalized Language Weight (Top 20)", "normalized-weight-chart"), width=6),
+            dbc.Col(card("Markup/Data Language Usage", "markup-language-usage-chart"), width=6),
+        ], className="mb-4"),
 
         # Gitlog charts
         dbc.Row([
