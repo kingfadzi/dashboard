@@ -1,9 +1,7 @@
 import plotly.express as px
 
 from utils.formattting import human_readable_size
-from config.colors import with_safe_colors
 
-@with_safe_colors
 def render_repo_status_chart(filtered_df):
     aggregated_df = filtered_df.groupby(
         ["activity_status", "host_name"], as_index=False

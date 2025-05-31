@@ -30,13 +30,17 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                         },
                         dashGridOptions={
                             "pagination": True,
-                            "paginationPageSize": 10,
+                            "paginationPageSize": 5,
                             "domLayout": "autoHeight",
                             "animateRows": True,
                             "enableCellTextSelection": True,
                             "suppressMultiSort": False,
                             "sortingOrder": ["asc", "desc", None],
+                            "onPaginationChanged": {
+                                "function": "function(e) { return { currentPage: e.api.paginationGetCurrentPage() }; }"
+                            },
                         },
+                        eventData={"paginationChanged": ["currentPage"]},
                         columnSize="sizeToFit",
                         style={
                             "width": "100%",

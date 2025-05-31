@@ -1,48 +1,28 @@
+import dash
+from dash import html, dcc, Input, Output, callback
 import urllib.parse
-from dash import html
-from data.fetch_repo_profile import fetch_repo_profile
 
-# Sections
-import profile.sections.section_bio as bio
-import profile.sections.section_kpis as section_kpis
-import profile.sections.section_tech_stack as section_tech_stack
-import profile.sections.section_modernization as section_modernization
-import profile.sections.section_code_quality as section_code_quality
-import profile.sections.section_git_activity_hygiene as section_git_activity_hygiene
-import profile.sections.section_dependency_risk_summary as section_dependency_risk_summary
-import profile.sections.section_eol_risks as section_eol_risks
+dash.register_page(__name__, path="/repo", name="Repository Profile")
 
-def render_repo_profile_content(search: str):
+layout = html.Div([
+    dcc.Location(id="url", refresh=False),
+    html.Div(id="return-button-container"),
+    html.Div(id="repo-profile-content")
+])
+
+@callback(
+    Output("return-button-container", "children"),
+    Input("url", "search"),
+)
+def render_return_button(search):
     if not search:
-        return html.Div([
-            html.H3("No repo_id provided."),
-            html.P("Please provide a repo_id in the URL parameters."),
-        ])
+        return html.Div()
 
-    params = urllib.parse.parse_qs(search.lstrip('?'))
-    repo_id = params.get('repo_id', [None])[0]
+    params = urllib.parse.parse_qs(search.lstrip("?"))
+    return_url_raw = params.get("returnUrl", ["/"])[0]
+    return_url = urllib.parse.unquote(return_url_raw)
 
-    if not repo_id:
-        return html.Div([
-            html.H3("No repo_id provided."),
-            html.P("Please provide a repo_id in the URL parameters."),
-        ])
-
-    try:
-        profile_data = fetch_repo_profile(repo_id)
-    except Exception as e:
-        return html.Div([
-            html.H3("Error loading profile"),
-            html.Pre(str(e))
-        ])
-
-    return html.Div([
-        bio.render(profile_data),
-        section_kpis.render(profile_data),
-        section_modernization.render(profile_data),
-        section_tech_stack.render(profile_data),
-        section_code_quality.render(profile_data),
-        section_git_activity_hygiene.render(profile_data),
-        section_dependency_risk_summary.render(profile_data),
-        section_eol_risks.render(profile_data),
-    ], style={"padding": "20px"})
+    return dcc.Link(
+        html.Button("← Return to Table", className="btn btn-secondary mb-3"),
+        href=return_url
+    )

@@ -108,10 +108,11 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
         if "last_commit_date" in df.columns:
             df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%Y-%m-%dT%H:%M:%S")
 
-        if "repo_id" in df.columns:
-            df["repo_id"] = df["repo_id"].apply(
-                lambda repo_id: f"<a href='/repo?repo_id={repo_id}' style='text-decoration: none; color: #007bff;'>{repo_id}</a>"
-            )
+        #if "repo_id" in df.columns:
+        #    df["repo_id"] = df["repo_id"].apply(
+         #       lambda repo_id: f"<a href='/repo?repo_id={repo_id}' style='text-decoration: none; color: #007bff;'>{repo_id}</a>"
+         #   )
+
 
         if "repo_age_days" in df.columns:
             df["repo_age_days"] = df["repo_age_days"].apply(format_repo_age)

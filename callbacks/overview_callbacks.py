@@ -44,7 +44,7 @@ from viz.viz_overview_charts import (
 
 def register_overview_callbacks(app):
 
-    @app.callback(Output("active-inactive-bar", "children"), Input("default-filter-store", "data"))
+    @app.callback(Output("active-inactive-bar", "figure"), Input("default-filter-store", "data"))
     def update_repo_status(store_data):
         filters = extract_filter_dict_from_store(store_data)
         logger.info(f"[Repo Status] Filters: {filters}")
