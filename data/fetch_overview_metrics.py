@@ -319,7 +319,7 @@ def fetch_cloc(filters=None):
         base_query += """
             GROUP BY cloc.language
             ORDER BY total_lines_of_code DESC
-            LIMIT 20
+            LIMIT 10
         """
 
         stmt = text(base_query)

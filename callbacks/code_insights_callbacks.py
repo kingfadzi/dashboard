@@ -17,7 +17,7 @@ def register_code_insights_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         return render_normalized_weight_chart(fetch_normalized_weight(filters)).figure
 
-    @app.callback(Output("markup-language-usage-chart", "children"), Input("default-filter-store", "data"))
+    @app.callback(Output("markup-language-usage-chart", "figure"), Input("default-filter-store", "data"))
     def update_markup_usage(store_data):
         filters = extract_filter_dict_from_store(store_data)
         return render_markup_language_usage_chart(fetch_markup_language_usage(filters))

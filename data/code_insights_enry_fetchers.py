@@ -49,7 +49,7 @@ def fetch_normalized_weight(filters=None):
               {f'AND {condition_string}' if condition_string else ''}
             GROUP BY ga.language
             ORDER BY avg_percent_usage DESC
-            LIMIT 20
+            LIMIT 10
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)

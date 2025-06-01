@@ -20,7 +20,6 @@ def render_spring_version_chart(df, title):
         labels={"normalized_version": "Version", "repo_count": "Repository Count"},
     )
     fig.update_layout(
-        height=400,
         title=None,
         margin=dict(t=10),
         dragmode=False,

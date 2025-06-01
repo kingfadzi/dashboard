@@ -15,6 +15,11 @@ def render_role_distribution_chart(df: pd.DataFrame):
         barmode="stack",
         text="repo_count",        
     )
+    fig.update_traces(
+        texttemplate='%{text:.0f}',
+        textposition='outside',
+        cliponaxis=False
+    )
     fig.update_layout(
         dragmode=False,          
         xaxis_title=None,
@@ -23,16 +28,24 @@ def render_role_distribution_chart(df: pd.DataFrame):
     return dcc.Graph(id="role-distribution-chart", figure=fig)
 
 
-def render_normalized_weight_chart(df: pd.DataFrame):
+
+def render_normalized_weight_chart(df):
     fig = px.bar(
         df,
         x="language",
         y="avg_percent_usage",
-        text="avg_percent_usage", 
+        text="avg_percent_usage",
+    )
+    fig.update_traces(
+        texttemplate='%{text:.2f}',
+        textposition='outside',
+        cliponaxis=False
     )
     fig.update_layout(
         dragmode=False,
         xaxis_title=None,
-        title=None
+        title=None,
+        margin=dict(t=40, b=20, l=20, r=20)
     )
     return dcc.Graph(id="normalized-weight-chart", figure=fig)
+

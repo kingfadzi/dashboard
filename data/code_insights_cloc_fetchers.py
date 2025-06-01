@@ -17,7 +17,7 @@ def fetch_code_volume_by_language(filters=None):
             {f'AND {condition_string}' if condition_string else ''}
             GROUP BY cloc.language
             ORDER BY code_lines DESC
-            LIMIT 20
+            LIMIT 10
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
@@ -38,7 +38,7 @@ def fetch_file_count_by_language(filters=None):
             {f'AND {condition_string}' if condition_string else ''}
             GROUP BY cloc.language
             ORDER BY total_files DESC
-            LIMIT 20
+            LIMIT 10
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
@@ -62,7 +62,7 @@ def fetch_code_composition_by_language(filters=None):
             {f'AND {condition_string}' if condition_string else ''}
             GROUP BY cloc.language
             ORDER BY code DESC
-            LIMIT 20
+            LIMIT 10
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)

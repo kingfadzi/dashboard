@@ -44,23 +44,8 @@ layout = dbc.Container(
 
         # Normalized + Markup side by side (50:50)
         dbc.Row([
-            dbc.Col(card("Normalized Language Weight (Top 20)", "normalized-weight-chart"), width=6),
-            dbc.Col(
-                dbc.Card(
-                    [
-                        dbc.CardHeader(html.B("Markup/Data Language Usage", className="text-center"), className="bg-light"),
-                        dbc.CardBody(
-                            dcc.Loading(
-                                html.Div(id="markup-language-usage-chart"),  # ✅ Matches original working pattern
-                                type="default"
-                            ),
-                            className="p-0",
-                        ),
-                    ],
-                    className="mb-4 h-100",
-                ),
-                width=6,
-            ),
+            dbc.Col(card("Normalized Language Weight (Top 10)", "normalized-weight-chart"), width=6),
+            dbc.Col(card("Markup/Data Language Usage", "markup-language-usage-chart"), width=6),
         ], className="mb-4"),
 
         # Gitlog charts
@@ -76,7 +61,7 @@ layout = dbc.Container(
         # Cloc charts
         dbc.Row([
             dbc.Col(card("Code Volume", "code-volume-chart"), width=6),
-            dbc.Col(card("File Count", "file-count-chart"), width=6),  # ✅ dcc.Graph used properly
+            dbc.Col(card("File Count", "file-count-chart"), width=6),
         ]),
         dbc.Row([
             dbc.Col(card("Code Composition", "code-composition-chart"), width=6),

@@ -6,7 +6,7 @@ from components.modal_table import modal_table
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
-def card(title, graph_id, height=400):
+def card(title, graph_id, height=300):
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -77,7 +77,7 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
-                dbc.Col(card("EOL Exposure",      "xeol-exposure-chart", height=450), width=6),
+                dbc.Col(card("EOL Exposure",      "xeol-exposure-chart"), width=6),
             ]
         ),
 

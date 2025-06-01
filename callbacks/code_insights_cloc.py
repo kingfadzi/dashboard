@@ -20,7 +20,7 @@ def register_code_insights_cloc_callbacks(app):
         df = fetch_code_volume_by_language(filters)
         return render_code_volume_chart(df).figure
 
-    @app.callback(Output("file-count-chart", "figure"), Input("default-filter_store", "data"))
+    @app.callback(Output("file-count-chart", "figure"), Input("default-filter-store", "data"))
     def update_file_count_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_file_count_by_language(filters)

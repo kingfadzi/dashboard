@@ -12,7 +12,6 @@ def render_iac_server_orchestration_chart(df: pd.DataFrame):
         labels={"framework": "Framework", "repo_count": "Repository Count"},
     )
     fig.update_layout(
-        height=400,
         title=None,
         margin=dict(t=10),
         dragmode=False,

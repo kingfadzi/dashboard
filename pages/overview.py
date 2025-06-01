@@ -52,7 +52,7 @@ layout = dbc.Container(
         # LOC + Heatmap side by side (50:50)
         dbc.Row(
             [
-                dbc.Col(card("Total Lines of Code", "cloc-bar-chart", height=400), width=6),
+                dbc.Col(card("Total Lines of Code (Top 10)", "cloc-bar-chart", height=400), width=6),
                 dbc.Col(card("Code Contribution by Language", "language-contributors-heatmap", height=400), width=6),
             ],
             className="mb-4",

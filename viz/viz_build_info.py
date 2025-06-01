@@ -20,7 +20,6 @@ def render_detection_coverage_chart(df):
 
     fig.update_layout(
         barmode="stack",
-        height=400,
         xaxis_title=None,
         yaxis_title="Repository Count",
         title=None
@@ -34,7 +33,6 @@ def render_module_count_chart(df):
         x="module_bucket",
         y="repo_count",
         labels={"module_bucket": "Module Count Range", "repo_count": "Repository Count"},
-        height=400
     )
     fig.update_layout(title=None)
     return fig
@@ -48,7 +46,6 @@ def render_repos_per_tool_variant_chart(df):
         color="tool",
         barmode="group",
         labels={"variant": "Build Tool Variant", "tool": "Language Tool", "repo_count": "Repository Count"},
-        height=400
     )
     fig.update_xaxes(tickangle=45)
     fig.update_layout(title=None)
@@ -63,7 +60,6 @@ def render_status_by_tool_chart(df):
         color="status",
         barmode="stack",
         labels={"tool": "Language (tool)", "status": "Status", "repo_count": "Repository Count"},
-        height=400
     )
     fig.update_layout(title=None)
     return fig
@@ -78,7 +74,6 @@ def render_runtime_versions_chart(df):
         color="variant",
         barmode="stack",
         labels={"runtime_version": "Runtime Version", "variant": "Build Tool Variant", "repo_count": "Repository Count"},
-        height=400
     )
     fig.update_xaxes(tickangle=45)
     fig.update_layout(title=None)
@@ -91,7 +86,6 @@ def render_runtime_fragmentation_chart(df):
         x="tool",
         y="version_count",
         labels={"tool": "Language (tool)", "version_count": "Distinct Runtime Versions"},
-        height=400
     )
     fig.update_layout(title=None)
     return fig
@@ -103,7 +97,6 @@ def render_confidence_distribution_chart(df):
         x="confidence",
         y="repo_count",
         labels={"confidence": "Confidence Level", "repo_count": "Repository Count"},
-        height=400
     )
     fig.update_xaxes(categoryorder="array", categoryarray=["high", "medium", "low", "unknown"])
     fig.update_layout(title=None)
