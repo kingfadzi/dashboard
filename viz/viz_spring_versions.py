@@ -1,30 +1,28 @@
 import plotly.express as px
-import pandas as pd
-import re
 
-def normalize_version(version):
-    if not version:
-        return "unknown"
-    match = re.match(r"(\d+\.\d+)", version)
-    return match.group(1) if match else version
-
-def render_spring_version_chart(df, title):
+def render_spring_version_chart(df, title=None):
     df = df.copy()
-    df["normalized_version"] = df["version"].apply(normalize_version)
-    grouped = df.groupby("normalized_version").agg({"repo_count": "sum"}).reset_index()
+    df["version"] = df["version"].fillna("not detected")
 
     fig = px.bar(
-        grouped,
-        x="normalized_version",
+        df,
+        x="framework",
         y="repo_count",
-        labels={"normalized_version": "Version", "repo_count": "Repository Count"},
+        color="version",
+        labels={
+            "framework": "Framework",
+            "version": "Version",
+            "repo_count": "Repository Count"
+        },
     )
     fig.update_layout(
-        title=None,
+        title=title,
+        barmode="stack",
         margin=dict(t=10),
         dragmode=False,
         xaxis_title=None,
         yaxis_title="Repository Count",
+        xaxis_fixedrange=True,
+        yaxis_fixedrange=True
     )
-    fig.update_layout(xaxis_fixedrange=True, yaxis_fixedrange=True)
     return fig
