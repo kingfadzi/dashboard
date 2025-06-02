@@ -19,7 +19,7 @@ def fetch_spring_framework_versions(filters=None):
             GROUP BY sd.version
             ORDER BY repo_count DESC
         """
-        param_dict["group_prefix"] = f"{group_prefix}:%"
+        param_dict["group_prefix"] = f"{group_prefix}%"
         return pd.read_sql(text(sql), engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
