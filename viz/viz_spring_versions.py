@@ -8,9 +8,10 @@ def render_spring_version_chart(df, title=None):
         df,
         x="version_bucket",
         y="repo_count",
+        text="repo_count",
         labels={"version_bucket": "Version", "repo_count": "Repository Count"},
-
     )
+    fig.update_traces(textposition="outside")
     fig.update_layout(
         margin=dict(t=10),
         dragmode=False,
