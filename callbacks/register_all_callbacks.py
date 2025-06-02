@@ -26,4 +26,4 @@ def register_all_callbacks(app):
     register_kpi_callbacks(app)
     register_overview_callbacks(app)
     register_repo_profile_callbacks(app)
-    register_dependency_insights_callbacks(app))
+    register_dependency_insights_callbacks(app)
