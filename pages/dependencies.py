@@ -24,7 +24,6 @@ def card(title, graph_id, height=300):
         className="mb-4",
     )
 
-
 header_with_button = dbc.Row(
     [
         dbc.Col(html.H2("Dependencies"), width="auto"),
@@ -42,9 +41,7 @@ header_with_button = dbc.Row(
 
 layout = dbc.Container(
     [
-
         dcc.Location(id="url", refresh=False),
-
         header_with_button,
 
         dbc.Row(
@@ -63,14 +60,10 @@ layout = dbc.Container(
                 dbc.Col(card("Framework Distribution",     "framework-distribution-chart"), width=6),
             ]
         ),
+
         dbc.Row([dbc.Col(card("Top Packages", "top-packages-chart"), width=12)]),
 
-        dbc.Row(
-            [
-                dbc.Col(card("Spring Core Version Usage", "spring-core-version-chart"), width=6),
-                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=6),
-            ]
-        ),
+        dbc.Row([dbc.Col(card("Spring & Spring Boot Version Usage", "spring-version-chart"), width=12)]),
 
         dbc.Row([dbc.Col(card("EOL Top Products", "xeol-top-products-chart"), width=12)]),
 
@@ -87,6 +80,7 @@ layout = dbc.Container(
                 dbc.Col(card("IaC Adoption",         "iac-adoption-chart"),         width=6),
             ]
         ),
+
         dbc.Row(
             [dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=12)],
         ),
