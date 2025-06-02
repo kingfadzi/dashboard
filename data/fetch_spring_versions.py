@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import logging
 from sqlalchemy import text
@@ -8,24 +9,40 @@ from univers.versions import MavenVersion
 
 logger = logging.getLogger(__name__)
 
+# Matches characters not allowed in semantic version strings
+UNPARSEABLE_RE = re.compile(r"[^\w.\-+]+")
+
+def is_valid_version_string(v: str) -> bool:
+    if not isinstance(v, str) or not v.strip():
+        return False
+    return not UNPARSEABLE_RE.search(v)
+
 def classify_framework_version_bucket(version: str) -> str:
+    if not is_valid_version_string(version):
+        logger.warning(f"[Spring Framework] Unrecognized version format: {version!r}")
+        return "Invalid / Unrecognized"
+
     try:
         mv = MavenVersion(version)
         if mv >= MavenVersion("7.0.0"):
             return "7.x"
         elif MavenVersion("6.0.0") <= mv < MavenVersion("7.0.0"):
             return "6.2.x – 6.0.x"
-        elif mv == MavenVersion("5.3.0") or (MavenVersion("5.3.0") <= mv < MavenVersion("5.4.0")):
+        elif MavenVersion("5.3.0") <= mv < MavenVersion("5.4.0"):
             return "5.3.x"
         elif MavenVersion("5.1.0") <= mv < MavenVersion("5.3.0"):
             return "5.2.x – 5.1.x"
         else:
             return "Legacy < 5.1"
     except Exception as e:
-        logger.warning(f"[Spring Framework] Invalid version '{version}': {e}")
+        logger.warning(f"[Spring Framework] Failed to parse version '{version}': {e}")
         return "Invalid / Unrecognized"
 
 def classify_boot_version_bucket(version: str) -> str:
+    if not is_valid_version_string(version):
+        logger.warning(f"[Spring Boot] Unrecognized version format: {version!r}")
+        return "Invalid / Unrecognized"
+
     try:
         mv = MavenVersion(version)
         if mv >= MavenVersion("4.0.0"):
@@ -34,7 +51,7 @@ def classify_boot_version_bucket(version: str) -> str:
             return "3.5.x – 3.4.x"
         elif MavenVersion("3.0.0") <= mv < MavenVersion("3.4.0"):
             return "3.3.x – 3.0.x"
-        elif mv == MavenVersion("2.7.0") or (MavenVersion("2.7.0") <= mv < MavenVersion("2.8.0")):
+        elif MavenVersion("2.7.0") <= mv < MavenVersion("2.8.0"):
             return "2.7.x"
         elif MavenVersion("2.0.0") <= mv < MavenVersion("2.7.0"):
             return "2.6.x – 2.0.x"
@@ -43,7 +60,7 @@ def classify_boot_version_bucket(version: str) -> str:
         else:
             return "Invalid / Unrecognized"
     except Exception as e:
-        logger.warning(f"[Spring Boot] Invalid version '{version}': {e}")
+        logger.warning(f"[Spring Boot] Failed to parse version '{version}': {e}")
         return "Invalid / Unrecognized"
 
 @cache.memoize()
