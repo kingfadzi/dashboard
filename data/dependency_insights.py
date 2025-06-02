@@ -1,7 +1,8 @@
 import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
-from data.build_filter_conditions import build_filter_conditions
+from data.sql_filter_utils import build_repo_filter_conditions
+
 from data.cache_instance import cache
 
 @cache.memoize()
