@@ -402,7 +402,11 @@ def fetch_language_distribution(filters=None):
         if condition_string:
             base_query += f" AND {condition_string}"
 
-        base_query += " GROUP BY hr.main_language"
+        base_query += """
+            GROUP BY hr.main_language
+            ORDER BY repo_count DESC
+            LIMIT 10
+        """
 
         logger.debug("Executing language data query:")
         logger.debug(base_query)
@@ -414,6 +418,7 @@ def fetch_language_distribution(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 def fetch_package_types(filters=None):
     @cache.memoize()
