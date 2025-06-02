@@ -6,20 +6,23 @@ from data.build_filter_conditions import build_filter_conditions
 
 @cache.memoize()
 def fetch_spring_framework_versions(filters=None):
-    def query_data(condition_string, param_dict, group_prefix):
+    def query_data(condition_string, param_dict, group_id):
         sql = f"""
             SELECT 
-                sd.version,
+                CASE 
+                    WHEN sd.version ~ '^\\d+\\.\\d+' 
+                        THEN SPLIT_PART(sd.version, '.', 1) || '.' || SPLIT_PART(sd.version, '.', 2)
+                    ELSE 'not detected'
+                END AS major_minor,
                 COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            WHERE sd.package_type = 'java-archive'
-              AND sd.package_name LIKE :group_prefix
-              {f"AND {condition_string}" if condition_string else ""}
-            GROUP BY sd.version
+            WHERE sd.group_id = :group_id
+            {f"AND {condition_string}" if condition_string else ""}
+            GROUP BY major_minor
             ORDER BY repo_count DESC
         """
-        param_dict["group_prefix"] = f"{group_prefix}%"
+        param_dict["group_id"] = group_id
         return pd.read_sql(text(sql), engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
