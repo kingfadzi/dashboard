@@ -23,8 +23,10 @@ def render_spring_version_chart(df, title=None):
 
     fig.update_yaxes(
         tickformat=".0f",
-        dtick=1,
-        tickmode="linear"
+        tickmode="auto",
+        automargin=True,
+        ticks="outside"
+
     )
 
     fig.update_layout(
