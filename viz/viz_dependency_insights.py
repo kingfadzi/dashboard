@@ -23,11 +23,15 @@ def render_legacy_version_chart(df):
 def render_junit_version_chart(df):
     fig = px.bar(
         df,
-        x="version",
+        x="normalized_version",
         y="repo_count",
-        labels={"version": "JUnit Version", "repo_count": "Repository Count"},
+        labels={"normalized_version": "", "repo_count": "Repository Count"},
     )
-    fig.update_layout(margin=dict(t=10), xaxis_tickangle=-30)
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(l=0, r=0, t=0, b=0),
+        xaxis_tickangle=45,
+    )
     return fig
 
 def render_dependency_count_chart(df):
