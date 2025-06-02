@@ -3,6 +3,7 @@ from sqlalchemy import text
 from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
 from data.cache_instance import cache
+from data.build_filter_conditions import build_filter_conditions
 
 @cache.memoize()
 def fetch_outdated_library_usage(filters=None):
@@ -22,7 +23,7 @@ def fetch_outdated_library_usage(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
     
-    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
 
 
@@ -44,7 +45,7 @@ def fetch_legacy_version_usage(filters=None):
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
 
 
@@ -66,7 +67,7 @@ def fetch_junit_version_usage(filters=None):
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
 
 
@@ -86,7 +87,7 @@ def fetch_dependency_count_per_repo(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
 
 
@@ -106,5 +107,5 @@ def fetch_frameworks_per_repo(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
