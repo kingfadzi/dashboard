@@ -2,16 +2,16 @@ import plotly.express as px
 
 def render_spring_version_chart(df, title=None):
     df = df.copy()
-    df["version"] = df["version"].fillna("not detected")
+    df["version_bucket"] = df["version_bucket"].fillna("not detected")
 
     fig = px.bar(
         df,
-        x="version",
+        x="version_bucket",
         y="repo_count",
-        labels={"version": "Version", "repo_count": "Repository Count"},
+        labels={"version_bucket": "Version", "repo_count": "Repository Count"},
+
     )
     fig.update_layout(
-        
         margin=dict(t=10),
         dragmode=False,
         xaxis_title=None,
