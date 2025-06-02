@@ -1,44 +1,3 @@
-import dash
-from dash import html, dcc
-import dash_bootstrap_components as dbc
-from config.config import DEFAULT_FILTERS
-from components.modal_table import modal_table
-
-dash.register_page(__name__, path="/dependencies", name="Dependencies")
-
-def card(title, graph_id, height=300):
-    return dbc.Card(
-        [
-            dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
-            dbc.CardBody(
-                dcc.Loading(
-                    dcc.Graph(
-                        id=graph_id,
-                        config={"staticPlot": True},
-                        style={"height": f"{height}px"},
-                    )
-                ),
-                className="p-0",
-            ),
-        ],
-        className="mb-4",
-    )
-
-header_with_button = dbc.Row(
-    [
-        dbc.Col(html.H2("Dependencies"), width="auto"),
-        dbc.Col(
-            html.Div(
-                dbc.Button("Table", id="dependencies-table-btn", color="secondary", size="sm"),
-                id="dependencies-table-link-container",
-                className="d-flex justify-content-end",
-            ),
-            width="auto",
-        ),
-    ],
-    className="mb-2 align-items-center",
-)
-
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
@@ -88,6 +47,26 @@ layout = dbc.Container(
 
         dbc.Row(
             [dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=12)],
+        ),
+
+        html.Hr(),
+
+        dbc.Row(
+            [
+                dbc.Col(card("Outdated Library Usage",       "outdated-library-chart"), width=6),
+                dbc.Col(card("Legacy Version Exposure",      "legacy-version-chart"), width=6),
+            ]
+        ),
+
+        dbc.Row(
+            [
+                dbc.Col(card("JUnit Version Usage",          "junit-version-chart"), width=6),
+                dbc.Col(card("Dependency Count per Repo",    "dependency-count-chart"), width=6),
+            ]
+        ),
+
+        dbc.Row(
+            [dbc.Col(card("Multiple Frameworks per Repo",   "frameworks-per-repo-chart"), width=12)],
         ),
 
         modal_table(),
