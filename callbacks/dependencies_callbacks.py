@@ -100,6 +100,9 @@ def register_dependencies_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         return render_iac_server_orchestration_chart(fetch_iac_server_orchestration_usage(filters))
 
+    
+
+  
     @app.callback(
         Output("spring-core-version-chart", "figure"),
         Output("spring-boot-version-chart", "figure"),
@@ -109,10 +112,10 @@ def register_dependencies_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         df_core, df_boot = fetch_spring_framework_versions(filters)
         return (
-            render_spring_version_chart(df_core, "Spring Core Versions"),
-            render_spring_version_chart(df_boot, "Spring Boot Core Versions")
+            render_spring_version_chart(df_core, "Spring Core Version Usage"),
+            render_spring_version_chart(df_boot, "Spring Boot Version Usage")
         )
-
+    
     generate_redirect_callbacks(
         app,
         target_href="/table-dependencies",
