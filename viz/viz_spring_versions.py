@@ -6,18 +6,12 @@ def render_spring_version_chart(df, title=None):
 
     fig = px.bar(
         df,
-        x="framework",
+        x="version",
         y="repo_count",
-        color="version",
-        labels={
-            "framework": "Framework",
-            "version": "Version",
-            "repo_count": "Repository Count"
-        },
+        labels={"version": "Version", "repo_count": "Repository Count"},
     )
     fig.update_layout(
         title=title,
-        barmode="stack",
         margin=dict(t=10),
         dragmode=False,
         xaxis_title=None,

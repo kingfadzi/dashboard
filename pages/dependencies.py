@@ -63,7 +63,12 @@ layout = dbc.Container(
 
         dbc.Row([dbc.Col(card("Top Packages", "top-packages-chart"), width=12)]),
 
-        dbc.Row([dbc.Col(card("Spring & Spring Boot Version Usage", "spring-version-chart"), width=12)]),
+        dbc.Row(
+            [
+                dbc.Col(card("Spring Core Version Usage", "spring-core-version-chart"), width=6),
+                dbc.Col(card("Spring Boot Version Usage", "spring-boot-version-chart"), width=6),
+            ]
+        ),
 
         dbc.Row([dbc.Col(card("EOL Top Products", "xeol-top-products-chart"), width=12)]),
 

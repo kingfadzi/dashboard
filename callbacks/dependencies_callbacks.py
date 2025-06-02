@@ -102,14 +102,19 @@ def register_dependencies_callbacks(app):
 
     
 
+  
     @app.callback(
-        Output("spring-version-chart", "figure"),
+        Output("spring-core-version-chart", "figure"),
+        Output("spring-boot-version-chart", "figure"),
         Input("default-filter-store", "data"),
     )
     def update_spring_versions(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        df = fetch_spring_framework_versions(filters)
-        return render_spring_version_chart(df, title="Spring & Spring Boot Usage by Version")
+        df_core, df_boot = fetch_spring_framework_versions(filters)
+        return (
+            render_spring_version_chart(df_core, "Spring Core Version Usage"),
+            render_spring_version_chart(df_boot, "Spring Boot Version Usage")
+        )
     
     generate_redirect_callbacks(
         app,
