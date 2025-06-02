@@ -10,12 +10,12 @@ from univers.versions import MavenVersion
 logger = logging.getLogger(__name__)
 
 # Matches characters not allowed in semantic version strings
-UNPARSEABLE_RE = re.compile(r"[^\w.\-+]+")
+SEMVER_LIKE_RE = re.compile(r"^\d+(\.\d+){0,2}([-+][\w.\-]+)?$")
 
 def is_valid_version_string(v: str) -> bool:
     if not isinstance(v, str) or not v.strip():
         return False
-    return not UNPARSEABLE_RE.search(v)
+    return bool(SEMVER_LIKE_RE.match(v.strip()))
 
 def classify_framework_version_bucket(version: str) -> str:
     if not is_valid_version_string(version):
