@@ -2,7 +2,6 @@ import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
 from data.sql_filter_utils import build_repo_filter_conditions
-
 from data.cache_instance import cache
 
 @cache.memoize()
@@ -10,12 +9,12 @@ def fetch_outdated_library_usage(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
-                package_name,
-                COUNT(DISTINCT normalized_version) AS version_count
+                sd.package_name,
+                COUNT(DISTINCT sd.normalized_version) AS version_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
             {where_clause}
-            GROUP BY package_name
+            GROUP BY sd.package_name
             ORDER BY version_count DESC
             LIMIT 10
         """
@@ -23,15 +22,16 @@ def fetch_outdated_library_usage(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
     
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 @cache.memoize()
 def fetch_legacy_version_usage(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
-                CONCAT(split_part(normalized_version, '.', 1), '.', split_part(normalized_version, '.', 2)) AS major_minor,
+                CONCAT(split_part(sd.normalized_version, '.', 1), '.', split_part(sd.normalized_version, '.', 2)) AS major_minor,
                 COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
@@ -46,28 +46,29 @@ def fetch_legacy_version_usage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
-    
+
 
 @cache.memoize()
 def fetch_junit_version_usage(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
-                normalized_version,
-                COUNT(DISTINCT repo_id) AS repo_count
+                sd.normalized_version,
+                COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            WHERE group_id ILIKE 'junit%' OR package_name ILIKE '%junit%'
+            WHERE (sd.group_id ILIKE 'junit%%' OR sd.package_name ILIKE '%%junit%%')
             {extra_where}
-            GROUP BY normalized_version
-            ORDER BY normalized_version
+            GROUP BY sd.normalized_version
+            ORDER BY sd.normalized_version
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 @cache.memoize()
 def fetch_dependency_count_per_repo(filters=None):
@@ -85,8 +86,9 @@ def fetch_dependency_count_per_repo(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 @cache.memoize()
 def fetch_frameworks_per_repo(filters=None):
@@ -104,5 +106,5 @@ def fetch_frameworks_per_repo(filters=None):
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
