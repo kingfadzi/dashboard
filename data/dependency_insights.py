@@ -32,10 +32,10 @@ def fetch_legacy_version_usage(filters=None):
         sql = """
             SELECT
                 CONCAT(split_part(normalized_version, '.', 1), '.', split_part(normalized_version, '.', 2)) AS major_minor,
-                COUNT(DISTINCT repo_id) AS repo_count
+                COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            WHERE sd.package_name ILIKE 'spring%' OR sd.package_name ILIKE '%boot%'
+            WHERE (sd.package_name ILIKE 'spring%%' OR sd.package_name ILIKE '%%boot%%')
             {extra_where}
             GROUP BY major_minor
             ORDER BY major_minor
@@ -44,8 +44,9 @@ def fetch_legacy_version_usage(filters=None):
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_repo_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+    
 
 @cache.memoize()
 def fetch_junit_version_usage(filters=None):
