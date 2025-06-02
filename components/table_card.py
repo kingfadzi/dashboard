@@ -30,7 +30,7 @@ def render_table_card(grid_id: str, title: str = "Repositories Overview"):
                         },
                         dashGridOptions={
                             "pagination": True,
-                            "paginationPageSize": 5,
+                            "paginationPageSize": 10,
                             "domLayout": "autoHeight",
                             "animateRows": True,
                             "enableCellTextSelection": True,

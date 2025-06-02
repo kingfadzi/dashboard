@@ -16,6 +16,7 @@ def fetch_markup_language_usage(filters=None):
             {where_clause}
             GROUP BY gea.language
             ORDER BY repo_count DESC
+            LIMIT 10
         """
         where_clause = f"AND {condition_string}" if condition_string else ""
         sql = text(base_query.format(where_clause=where_clause))

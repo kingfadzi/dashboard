@@ -67,7 +67,7 @@ layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(card("Primary Language in Multilingual Repos", "repos-by-language-bar"), width=6),
+                dbc.Col(card("Primary Language in Multilingual Repos (Top 10)", "repos-by-language-bar"), width=6),
                 dbc.Col(card("Package Type Distribution", "package-type-bar-chart"), width=6),
             ],
             className="mb-4",
