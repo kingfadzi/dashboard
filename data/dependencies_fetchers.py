@@ -186,20 +186,30 @@ def fetch_dependency_volume_buckets(filters=None):
 def fetch_xeol_top_products(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT x.product_name, COUNT(DISTINCT x.repo_id) AS repo_count
+            SELECT
+                CASE
+                    WHEN x.eol_date IS NULL THEN 'unknown'
+                    WHEN CAST(x.eol_date AS DATE) < CURRENT_DATE THEN 'past_eol'
+                    WHEN CAST(x.eol_date AS DATE) BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '180 days' THEN 'near_eol'
+                    ELSE 'future_eol'
+                END AS eol_state,
+                x.artifact_type,
+                COUNT(DISTINCT x.repo_id) AS repo_count
             FROM xeol_results x
             JOIN harvested_repositories hr ON x.repo_id = hr.repo_id
             WHERE x.product_name IS NOT NULL
             {extra_where}
-            GROUP BY x.product_name
-            ORDER BY repo_count DESC
-            LIMIT 15
+            GROUP BY eol_state, x.artifact_type
+            ORDER BY eol_state, artifact_type
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
+
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+
 
 @cache.memoize()
 def fetch_xeol_exposure_by_bucket_and_artifact_type(filters=None):
@@ -296,5 +306,29 @@ def fetch_iac_adoption_by_framework_count(filters=None):
     return query_data(condition_string, param_dict)
 
 
+@cache.memoize()
+def fetch_top_expired_xeol_products(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                x.product_name,
+                x.artifact_type,
+                COUNT(DISTINCT x.repo_id) AS repo_count
+            FROM xeol_results x
+            JOIN harvested_repositories hr ON x.repo_id = hr.repo_id
+            WHERE x.product_name IS NOT NULL
+              AND x.eol_date IS NOT NULL
+              AND CAST(x.eol_date AS DATE) < CURRENT_DATE
+              {extra_where}
+            GROUP BY x.product_name, x.artifact_type
+            ORDER BY repo_count DESC
+            LIMIT 10
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
 
 

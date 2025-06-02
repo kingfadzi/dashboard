@@ -77,7 +77,10 @@ layout = dbc.Container(
         ),
 
         dbc.Row(
-            [dbc.Col(card("EOL Top Products", "xeol-top-products-chart"), width=12)],
+            [
+                dbc.Col(card("EOL Top Products", "xeol-top-products-chart"), width=6),
+                dbc.Col(card("Top Expired Xeol Products", "top-expired-xeol-products-chart"), width=6),
+            ]
         ),
 
         dbc.Row(

@@ -10,7 +10,7 @@ from data.dependencies_fetchers import (
     fetch_xeol_exposure_by_bucket_and_artifact_type,
     fetch_xeol_top_products,
     fetch_iac_framework_usage,
-    fetch_iac_adoption_by_framework_count,
+    fetch_iac_adoption_by_framework_count, fetch_top_expired_xeol_products,
 )
 from data.fetch_spring_versions import fetch_spring_framework_versions
 from data.fetch_iac_data import fetch_iac_server_orchestration_usage
@@ -29,7 +29,7 @@ from viz.viz_dependencies import (
     render_xeol_exposure_bucketed_chart,
     render_xeol_top_products_chart,
     render_iac_framework_usage_chart,
-    render_iac_adoption_by_framework_count_chart,
+    render_iac_adoption_by_framework_count_chart, render_top_expired_xeol_products_chart,
 )
 from viz.viz_spring_versions import render_spring_version_chart
 from viz.viz_iac_server_orchestration import render_iac_server_orchestration_chart
@@ -100,9 +100,13 @@ def register_dependencies_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         return render_iac_server_orchestration_chart(fetch_iac_server_orchestration_usage(filters))
 
-    
+    @app.callback(Output("top-expired-xeol-products-chart", "figure"), Input("default-filter-store", "data"))
+    def update_top_expired_xeol_products_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        return render_top_expired_xeol_products_chart(fetch_top_expired_xeol_products(filters))
 
-  
+
+
     @app.callback(
         Output("spring-core-version-chart", "figure"),
         Output("spring-boot-version-chart", "figure"),
