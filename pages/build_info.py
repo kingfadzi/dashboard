@@ -7,7 +7,7 @@ from layouts.layout_filters import filter_layout
 
 dash.register_page(__name__, path="/build-info", name="Build Info")
 
-def card(title, graph_id, height=300):
+def card(title, graph_id, height=400):
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -44,9 +44,17 @@ layout = dbc.Container(
         header_with_button,
 
         dbc.Row([
-            dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=6),
-            dbc.Col(card("Module Count", "module-count-chart"), width=6),
+            dbc.Col(card("Runtime Coverage by Tool", "build-runtime-coverage-chart"), width=4),
+            dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=4),
+            dbc.Col(card("Status by Tool", "status-by-tool-chart"), width=4),
         ], className="mb-4"),
+
+
+        dbc.Row([
+            dbc.Col(card("Build Tool Variants (with Runtime)", "build-tool-variant-chart"), width=12),
+        ], className="mb-4"),
+
+
 
         dbc.Row([
             dbc.Col(
@@ -68,14 +76,17 @@ layout = dbc.Container(
             dbc.Col(card("Runtime Versions", "runtime-versions-chart"), width=12),
         ], className="mb-4"),
 
-        dbc.Row([
-            dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=6),
-            dbc.Col(card("Status by Tool", "status-by-tool-chart"), width=6),
-        ], className="mb-4"),
+
 
         dbc.Row([
-            dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
+
+            dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=4),
+            dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=4),
+            dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
         ], className="mb-4"),
+
+
+
 
         modal_table(),
 

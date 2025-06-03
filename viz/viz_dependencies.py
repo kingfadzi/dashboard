@@ -1,6 +1,10 @@
 from components.chart_style import standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+import numpy as np
+
 
 @standard_chart_style
 def render_dependency_detection_chart(df):
@@ -81,13 +85,16 @@ def render_subcategory_distribution_chart(df):
     fig.update_xaxes(showticklabels=True)
     return fig
 
-
+@standard_chart_style
 def render_dependency_volume_chart(df):
     fig = px.bar(
         df,
         x="dep_bucket",
         y="repo_count",
+        color="main_language",
+        text="repo_count",
         labels={"dep_bucket": "Dependency Count", "repo_count": "Repository Count"},
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
     fig.update_layout(
         xaxis_title="Dependency Count",
@@ -98,6 +105,10 @@ def render_dependency_volume_chart(df):
             xanchor="center",
             font=dict(size=10)
         )
+    )
+    fig.update_layout(
+        barmode="stack",
+        xaxis=dict(type="category", showticklabels=True)
     )
     return fig
 
@@ -198,29 +209,41 @@ def render_iac_category_summary_chart(df):
     return fig
 
 
-
-
-
-
-
-
-
-
+@standard_chart_style
 def render_iac_adoption_by_framework_count_chart(df):
     fig = px.bar(
         df,
         x="framework_bucket",
         y="repo_count",
+        color="main_language",
+        barmode="stack",
+        text="repo_count",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        category_orders={"framework_bucket": ["0", "1", "2–4", "5–7", "8+"]},
         labels={
-            "framework_bucket": "Frameworks Used per Repo",
+            "framework_bucket": "Frameworks Used per Repository",
             "repo_count": "Repository Count",
-        },
+            "main_language": "Main Language"
+        }
     )
+
+    fig.update_traces(
+        texttemplate="%{text}",
+        textposition="inside",
+        textfont_size=12
+    )
+
     fig.update_layout(
+        title=None,
+        margin=dict(l=20, r=20, t=20, b=20),
         xaxis_title="Frameworks Used per Repository",
-        showlegend=False
+        yaxis_title="Repository Count"
     )
+
+    fig.update_xaxes(showticklabels=True)
+
     return fig
+
 
 
 from components.chart_style import standard_chart_style
@@ -265,5 +288,71 @@ def render_top_expired_xeol_products_chart(df):
     return fig
 
 
+def render_dependency_detection_chart(df):
+
+    heatmap_data = df.pivot_table(
+        index="classification_label",
+        columns="status",
+        values="repo_count",
+        aggfunc="sum",
+        fill_value=0
+    )
+
+    z = heatmap_data.values
+    x = heatmap_data.columns.tolist()
+    y = heatmap_data.index.tolist()
+    text = np.vectorize(str)(z)
+
+    fig = go.Figure(go.Heatmap(
+        z=z,
+        x=x,
+        y=y,
+        text=text,
+        texttemplate="%{text}",
+        textfont={"size": 12},
+        colorscale=NEUTRAL_COLOR_SEQUENCE,
+        showscale=False
+    ))
+
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="Repo size",
+        margin=dict(l=20, r=20, t=20, b=20)
+    )
+
+    return fig
 
 
+from plotly import express as px
+from components.chart_style import standard_chart_style
+
+@standard_chart_style
+def render_middleware_subcategory_chart(df):
+    fig = px.bar(
+        df,
+        x="framework",
+        y="repo_count",
+        color="main_language",
+        text="repo_count",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        labels={
+            "framework": "Framework",
+            "repo_count": "Repository Count",
+            "main_language": "Language"
+        },
+    )
+
+    fig.update_traces(
+        texttemplate="%{text}",
+        textposition="inside",
+        textfont_size=12
+    )
+
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=20, b=20),
+        xaxis_title=None,
+        yaxis_title="Repository Count",
+        xaxis_tickangle=-45
+    )
+    fig.update_xaxes(showticklabels=True)
+    return fig

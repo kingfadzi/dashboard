@@ -11,19 +11,26 @@ def fetch_dependency_detection_coverage(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT status, COUNT(*) AS repo_count
+            SELECT 
+                sub.status,
+                sub.main_language,
+                sub.classification_label,
+                COUNT(*) AS repo_count
             FROM (
                 SELECT
                     hr.repo_id,
-                    CASE WHEN sd.repo_id IS NULL THEN 'No Dependencies Detected'
-                         ELSE 'Dependencies Detected'
+                    hr.main_language,
+                    hr.classification_label,
+                    CASE 
+                        WHEN sd.repo_id IS NULL THEN 'None'
+                        ELSE 'Detected'
                     END AS status
                 FROM harvested_repositories hr
                 LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id  
                 {where_clause}
-                GROUP BY hr.repo_id, sd.repo_id
+                GROUP BY hr.repo_id, sd.repo_id, hr.main_language, hr.classification_label
             ) sub
-            GROUP BY status
+            GROUP BY sub.status, sub.main_language, sub.classification_label
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -31,6 +38,8 @@ def fetch_dependency_detection_coverage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+
 
 
 # 2. IaC Component Coverage
@@ -149,34 +158,34 @@ def fetch_subcategory_distribution(filters=None):
 def fetch_dependency_volume_buckets(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT dep_bucket, COUNT(*) AS repo_count
+            SELECT
+                CASE
+                    WHEN dep_count = 0 THEN '0'
+                    WHEN dep_count <= 10 THEN '1–10'
+                    WHEN dep_count <= 50 THEN '11–50' 
+                    WHEN dep_count <= 100 THEN '51–100'
+                    ELSE '100+'
+                END AS dep_bucket,
+                main_language,
+                COUNT(*) AS repo_count
             FROM (
-                SELECT
+                SELECT 
                     hr.repo_id,
-                    CASE
-                        WHEN COUNT(sd.id) = 0 THEN '0'
-                        WHEN COUNT(sd.id) BETWEEN 1 AND 10 THEN '1–10'
-                        WHEN COUNT(sd.id) BETWEEN 11 AND 50 THEN '11–50'
-                        WHEN COUNT(sd.id) BETWEEN 51 AND 100 THEN '51–100'
-                        ELSE '100+'
-                    END AS dep_bucket
+                    hr.main_language,
+                    COUNT(sd.id) AS dep_count
                 FROM harvested_repositories hr
                 LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id
-                {where_clause}
-                GROUP BY hr.repo_id
+                JOIN cloc_metrics cloc ON hr.repo_id = cloc.repo_id
+                JOIN languages ON cloc.language = languages.name
+                WHERE languages.type = 'programming'
+                {extra_where}
+                GROUP BY hr.repo_id, hr.main_language
             ) sub
-            GROUP BY dep_bucket
-            ORDER BY
-                CASE dep_bucket
-                    WHEN '0' THEN 1
-                    WHEN '1–10' THEN 2
-                    WHEN '11–50' THEN 3
-                    WHEN '51–100' THEN 4
-                    WHEN '100+' THEN 5
-                END
+            GROUP BY dep_bucket, main_language
+            ORDER BY MIN(dep_count)
         """
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(sql.format(where_clause=where_clause))
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
@@ -239,39 +248,43 @@ def fetch_iac_category_summary(filters=None):
 def fetch_iac_adoption_by_framework_count(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT framework_bucket, COUNT(*) AS repo_count
+            SELECT framework_bucket, main_language, COUNT(*) AS repo_count
             FROM (
                 SELECT
                     hr.repo_id,
+                    hr.main_language,
                     COUNT(DISTINCT ic.framework) AS framework_count,
                     CASE
                         WHEN COUNT(DISTINCT ic.framework) = 0 THEN '0 (none)'
                         WHEN COUNT(DISTINCT ic.framework) = 1 THEN '1'
-                        WHEN COUNT(DISTINCT ic.framework) = 2 THEN '2'
-                        WHEN COUNT(DISTINCT ic.framework) BETWEEN 3 AND 4 THEN '3–4'
-                        ELSE '5+'
+                        WHEN COUNT(DISTINCT ic.framework) BETWEEN 2 AND 4 THEN '2–4'
+                        WHEN COUNT(DISTINCT ic.framework) BETWEEN 5 AND 7 THEN '5–7'
+                        ELSE '8+'
                     END AS framework_bucket
                 FROM harvested_repositories hr
-                LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id           
+                LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id
                 {where_clause}
-                GROUP BY hr.repo_id
+                GROUP BY hr.repo_id, hr.main_language
             ) sub
-            GROUP BY framework_bucket
+            GROUP BY framework_bucket, main_language
             ORDER BY
                 CASE framework_bucket
                     WHEN '0 (none)' THEN 1
                     WHEN '1' THEN 2
-                    WHEN '2' THEN 3
-                    WHEN '3–4' THEN 4
+                    WHEN '2–4' THEN 3
+                    WHEN '5–7' THEN 4
                     ELSE 5
-                END
+                END,
+                main_language
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
+
 
 
 @cache.memoize()
@@ -299,5 +312,11 @@ def fetch_top_expired_xeol_products(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+
+
+
+
+
 
 

@@ -41,6 +41,7 @@ def fetch_iac_server_orchestration_usage(filters=None):
         sql = f"""
             SELECT 
                 ic.framework,
+                hr.main_language,
                 COUNT(DISTINCT ic.repo_id) AS repo_count
             FROM iac_components ic
             JOIN harvested_repositories hr ON ic.repo_id = hr.repo_id
@@ -48,7 +49,7 @@ def fetch_iac_server_orchestration_usage(filters=None):
                 ARRAY['application servers', 'kubernetes orchestration']
             )
             {f"AND {condition_string}" if condition_string else ""}
-            GROUP BY ic.framework
+            GROUP BY ic.framework, hr.main_language
             ORDER BY repo_count DESC
         """
 

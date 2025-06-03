@@ -1,55 +1,36 @@
 import plotly.express as px
 
-def render_outdated_library_chart(df):
-    fig = px.bar(
-        df,
-        x="package_name",
-        y="version_count",
-        labels={"package_name": "Package", "version_count": "Distinct Versions"},
-    )
-    fig.update_layout(margin=dict(t=10), xaxis_tickangle=-45)
-    return fig
+from components.chart_style import standard_chart_style
+from components.colors import NEUTRAL_COLOR_SEQUENCE
 
-def render_legacy_version_chart(df):
+@standard_chart_style
+def render_middleware_subcategory_chart(df):
     fig = px.bar(
         df,
-        x="major_minor",
+        x="framework",
         y="repo_count",
-        labels={"major_minor": "Version Group", "repo_count": "Repository Count"},
+        color="main_language",
+        text="repo_count",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        labels={
+            "framework": "Framework",
+            "repo_count": "Repository Count",
+            "main_language": "Language"
+        },
     )
-    fig.update_layout(margin=dict(t=10), xaxis_tickangle=-30)
-    return fig
 
-def render_junit_version_chart(df):
-    fig = px.bar(
-        df,
-        x="normalized_version",
-        y="repo_count",
-        labels={"normalized_version": "", "repo_count": "Repository Count"},
+    fig.update_traces(
+        texttemplate="%{text}",
+        textposition="inside",
+        textfont_size=12
     )
+
     fig.update_layout(
-        showlegend=False,
-        margin=dict(l=0, r=0, t=0, b=0),
-        xaxis_tickangle=45,
+        margin=dict(l=20, r=20, t=20, b=20),
+        xaxis_title=None,
+        yaxis_title="Repository Count",
+        xaxis_tickangle=-45
     )
+
     return fig
 
-def render_dependency_count_chart(df):
-    fig = px.histogram(
-        df,
-        x="dep_count",
-        nbins=30,
-        labels={"dep_count": "Dependency Count"},
-    )
-    fig.update_layout(margin=dict(t=10))
-    return fig
-
-def render_frameworks_per_repo_chart(df):
-    fig = px.histogram(
-        df,
-        x="framework_count",
-        nbins=10,
-        labels={"framework_count": "Frameworks per Repo"},
-    )
-    fig.update_layout(margin=dict(t=10))
-    return fig

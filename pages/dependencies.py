@@ -2,7 +2,6 @@ import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from config.config import DEFAULT_FILTERS
-from components.modal_table import modal_table
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
@@ -70,14 +69,9 @@ layout = dbc.Container(
             ]
         ),
 
-
         dbc.Row(
-            [
-                dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=12)
-
-            ]
+            [dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=12)]
         ),
-
 
         dbc.Row(
             [
@@ -85,47 +79,61 @@ layout = dbc.Container(
                 dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
             ]
         ),
+
         dbc.Row(
             [
-
                 dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
-                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=6)
+                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=6),
             ]
         ),
 
+        # Side-by-side: Dependency Volume and Middleware Usage
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                dbc.Row(
+                                    [
+                                        dbc.Col(html.B("Middleware Usage"), className="text-start"),
+                                        dbc.Col(
+                                            dcc.Dropdown(
+                                                id="middleware-subcategory-dropdown",
+                                                placeholder="Select Middleware Category",
+                                                clearable=True,
+                                                value=None,
+                                                style={"width": "250px", "fontSize": "14px"}
+                                            ),
+                                            width="auto"
+                                        )
+                                    ],
+                                    className="align-items-center justify-content-between"
+                                ),
+                                className="bg-light"
+                            ),
 
+
+                            dbc.CardBody(
+                                dcc.Loading(
+                                    dcc.Graph(
+                                        id="middleware-subcategory-chart",
+                                        config={"staticPlot": True},
+                                        style={"height": "400px"},
+                                    )
+                                ),
+                                className="p-0",
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=6,
+                )
             ]
         ),
 
-        dbc.Row(
-            [
-                dbc.Col(card("Frameworks per Repo", "frameworks-per-repo-chart"), width=6),
-                dbc.Col(card("Dependency Count per Repo", "dependency-count-chart"), width=6),
-            ]
-        ),
 
-
-        html.Hr(),
-
-        dbc.Row(
-            [
-                dbc.Col(card("Outdated Libraries", "outdated-library-chart"), width=6),
-                dbc.Col(card("Legacy Version Usage", "legacy-version-chart"), width=6),
-            ]
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(card("JUnit Version Usage", "junit-version-chart"), width=6),
-                dbc.Col(card("Dependency Count per Repo", "dependency-count-chart"), width=6),
-            ]
-        ),
-
-
-        modal_table(),
         dcc.Store(id="default-filter-store"),
         dcc.Store(id="filters-applied-trigger"),
     ],

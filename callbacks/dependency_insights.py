@@ -1,56 +1,45 @@
-from dash import Input, Output
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
+
+
 from data.dependency_insights import (
-    fetch_outdated_library_usage,
-    fetch_legacy_version_usage,
-    fetch_junit_version_usage,
-    fetch_dependency_count_per_repo,
-    fetch_frameworks_per_repo,
+    fetch_middleware_usage_detailed, fetch_middleware_usage_by_sub_category,
 )
-from viz.viz_dependency_insights import (
-    render_outdated_library_chart,
-    render_legacy_version_chart,
-    render_junit_version_chart,
-    render_dependency_count_chart,
-    render_frameworks_per_repo_chart,
-)
+from utils.filter_utils import extract_filter_dict_from_store
+from viz.viz_dependencies import render_middleware_subcategory_chart
 
 def register_dependency_insights_callbacks(app):
     @app.callback(
-        Output("outdated-library-chart", "figure"),
-        Input("default-filter-store", "data"),
+        Output("middleware-subcategory-dropdown", "options"),
+        Input("middleware-subcategory-dropdown", "id")  # dummy input
     )
-    def update_outdated_library_chart(store_data):
-        df = fetch_outdated_library_usage(store_data)
-        return render_outdated_library_chart(df)
+    def populate_subcategory_dropdown(_):
+        df = fetch_middleware_usage_detailed()
+        options = sorted(df["sub_category"].dropna().unique())
+        return [{"label": s, "value": s} for s in options]
 
     @app.callback(
-        Output("legacy-version-chart", "figure"),
-        Input("default-filter-store", "data"),
+        Output("middleware-subcategory-chart", "figure"),
+        Input("middleware-subcategory-dropdown", "value"),
+        State("default-filter-store", "data"),
     )
-    def update_legacy_version_chart(store_data):
-        df = fetch_legacy_version_usage(store_data)
-        return render_legacy_version_chart(df)
+    def update_middleware_chart(selected_subcategory, filters):
+        filters = filters or {}  # ← Ensure it's a dict
+        df = fetch_middleware_usage_by_sub_category(filters)
 
-    @app.callback(
-        Output("junit-version-chart", "figure"),
-        Input("default-filter-store", "data"),
-    )
-    def update_junit_version_chart(store_data):
-        df = fetch_junit_version_usage(store_data)
-        return render_junit_version_chart(df)
+        print("Selected subcategory:", selected_subcategory)
+        print("Filters:", filters)
+        print("Middleware Data:")
+        print(df.head())
 
-    @app.callback(
-        Output("dependency-count-chart", "figure"),
-        Input("default-filter-store", "data"),
-    )
-    def update_dependency_count_chart(store_data):
-        df = fetch_dependency_count_per_repo(store_data)
-        return render_dependency_count_chart(df)
+        if selected_subcategory:
+            df = df[df["sub_category"] == selected_subcategory]
 
-    @app.callback(
-        Output("frameworks-per-repo-chart", "figure"),
-        Input("default-filter-store", "data"),
-    )
-    def update_frameworks_per_repo_chart(store_data):
-        df = fetch_frameworks_per_repo(store_data)
-        return render_frameworks_per_repo_chart(df)
+        if df.empty:
+            raise PreventUpdate
+
+        return render_middleware_subcategory_chart(df)
+
+
+
+
