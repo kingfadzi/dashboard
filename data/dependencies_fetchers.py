@@ -105,37 +105,38 @@ def fetch_package_type_distribution(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
-@cache.memoize()
-def fetch_top_packages(filters=None):
-    def query_data(condition_string, param_dict):
-        sql = """
-            SELECT sd.package_name, COUNT(*) AS count
-            FROM syft_dependencies sd
-            JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            {where_clause}
-            GROUP BY sd.package_name
-            ORDER BY count DESC
-            LIMIT 20
-        """
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(sql.format(where_clause=where_clause))
-        return pd.read_sql(stmt, engine, params=param_dict)
-
-    condition_string, param_dict = build_repo_filter_conditions(filters)
-    return query_data(condition_string, param_dict)
 
 @cache.memoize()
-def fetch_framework_distribution(filters=None):
+def fetch_subcategory_distribution(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT sd.framework, COUNT(DISTINCT sd.repo_id) AS repo_count
+            WITH subcat_totals AS (
+                SELECT 
+                    sd.sub_category,
+                    COUNT(DISTINCT sd.repo_id) AS total_repo_count
+                FROM syft_dependencies sd
+                JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
+                WHERE sd.sub_category IS NOT NULL AND sd.sub_category <> ''
+                {extra_where}
+                GROUP BY sd.sub_category
+            ),
+            top_subcategories AS (
+                SELECT sub_category
+                FROM subcat_totals
+                ORDER BY total_repo_count DESC
+                LIMIT 15
+            )
+            SELECT 
+                sd.sub_category,
+                sd.package_type,
+                COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            WHERE sd.framework IS NOT NULL AND sd.framework <> ''
+            JOIN top_subcategories ts ON sd.sub_category = ts.sub_category
+            WHERE sd.package_type IS NOT NULL AND sd.package_type <> ''
             {extra_where}
-            GROUP BY sd.framework
-            ORDER BY repo_count DESC
-            LIMIT 15
+            GROUP BY sd.sub_category, sd.package_type
+            ORDER BY sd.sub_category, repo_count DESC
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
@@ -210,62 +211,29 @@ def fetch_xeol_top_products(filters=None):
     return query_data(condition_string, param_dict)
 
 
-
 @cache.memoize()
-def fetch_xeol_exposure_by_bucket_and_artifact_type(filters=None):
+def fetch_iac_category_summary(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT bucket, artifact_type, COUNT(*) AS repo_count
-            FROM (
-                SELECT
-                    hr.repo_id,
-                    COALESCE(x.artifact_type, 'unknown') AS artifact_type,
-                    COUNT(x.id) AS eol_count,
-                    CASE
-                        WHEN COUNT(x.id) = 0 THEN '0'
-                        WHEN COUNT(x.id) BETWEEN 1 AND 5 THEN '1–5'
-                        WHEN COUNT(x.id) BETWEEN 6 AND 20 THEN '6–20'
-                        ELSE '20+'
-                    END AS bucket
-                FROM harvested_repositories hr
-                LEFT JOIN xeol_results x ON hr.repo_id = x.repo_id
-                {where_clause}
-                GROUP BY hr.repo_id, artifact_type
-            ) sub
-            WHERE bucket <> '0'
-            GROUP BY bucket, artifact_type
-            ORDER BY
-                CASE bucket
-                    WHEN '1–5' THEN 1
-                    WHEN '6–20' THEN 2
-                    ELSE 3
-                END,
-                artifact_type
-        """
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(sql.format(where_clause=where_clause))
-        return pd.read_sql(stmt, engine, params=param_dict)
-    condition_string, param_dict = build_repo_filter_conditions(filters)
-    return query_data(condition_string, param_dict)
-
-
-@cache.memoize()
-def fetch_iac_framework_usage(filters=None):
-    def query_data(condition_string, param_dict):
-        sql = """
-            SELECT ic.framework, COUNT(DISTINCT ic.repo_id) AS repo_count
+            SELECT
+                ic.category,
+                COUNT(DISTINCT ic.framework) AS framework_count,
+                COUNT(DISTINCT ic.repo_id) AS repo_count
             FROM iac_components ic
             JOIN harvested_repositories hr ON ic.repo_id = hr.repo_id
             {where_clause}
-            GROUP BY ic.framework
+            GROUP BY ic.category
             ORDER BY repo_count DESC
-            LIMIT 15
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
+
     condition_string, param_dict = build_repo_filter_conditions(filters)
-    return query_data(condition_string, param_dict)
+    df = query_data(condition_string, param_dict)
+    return df if not df.empty else pd.DataFrame(columns=["category", "framework_count", "repo_count"])
+
+
 
 @cache.memoize()
 def fetch_iac_adoption_by_framework_count(filters=None):
@@ -311,16 +279,17 @@ def fetch_top_expired_xeol_products(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
-                x.product_name,
+                x.artifact_name,
                 x.artifact_type,
+                x.artifact_version,  -- NEW
                 COUNT(DISTINCT x.repo_id) AS repo_count
             FROM xeol_results x
             JOIN harvested_repositories hr ON x.repo_id = hr.repo_id
-            WHERE x.product_name IS NOT NULL
+            WHERE x.artifact_name IS NOT NULL
               AND x.eol_date IS NOT NULL
               AND CAST(x.eol_date AS DATE) < CURRENT_DATE
               {extra_where}
-            GROUP BY x.product_name, x.artifact_type
+            GROUP BY x.artifact_name, x.artifact_type, x.artifact_version  
             ORDER BY repo_count DESC
             LIMIT 10
         """

@@ -1,20 +1,18 @@
 import plotly.express as px
+from components.chart_style import standard_chart_style
+from components.colors import NEUTRAL_COLOR_SEQUENCE
 
-import plotly.express as px
-
+@standard_chart_style
 def render_spring_version_chart(df, title=None):
     df = df.copy()
 
-    # Normalize version buckets and handle missing values
     df["version_bucket"] = (
         df["version_bucket"]
-        .str.strip()  # Remove leading/trailing whitespace
+        .str.strip()
         .fillna("Invalid / Unrecognized")
     )
 
-    # Ensure unique combinations by aggregating (if needed)
     df = df.groupby(["version_bucket", "host_name"], as_index=False)["repo_count"].sum()
-
     df["repo_count"] = df["repo_count"].astype(int)
     df["text_label"] = df["repo_count"].astype(str)
 
@@ -29,6 +27,7 @@ def render_spring_version_chart(df, title=None):
             "repo_count": "Repository Count",
             "host_name": "Host",
         },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
 
     fig.update_traces(textposition="outside")
@@ -36,18 +35,13 @@ def render_spring_version_chart(df, title=None):
         tickformat=".0f",
         tickmode="auto",
         automargin=True,
-        ticks="outside"
+        ticks="outside",
+        title_text="Repository Count"
     )
-
-    fig.update_layout(
-        barmode="stack",
-        margin=dict(t=10),
-        dragmode=False,
-        xaxis_title=None,
-        yaxis_title="Repository Count",
-        xaxis_fixedrange=True,
-        yaxis_fixedrange=True,
-        xaxis={'categoryorder': 'category ascending'}  # Enforce consistent ordering
+    fig.update_xaxes(
+        categoryorder="category ascending",
+        showticklabels=True
     )
+    fig.update_layout(barmode="stack")
 
     return fig
