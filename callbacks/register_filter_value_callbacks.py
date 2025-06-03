@@ -33,17 +33,24 @@ def register_filter_value_callbacks(app):
         ],
         prevent_initial_call=False,
     )
-    def unified_filter_logic(mod_ts, activity, tc, lang, classification, app_id, host,
+   def unified_filter_logic(mod_ts, activity, tc, lang, classification, app_id, host,
                          store_data,
                          activity_opts, tc_opts, lang_opts, class_opts, host_opts):
         print("\n[unified_filter_logic] Triggered by:", ctx.triggered_id)
         print(f"[unified_filter_logic] Store data: {json.dumps(store_data, indent=2)}")
     
         def validate(vals, options):
+            if vals is None:
+                return []
             valid = {o["value"] for o in options}
-            return [v for v in vals] if vals is None else [v for v in vals if v in valid]
+            return [v for v in vals if v in valid]
     
-        # 1. Handle store initialization
+        # 1. Handle initial page load (store not ready)
+        if mod_ts is None:
+            print("[unified_filter_logic] Store not loaded yet")
+            raise PreventUpdate  # Wait for store to load
+    
+        # 2. Initialize store if empty
         if store_data is None:
             initial = {
                 "host_name": [],
@@ -61,12 +68,11 @@ def register_filter_value_callbacks(app):
                 initial["classification_label"],
                 initial["app_id"],
                 initial["host_name"],
-                initial  # This writes to the store
+                initial
             ]
     
-        # 2. Handle store load → hydrate UI
+        # 3. Handle store load → hydrate UI
         if ctx.triggered_id == "default-filter-store":
-            # Validate options against current filter choices
             hydrated = [
                 validate(store_data.get("activity_status", []), activity_opts),
                 validate(store_data.get("transaction_cycle", []), tc_opts),
@@ -74,12 +80,12 @@ def register_filter_value_callbacks(app):
                 validate(store_data.get("classification_label", []), class_opts),
                 store_data.get("app_id", ""),
                 validate(store_data.get("host_name", []), host_opts),
-                dash.no_update  # Don't modify store
+                dash.no_update
             ]
-            print("[unified_filter_logic] Hydrated filters from store.")
+            print("[unified_filter_logic] Hydrated filters from store")
             return hydrated
     
-        # 3. Handle filter changes → update store
+        # 4. Handle filter changes → update store
         updated = {
             "host_name": host or [],
             "activity_status": activity or [],
@@ -89,6 +95,4 @@ def register_filter_value_callbacks(app):
             "app_id": app_id or "",
         }
         print("[unified_filter_logic] Updating store with:", json.dumps(updated, indent=2))
-        
-        # Return current UI values + updated store
         return [activity, tc, lang, classification, app_id, host, updated]
