@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from config.config import DEFAULT_FILTERS
 from components.modal_table import modal_table
 from layouts.layout_filters import filter_layout
 
@@ -80,7 +79,6 @@ layout = dbc.Container(
 
         modal_table(),
 
-        dcc.Store(id="default-filter-store"),
         dcc.Store(id="filters-applied-trigger"),
     ],
     fluid=True,

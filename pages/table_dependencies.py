@@ -8,7 +8,6 @@ dash.register_page(__name__, path="/table-dependencies", name="Dependencies")
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
-        dcc.Store(id="default-filter-store"),
 
         dbc.Row(
             [

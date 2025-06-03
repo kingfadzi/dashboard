@@ -7,10 +7,6 @@ from dash.dependencies import Input, Output, State
 from data.cache_instance import cache
 from layouts.layout_filters import filter_layout  # Original name preserved
 from callbacks.register_all_callbacks import register_all_callbacks
-from callbacks.table_callbacks import register_table_callbacks
-import callbacks.repo_profile_callback
-from config.config import DEFAULT_FILTERS
-from callbacks.register_filter_callbacks import register_filter_callbacks
 
 # Initialize Dash app
 app = Dash(
@@ -68,7 +64,7 @@ app.layout = dbc.Container(
         dcc.Location(id="repo-modal-location", refresh=False),  # ← ADD HERE
         html.Div(id="repo-modal-container"),                    # ← AND HERE
         navbar,
-        dcc.Store(id="default-filter-store", data=DEFAULT_FILTERS),
+        dcc.Store(id="default-filter-store", storage_type="local"),
         dbc.Collapse(filter_layout(), id="filter-collapse", is_open=False),
         dash.page_container,
     ],

@@ -8,7 +8,6 @@ dash.register_page(__name__, path="/table-code-insights", name="Code Insights â€
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
-        dcc.Store(id="default-filter-store"),
 
         dbc.Row(
             [

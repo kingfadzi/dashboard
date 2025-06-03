@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from config.config import DEFAULT_FILTERS
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
@@ -133,9 +132,7 @@ layout = dbc.Container(
             ]
         ),
 
-
-        dcc.Store(id="default-filter-store"),
-        dcc.Store(id="filters-applied-trigger"),
+         dcc.Store(id="filters-applied-trigger"),
     ],
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},

@@ -10,7 +10,6 @@ dash.register_page(__name__, path="/table-build-info", name="Build Info – Tabl
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
-        dcc.Store(id="default-filter-store"),
 
         dbc.Row(
             [

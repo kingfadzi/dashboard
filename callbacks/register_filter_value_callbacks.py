@@ -1,23 +1,7 @@
-import os
-from dotenv import load_dotenv
+import json
 from dash import Input, Output, State, callback, ctx
 from dash.exceptions import PreventUpdate
-from urllib.parse import parse_qs
-
-load_dotenv()  # Load values from .env
-
-def env_list(key):
-    val = os.getenv(key, "")
-    return [v.strip() for v in val.split(",") if v.strip()]
-
-DEFAULT_FILTERS = {
-    "host_name": env_list("DEFAULT_HOSTNAME"),
-    "activity_status": env_list("DEFAULT_ACTIVITY_STATUS"),
-    "transaction_cycle": env_list("DEFAULT_TRANSACTION_CYCLE"),
-    "main_language": env_list("DEFAULT_LANGUAGE"),
-    "classification_label": env_list("DEFAULT_CLASSIFICATION"),
-    "app_id": os.getenv("DEFAULT_APP_ID", ""),
-}
+import dash
 
 def register_filter_value_callbacks(app):
     @callback(
@@ -28,59 +12,83 @@ def register_filter_value_callbacks(app):
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
             Output("host-name-filter", "value"),
+            Output("default-filter-store", "data"),
         ],
         [
-            Input("_pages_location", "pathname"),
-            Input("url", "search"),
-            Input("activity-status-filter", "options"),
-            Input("tc-filter", "options"),
-            Input("language-filter", "options"),
-            Input("classification-filter", "options"),
-            Input("host-name-filter", "options"),
+            Input("default-filter-store", "modified_timestamp"),
+            Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
+            Input("host-name-filter", "value"),
         ],
-        State("default-filter-store", "data"),
-        prevent_initial_call=True,
-        allow_duplicate=True,
+        [
+            State("default-filter-store", "data"),
+            State("activity-status-filter", "options"),
+            State("tc-filter", "options"),
+            State("language-filter", "options"),
+            State("classification-filter", "options"),
+            State("host-name-filter", "options"),
+        ],
+        prevent_initial_call=False,
     )
-    def unified_filter_loader(pathname, search,
-                              activity_opts, tc_opts, lang_opts, class_opts, host_opts,
-                              default_store_filters):
-        print("[unified_filter_loader] Triggered by:", ctx.triggered_id)
-
-        if ctx.triggered_id == "url" and search:
-            print(f"[unified_filter_loader] Populating from URL query: {search}")
-            parsed = parse_qs(search.lstrip("?"))
-            filters = {
-                "host_name": parsed.get("host_name", []),
-                "activity_status": parsed.get("activity_status", []),
-                "transaction_cycle": parsed.get("transaction_cycle", []),
-                "main_language": parsed.get("main_language", []),
-                "classification_label": parsed.get("classification_label", []),
-                "app_id": parsed.get("app_id", [""])[0],
-            }
-        elif default_store_filters:
-            print(f"[unified_filter_loader] Populating from store: {default_store_filters}")
-            filters = {
-                "host_name": default_store_filters.get("host_name", []),
-                "activity_status": default_store_filters.get("activity_status", []),
-                "transaction_cycle": default_store_filters.get("transaction_cycle", []),
-                "main_language": default_store_filters.get("main_language", []),
-                "classification_label": default_store_filters.get("classification_label", []),
-                "app_id": default_store_filters.get("app_id", ""),
-            }
-        else:
-            print("[unified_filter_loader] Falling back to .env defaults")
-            filters = DEFAULT_FILTERS
+    def unified_filter_logic(mod_ts, activity, tc, lang, classification, app_id, host,
+                             store_data,
+                             activity_opts, tc_opts, lang_opts, class_opts, host_opts):
+        print("\n[unified_filter_logic] Triggered by:", ctx.triggered_id)
+        print(f"[unified_filter_logic] Store data: {json.dumps(store_data, indent=2)}")
 
         def validate(vals, options):
             valid = {o["value"] for o in options}
             return [v for v in vals if v in valid]
 
-        return [
-            validate(filters["activity_status"], activity_opts),
-            validate(filters["transaction_cycle"], tc_opts),
-            validate(filters["main_language"], lang_opts),
-            validate(filters["classification_label"], class_opts),
-            filters["app_id"],
-            validate(filters["host_name"], host_opts),
+        # Store is empty, initialize
+        if store_data is None:
+            initial = {
+                "host_name": [],
+                "activity_status": [],
+                "transaction_cycle": [],
+                "main_language": [],
+                "classification_label": [],
+                "app_id": ""
+            }
+            print("[unified_filter_logic] Initializing store")
+            return [
+                initial["activity_status"],
+                initial["transaction_cycle"],
+                initial["main_language"],
+                initial["classification_label"],
+                initial["app_id"],
+                initial["host_name"],
+                initial
+            ]
+
+        # Triggered by filter changes → update store
+        if ctx.triggered_id in {
+            "activity-status-filter", "tc-filter", "language-filter",
+            "classification-filter", "app-id-filter", "host-name-filter"
+        }:
+            updated = {
+                "host_name": host,
+                "activity_status": activity,
+                "transaction_cycle": tc,
+                "main_language": lang,
+                "classification_label": classification,
+                "app_id": app_id,
+            }
+            print("[unified_filter_logic] Updating store with:", json.dumps(updated, indent=2))
+            raise PreventUpdate  # Filters already updated via UI; store will update silently
+
+        # Triggered by store load → hydrate UI
+        hydrated = [
+            validate(store_data.get("activity_status", []), activity_opts),
+            validate(store_data.get("transaction_cycle", []), tc_opts),
+            validate(store_data.get("main_language", []), lang_opts),
+            validate(store_data.get("classification_label", []), class_opts),
+            store_data.get("app_id", ""),
+            validate(store_data.get("host_name", []), host_opts),
+            dash.no_update  # No need to rewrite the store
         ]
+        print("[unified_filter_logic] Hydrated filters from store.")
+        return hydrated
