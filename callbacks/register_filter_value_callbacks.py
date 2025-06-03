@@ -41,9 +41,9 @@ def register_filter_value_callbacks(app):
     
         def validate(vals, options):
             valid = {o["value"] for o in options}
-            return [v for v in vals if v in valid]
+            return [v for v in vals] if vals is None else [v for v in vals if v in valid]
     
-        # 1. Initialize store if empty
+        # 1. Handle store initialization
         if store_data is None:
             initial = {
                 "host_name": [],
@@ -61,11 +61,12 @@ def register_filter_value_callbacks(app):
                 initial["classification_label"],
                 initial["app_id"],
                 initial["host_name"],
-                initial
+                initial  # This writes to the store
             ]
     
-        # 2. Handle store load (hydrate UI)
+        # 2. Handle store load → hydrate UI
         if ctx.triggered_id == "default-filter-store":
+            # Validate options against current filter choices
             hydrated = [
                 validate(store_data.get("activity_status", []), activity_opts),
                 validate(store_data.get("transaction_cycle", []), tc_opts),
@@ -78,14 +79,14 @@ def register_filter_value_callbacks(app):
             print("[unified_filter_logic] Hydrated filters from store.")
             return hydrated
     
-        # 3. Handle filter changes (update store)
+        # 3. Handle filter changes → update store
         updated = {
-            "host_name": host,
-            "activity_status": activity,
-            "transaction_cycle": tc,
-            "main_language": lang,
-            "classification_label": classification,
-            "app_id": app_id,
+            "host_name": host or [],
+            "activity_status": activity or [],
+            "transaction_cycle": tc or [],
+            "main_language": lang or [],
+            "classification_label": classification or [],
+            "app_id": app_id or "",
         }
         print("[unified_filter_logic] Updating store with:", json.dumps(updated, indent=2))
         
