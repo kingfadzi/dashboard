@@ -4,7 +4,54 @@ from dash.exceptions import PreventUpdate
 import dash
 
 def register_filter_value_callbacks(app):
-    @callback(
+    # 1. Define store with initial data
+    dcc.Store(
+        id="default-filter-store",
+        storage_type="local",
+        data={  # Initial structure
+            "host_name": [],
+            "activity_status": [],
+            "transaction_cycle": [],
+            "main_language": [],
+            "classification_label": [],
+            "app_id": ""
+        }
+    )
+    
+    # 2. Single callback for filter persistence
+    @app.callback(
+        Output("default-filter-store", "data"),
+        Input("activity-status-filter", "value"),
+        Input("tc-filter", "value"),
+        Input("language-filter", "value"),
+        Input("classification-filter", "value"),
+        Input("app-id-filter", "value"),
+        Input("host-name-filter", "value"),
+        State("default-filter-store", "data"),
+    )
+    def persist_filter_values(activity, tc, lang, classification, app_id, host, current_store):
+        # Only update if any value actually changed
+        if (activity != current_store["activity_status"] or
+            tc != current_store["transaction_cycle"] or
+            lang != current_store["main_language"] or
+            classification != current_store["classification_label"] or
+            app_id != current_store["app_id"] or
+            host != current_store["host_name"]):
+            
+            new_store = {
+                "host_name": host or [],
+                "activity_status": activity or [],
+                "transaction_cycle": tc or [],
+                "main_language": lang or [],
+                "classification_label": classification or [],
+                "app_id": app_id or ""
+            }
+            return new_store
+        
+        raise PreventUpdate
+    
+    # 3. Hydration callback (runs once when page loads)
+    @app.callback(
         [
             Output("activity-status-filter", "value"),
             Output("tc-filter", "value"),
@@ -12,87 +59,16 @@ def register_filter_value_callbacks(app):
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
             Output("host-name-filter", "value"),
-            Output("default-filter-store", "data"),
         ],
-        [
-            Input("default-filter-store", "modified_timestamp"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-            Input("host-name-filter", "value"),
-        ],
-        [
-            State("default-filter-store", "data"),
-            State("activity-status-filter", "options"),
-            State("tc-filter", "options"),
-            State("language-filter", "options"),
-            State("classification-filter", "options"),
-            State("host-name-filter", "options"),
-        ],
-        prevent_initial_call=False,
+        Input("default-filter-store", "data"),
+        prevent_initial_call=True
     )
-   def unified_filter_logic(mod_ts, activity, tc, lang, classification, app_id, host,
-                         store_data,
-                         activity_opts, tc_opts, lang_opts, class_opts, host_opts):
-        print("\n[unified_filter_logic] Triggered by:", ctx.triggered_id)
-        print(f"[unified_filter_logic] Store data: {json.dumps(store_data, indent=2)}")
-    
-        def validate(vals, options):
-            if vals is None:
-                return []
-            valid = {o["value"] for o in options}
-            return [v for v in vals if v in valid]
-    
-        # 1. Handle initial page load (store not ready)
-        if mod_ts is None:
-            print("[unified_filter_logic] Store not loaded yet")
-            raise PreventUpdate  # Wait for store to load
-    
-        # 2. Initialize store if empty
-        if store_data is None:
-            initial = {
-                "host_name": [],
-                "activity_status": [],
-                "transaction_cycle": [],
-                "main_language": [],
-                "classification_label": [],
-                "app_id": ""
-            }
-            print("[unified_filter_logic] Initializing store")
-            return [
-                initial["activity_status"],
-                initial["transaction_cycle"],
-                initial["main_language"],
-                initial["classification_label"],
-                initial["app_id"],
-                initial["host_name"],
-                initial
-            ]
-    
-        # 3. Handle store load → hydrate UI
-        if ctx.triggered_id == "default-filter-store":
-            hydrated = [
-                validate(store_data.get("activity_status", []), activity_opts),
-                validate(store_data.get("transaction_cycle", []), tc_opts),
-                validate(store_data.get("main_language", []), lang_opts),
-                validate(store_data.get("classification_label", []), class_opts),
-                store_data.get("app_id", ""),
-                validate(store_data.get("host_name", []), host_opts),
-                dash.no_update
-            ]
-            print("[unified_filter_logic] Hydrated filters from store")
-            return hydrated
-    
-        # 4. Handle filter changes → update store
-        updated = {
-            "host_name": host or [],
-            "activity_status": activity or [],
-            "transaction_cycle": tc or [],
-            "main_language": lang or [],
-            "classification_label": classification or [],
-            "app_id": app_id or "",
-        }
-        print("[unified_filter_logic] Updating store with:", json.dumps(updated, indent=2))
-        return [activity, tc, lang, classification, app_id, host, updated]
+    def hydrate_filters(store_data):
+        return [
+            store_data["activity_status"],
+            store_data["transaction_cycle"],
+            store_data["main_language"],
+            store_data["classification_label"],
+            store_data["app_id"],
+            store_data["host_name"],
+        ]
