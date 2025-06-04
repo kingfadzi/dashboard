@@ -2,6 +2,7 @@ import json
 from dash import Input, Output, State, callback, ctx
 from dash.exceptions import PreventUpdate
 import dash
+from dash import html, dcc
 
 def register_filter_value_callbacks(app):
     # 1. Define store with initial data
