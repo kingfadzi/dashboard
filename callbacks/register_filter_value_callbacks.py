@@ -1,31 +1,6 @@
-from dash import Input, Output, State, callback, no_update
-import dash
+from dash import Input, Output, State, ctx, no_update
 
 def register_filter_value_callbacks(app):
-    # ✅ 1. Save user input to the store
-    @app.callback(
-        Output("default-filter-store", "data"),
-        [
-            Input("host-name-filter", "value"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-        ],
-        prevent_initial_call=True
-    )
-    def update_filter_store(hosts, activity, tc, lang, classif, app_id):
-        return {
-            "host-name-filter": hosts,
-            "activity-status-filter": activity,
-            "tc-filter": tc,
-            "language-filter": lang,
-            "classification-filter": classif,
-            "app-id-filter": app_id,
-        }
-
-    # ✅ 2. Restore values AND re-trigger charts by re-writing store
     @app.callback(
         [
             Output("host-name-filter", "value"),
@@ -34,9 +9,15 @@ def register_filter_value_callbacks(app):
             Output("language-filter", "value"),
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
-            Output("default-filter-store", "data"),  # used to trigger chart updates
+            Output("default-filter-store", "data"),
         ],
         [
+            Input("host-name-filter", "value"),
+            Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
             Input("host-name-filter", "options"),
             Input("activity-status-filter", "options"),
             Input("tc-filter", "options"),
@@ -44,19 +25,39 @@ def register_filter_value_callbacks(app):
             Input("classification-filter", "options"),
         ],
         State("default-filter-store", "data"),
-        prevent_initial_call=True,
-        allow_duplicate=True  # ✅ Required to reuse the same Output
+        prevent_initial_call=True
     )
-    def restore_filter_values(*args):
-        data = args[-1]
-        if not data:
-            return [None] * 6 + [no_update]
+    def sync_filter_state(
+        hosts_val, activity_val, tc_val, lang_val, classif_val, app_id_val,
+        hosts_opts, activity_opts, tc_opts, lang_opts, classif_opts,
+        store_data
+    ):
+        # Determine if we're restoring or updating
+        trigger = ctx.triggered_id
+        is_restore_trigger = trigger and trigger.endswith(".options")
+
+        if is_restore_trigger:
+            if not store_data:
+                return [None] * 6 + [no_update]
+            return [
+                store_data.get("host-name-filter"),
+                store_data.get("activity-status-filter"),
+                store_data.get("tc-filter"),
+                store_data.get("language-filter"),
+                store_data.get("classification-filter"),
+                store_data.get("app-id-filter"),
+                store_data,
+            ]
+
+        # Else: user manually changed a filter, save it
         return [
-            data.get("host-name-filter"),
-            data.get("activity-status-filter"),
-            data.get("tc-filter"),
-            data.get("language-filter"),
-            data.get("classification-filter"),
-            data.get("app-id-filter"),
-            data,  # ✅ Write same data back to trigger chart callbacks
+            no_update, no_update, no_update, no_update, no_update, no_update,
+            {
+                "host-name-filter": hosts_val,
+                "activity-status-filter": activity_val,
+                "tc-filter": tc_val,
+                "language-filter": lang_val,
+                "classification-filter": classif_val,
+                "app-id-filter": app_id_val,
+            },
         ]
