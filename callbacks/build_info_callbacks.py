@@ -1,5 +1,5 @@
-import urllib.parse
 from dash import Input, Output
+
 from data.build_info_fetchers import (
     fetch_detection_coverage_by_tool,
     fetch_module_counts_per_repo,
@@ -8,7 +8,7 @@ from data.build_info_fetchers import (
     fetch_runtime_fragmentation_by_tool,
     fetch_confidence_distribution, fetch_runtime_coverage_by_tool, fetch_build_tool_variants_with_runtime,
 )
-from utils.redirect_callbacks import generate_redirect_callbacks
+from callbacks.redirect_callbacks import generate_redirect_callbacks
 from viz.viz_build_info import (
     render_detection_coverage_chart,
     render_module_count_chart,

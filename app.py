@@ -65,7 +65,7 @@ app.layout = dbc.Container(
         html.Div(id="repo-modal-container"),                    # ← AND HERE
         navbar,
         dcc.Store(id="default-filter-store", storage_type="local"),
-        dbc.Collapse(filter_layout(), id="filter-collapse", is_open=False),
+        dbc.Collapse(filter_layout(), id="filter-collapse", is_open=True),
         dash.page_container,
     ],
     fluid=True,

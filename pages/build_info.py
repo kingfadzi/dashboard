@@ -26,7 +26,13 @@ header_with_button = dbc.Row(
         dbc.Col(html.H2("Build Info"), width="auto"),
         dbc.Col(
             html.Div(
-                dbc.Button("Table", id="build-info-table-btn", color="secondary", size="sm"),
+                dbc.Button(
+                    "Table",
+                    id="build-info-table-btn",
+                    color="secondary",
+                    size="sm",
+                    n_clicks=0
+                ),
                 id="build-info-table-link-container",
                 className="d-flex justify-content-end",
             ),

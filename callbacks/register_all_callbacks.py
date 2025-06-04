@@ -4,6 +4,7 @@ from .code_insights_cloc import register_code_insights_cloc_callbacks
 from .code_insights_gitlog_callbacks import register_code_insights_gitlog_callbacks
 from .code_insights_lizard_callbacks import register_code_insights_lizard_callbacks
 from .dependencies_callbacks import register_dependencies_callbacks
+from .dropdown_callbacks import register_dropdown_callbacks
 from .overview_callbacks import register_overview_callbacks
 from .register_filter_callbacks import register_filter_callbacks
 from .register_filter_value_callbacks import register_filter_value_callbacks
@@ -22,8 +23,9 @@ def register_all_callbacks(app):
     register_build_info_callbacks(app)
     register_dependencies_callbacks(app)
     register_table_callbacks(app)
-    register_filter_value_callbacks(app)
+    #register_filter_value_callbacks(app)
     register_kpi_callbacks(app)
     register_overview_callbacks(app)
     register_repo_profile_callbacks(app)
     register_dependency_insights_callbacks(app)
+    register_dropdown_callbacks(app)

@@ -1,33 +1,20 @@
-from dash import Input, Output, State, callback, no_update
+# table_callbacks.py
+
+from dash import Input, Output, callback, State
 import urllib.parse
+
 from dash.exceptions import PreventUpdate
 
 from data.fetch_table_data import fetch_table_data
-from utils.filter_utils import extract_filter_dict_from_store
 
-# Extract page=N from query string
-def extract_page_from_search(search):
-    if not search:
-        return None
-    parsed = urllib.parse.parse_qs(search.lstrip("?"))
-    try:
-        page = int(parsed.get("page", [1])[0])
-        return max(page - 1, 0)  # AG Grid expects 0-based
-    except Exception:
-        return None
-
-# Generate table data and column definitions
-def get_table_outputs(store_data, current_path=None, current_search=None):
-    filters = extract_filter_dict_from_store(store_data or {})
+def get_table_outputs_from_store(store_data, table_id=None):
+    filters = { k: v for k, v in (store_data or {}).items() if v not in (None, "") }
     df, _ = fetch_table_data(filters, 0, 1000)
     table_data = df.to_dict("records")
 
-    base_path = current_path.split("?")[0] if current_path else "/table-overview"
-    current_page = extract_page_from_search(current_search)
-    current_page = current_page + 1 if current_page is not None else 1
-
-    return_url_with_page = f"{base_path}?page={current_page}"
-    encoded_return_url = urllib.parse.quote(return_url_with_page)
+    # Build a “returnUrl” for any link in the table (optional)
+    return_url = f"/table-{table_id}"
+    encoded_return_url = urllib.parse.quote(return_url)
 
     column_defs = [
         {
@@ -35,26 +22,25 @@ def get_table_outputs(store_data, current_path=None, current_search=None):
             "field": "repo_id",
             "cellRenderer": "markdown",
             "valueGetter": {
-                "function": f"`[${'{'}params.data.repo_id{'}'}](/repo?repo_id=${'{'}params.data.repo_id{'}'}&returnUrl={encoded_return_url})`"
+                "function": (
+                    f"`[${'{'}params.data.repo_id{'}'}]("
+                    f"/repo?repo_id=${'{'}params.data.repo_id{'}'}&returnUrl={encoded_return_url})`"
+                )
             },
             "filterValueGetter": {"function": "params.data.repo_id"},
-            "cellRendererParams": {
-                "linkTarget": "_self",
-                "html": True
-            }
+            "cellRendererParams": {"linkTarget": "_self", "html": True},
         },
         {
             "headerName": "App ID",
             "field": "app_id",
             "cellRenderer": "markdown",
             "valueGetter": {
-                "function": f"`[${'{'}params.data.app_id{'}'}](${ '{' }params.data.browse_url{'}'})`"
+                "function": (
+                    f"`[${'{'}params.data.app_id{'}'}](${ '{' }params.data.browse_url{'}'})`"
+                )
             },
             "filterValueGetter": {"function": "params.data.app_id"},
-            "cellRendererParams": {
-                "linkTarget": "_blank",
-                "html": True
-            }
+            "cellRendererParams": {"linkTarget": "_blank", "html": True},
         },
         {"headerName": "Status", "field": "activity_status"},
         {"headerName": "Size", "field": "classification_label"},
@@ -68,59 +54,50 @@ def get_table_outputs(store_data, current_path=None, current_search=None):
             "field": "last_commit_date",
             "valueFormatter": {
                 "function": "params.value ? new Date(params.value).toLocaleDateString() : ''"
-            }
+            },
         },
     ]
 
     return table_data, column_defs
 
+
 def register_table_callbacks(app):
+    # For each of the four “table” pages, only run when pathname matches
     for table_id in ["overview", "build-info", "code-insights", "dependencies"]:
         @app.callback(
             Output(f"{table_id}-table", "rowData"),
             Output(f"{table_id}-table", "columnDefs"),
-            Output(f"{table_id}-table", "paginationGoTo"),
             Input("default-filter-store", "data"),
             State("url", "pathname"),
-            State("url", "search"),
         )
-        def update_table(store_data, current_path, search):
-            table_data, column_defs = get_table_outputs(store_data, current_path, search)
-            page = extract_page_from_search(search)
-            return table_data, column_defs, page if page is not None else no_update
-
-        # Store current pagination page to URL
-        @app.callback(
-            Output("url", "search", allow_duplicate=True),
-            Input(f"{table_id}-table", "eventData"),
-            State("url", "pathname"),
-            prevent_initial_call=True,
-        )
-        def update_url_on_page_change(event, pathname):
-            if not event or "currentPage" not in event:
+        def update_table(store_data, pathname, table_id=table_id):
+            if not pathname.startswith(f"/table-{table_id}"):
                 raise PreventUpdate
-            new_page = int(event["currentPage"]) + 1  # Make it 1-based
-            return f"?page={new_page}"
 
-    # Filter store update
-    @app.callback(
-        Output("default-filter-store", "data", allow_duplicate=True),
-        [
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-            Input("host-name-filter", "value"),
-        ],
-        prevent_initial_call=True,
-    )
-    def update_filter_store(activity, tc, lang, classification, app_id, host):
-        return {
-            "activity_status": activity,
-            "transaction_cycle": tc,
-            "main_language": lang,
-            "classification_label": classification,
-            "app_id": app_id,
-            "host_name": host,
-        }
+            table_data, column_defs = get_table_outputs_from_store(store_data, table_id=table_id)
+            return table_data, column_defs
+
+    # Build each “Table” button’s href from the current dropdown values
+    for table_id in ["overview", "build-info", "code-insights", "dependencies"]:
+        @app.callback(
+            Output(f"{table_id}-table-btn", "href"),
+            [
+                Input("activity-status-filter",   "value"),
+                Input("tc-filter",                "value"),
+                Input("language-filter",          "value"),
+                Input("classification-filter",    "value"),
+                Input("app-id-filter",            "value"),
+                Input("host-name-filter",         "value"),
+            ],
+        )
+        def update_table_button_href(activity, tc, lang, classification, app_id, host, table_id=table_id):
+            qs = {}
+            if activity:       qs["activity_status"] = activity
+            if tc:             qs["transaction_cycle"] = tc
+            if lang:           qs["main_language"] = lang
+            if classification: qs["classification_label"] = classification
+            if app_id:         qs["app_id"] = app_id
+            if host:           qs["host_name"] = host
+
+            base = f"/table-{table_id}"
+            return base + "?" + urllib.parse.urlencode(qs) if qs else base

@@ -57,7 +57,7 @@ def build_filter_conditions(filters, alias=None, field_alias_map=None):
 
     condition_string = " AND ".join(conditions)
 
-    print("\nDEBUG: Final SQL WHERE Clause:", condition_string)
-    print("DEBUG: SQL Parameters:", param_dict)
+    #print("\nDEBUG: Final SQL WHERE Clause:", condition_string)
+    #print("DEBUG: SQL Parameters:", param_dict)
 
     return condition_string, param_dict

@@ -1,7 +1,7 @@
 from dash import Input, Output
 from data.fetch_markup_language import fetch_markup_language_usage
 from data.code_insights_enry_fetchers import fetch_role_distribution, fetch_normalized_weight
-from utils.redirect_callbacks import generate_redirect_callbacks
+from callbacks.redirect_callbacks import generate_redirect_callbacks
 from utils.filter_utils import extract_filter_dict_from_store
 from viz.viz_code_insights_charts import render_role_distribution_chart, render_normalized_weight_chart
 from viz.viz_code_insights_markup import render_markup_language_usage_chart

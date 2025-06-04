@@ -117,13 +117,6 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
         if "repo_age_days" in df.columns:
             df["repo_age_days"] = df["repo_age_days"].apply(format_repo_age)
 
-        print(">>> Filter Dict:", filters)
-        print(">>> SQL Params:", param_dict)
-        print(">>> Final Query:", stmt)
-        print(">>> Retrieved Rows:", len(df))
-        print(">>> Sample Rows:\n", df.head().to_string())
-
-
         return df, total_count
 
     return query_data(*build_filter_conditions(filters, field_alias_map={

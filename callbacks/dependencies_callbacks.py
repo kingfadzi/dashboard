@@ -13,7 +13,7 @@ from data.dependencies_fetchers import (
 from data.fetch_spring_versions import fetch_spring_framework_versions
 from data.fetch_iac_data import fetch_iac_server_orchestration_usage
 
-from utils.redirect_callbacks import generate_redirect_callbacks
+from callbacks.redirect_callbacks import generate_redirect_callbacks
 from utils.filter_utils import extract_filter_dict_from_store
 
 from viz.viz_dependencies import (

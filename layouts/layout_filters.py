@@ -1,5 +1,6 @@
-from dash import dcc
+from dash import dcc, html
 import dash_bootstrap_components as dbc
+
 
 def filter_layout():
     return dbc.Card(
@@ -14,6 +15,9 @@ def filter_layout():
                             placeholder="Select Host Name(s)",
                             clearable=True,
                             style={"fontSize": "14px"},
+                            persistence=True,
+                            persistence_type="local",
+
                         ), width=2
                     ),
                     dbc.Col(
@@ -24,6 +28,9 @@ def filter_layout():
                             placeholder="Select Activity Status",
                             clearable=True,
                             style={"fontSize": "14px"},
+                            persistence=True,
+                            persistence_type="local",
+
                         ), width=2
                     ),
                     dbc.Col(
@@ -34,6 +41,9 @@ def filter_layout():
                             placeholder="Select TC(s)",
                             clearable=True,
                             style={"fontSize": "14px"},
+                            persistence=True,
+                            persistence_type="local",
+
                         ), width=2
                     ),
                     dbc.Col(
@@ -44,6 +54,9 @@ def filter_layout():
                             placeholder="Select Language(s)",
                             clearable=True,
                             style={"fontSize": "14px"},
+                            persistence=True,
+                            persistence_type="local",
+
                         ), width=2
                     ),
                     dbc.Col(
@@ -54,6 +67,9 @@ def filter_layout():
                             placeholder="Select Classification(s)",
                             clearable=True,
                             style={"fontSize": "14px"},
+                            persistence=True,
+                            persistence_type="local",
+
                         ), width=2
                     ),
                     dbc.Col(
@@ -64,6 +80,9 @@ def filter_layout():
                             debounce=True,
                             className="form-control",
                             style={"fontSize": "14px"},
+                            persistence=True,
+                            persistence_type="local",
+
                         ), width=2
                     ),
                 ],
@@ -73,3 +92,4 @@ def filter_layout():
         ),
         className="bg-light mb-4",
     )
+html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})

@@ -1,7 +1,6 @@
 from dash import Input, Output
-from utils.redirect_callbacks import generate_redirect_callbacks
+from callbacks.redirect_callbacks import generate_redirect_callbacks
 from utils.filter_utils import extract_filter_dict_from_store
-from dash.exceptions import PreventUpdate
 
 import logging
 logging.basicConfig(level=logging.INFO)
