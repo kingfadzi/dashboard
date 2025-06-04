@@ -1,4 +1,5 @@
 from dash import Input, Output, State, ctx, no_update
+import dash
 
 def register_filter_value_callbacks(app):
     @app.callback(
@@ -23,19 +24,27 @@ def register_filter_value_callbacks(app):
             Input("tc-filter", "options"),
             Input("language-filter", "options"),
             Input("classification-filter", "options"),
+            Input("_pages_location", "pathname"),  # page change
         ],
         State("default-filter-store", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
+        allow_duplicate=True  # needed for re-writing same store data
     )
     def sync_filter_state(
         hosts_val, activity_val, tc_val, lang_val, classif_val, app_id_val,
         hosts_opts, activity_opts, tc_opts, lang_opts, classif_opts,
+        pathname,
         store_data
     ):
-        # Determine if we're restoring or updating
         trigger = ctx.triggered_id
-        is_restore_trigger = trigger and trigger.endswith(".options")
 
+        if trigger is None:
+            return [no_update] * 7
+
+        is_restore_trigger = trigger.endswith(".options")
+        is_page_trigger = trigger == "_pages_location"
+
+        # 🟩 Restore filter UI from store
         if is_restore_trigger:
             if not store_data:
                 return [None] * 6 + [no_update]
@@ -49,7 +58,13 @@ def register_filter_value_callbacks(app):
                 store_data,
             ]
 
-        # Else: user manually changed a filter, save it
+        # 🟦 Refresh on page navigation
+        if is_page_trigger:
+            if not store_data:
+                return [no_update] * 7
+            return [no_update] * 6 + [store_data]
+
+        # 🟨 User input → update store
         return [
             no_update, no_update, no_update, no_update, no_update, no_update,
             {
