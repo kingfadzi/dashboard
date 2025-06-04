@@ -91,13 +91,19 @@ def render_dependency_volume_chart(df):
         df,
         x="dep_bucket",
         y="repo_count",
-        color="main_language",
+        color="package_type",  # now stripe by package_type
         text="repo_count",
-        labels={"dep_bucket": "Dependency Count", "repo_count": "Repository Count"},
+        labels={
+            "dep_bucket": "Dependency Count",
+            "repo_count": "Repository Count",
+            "package_type": "Package Type"
+        },
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
     fig.update_layout(
         xaxis_title="Dependency Count",
+        barmode="stack",
+        xaxis=dict(type="category", showticklabels=True),
         legend=dict(
             orientation="h",
             y=1.02,
@@ -106,11 +112,13 @@ def render_dependency_volume_chart(df):
             font=dict(size=10)
         )
     )
-    fig.update_layout(
-        barmode="stack",
-        xaxis=dict(type="category", showticklabels=True)
+    fig.update_traces(
+        texttemplate="%{text}",
+        textposition="inside",
+        textfont_size=12
     )
     return fig
+
 
 
 @standard_chart_style
@@ -292,21 +300,46 @@ def render_top_expired_xeol_products_chart(df):
     return fig
 
 
-def render_dependency_detection_chart(df):
+def render_dependency_detection_heatmap(df):
+    # 1) Define the “canonical” order for languages and statuses
+    full_language_order = [
+        "no_language",
+        "markup_or_data",
+        "other_programming",
+        "dotnet",
+        "go",
+        "javascript",
+        "python",
+        "java",
+    ]
+    full_status_order = ["Detected", "None Detected"]
 
+    # 2) Pivot so that rows = language_group, columns = detection_status
     heatmap_data = df.pivot_table(
-        index="classification_label",
-        columns="status",
+        index="language_group",
+        columns="detection_status",
         values="repo_count",
         aggfunc="sum",
         fill_value=0
     )
 
-    z = heatmap_data.values
-    x = heatmap_data.columns.tolist()
-    y = heatmap_data.index.tolist()
-    text = np.vectorize(str)(z)
+    # 3) Keep only whatever languages/statuses actually appear, but in the order we want
+    existing_languages = [lang for lang in full_language_order if lang in heatmap_data.index]
+    existing_statuses  = [st   for st   in full_status_order   if st   in heatmap_data.columns]
 
+    heatmap_data = heatmap_data.reindex(
+        index=existing_languages,
+        columns=existing_statuses,
+        fill_value=0
+    )
+
+    # 4) Extract z, x, y; force integer labels
+    z = heatmap_data.values
+    x = heatmap_data.columns.tolist()   # e.g. ["Detected", "None Detected"]
+    y = heatmap_data.index.tolist()     # e.g. ["no_language", "markup_or_data", …, "java"]
+    text = np.vectorize(lambda v: str(int(v)))(z)
+
+    # 5) Build the Heatmap (no textposition required; texttemplate centers it)
     fig = go.Figure(go.Heatmap(
         z=z,
         x=x,
@@ -319,12 +352,12 @@ def render_dependency_detection_chart(df):
     ))
 
     fig.update_layout(
-        xaxis_title="",
-        yaxis_title="Repo size",
+        xaxis_title="Dependency Detection Status",
+        yaxis_title="Language Group",
         margin=dict(l=20, r=20, t=20, b=20)
     )
-
     return fig
+
 
 
 from plotly import express as px

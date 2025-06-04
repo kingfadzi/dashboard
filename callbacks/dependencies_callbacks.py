@@ -1,6 +1,6 @@
 from dash import Input, Output
 from data.dependencies_fetchers import (
-    fetch_dependency_detection_coverage,
+    fetch_dependency_detection_by_language,
     fetch_iac_detection_coverage,
     fetch_xeol_detection_coverage,
     fetch_package_type_distribution,
@@ -17,7 +17,7 @@ from callbacks.redirect_callbacks import generate_redirect_callbacks
 from utils.filter_utils import extract_filter_dict_from_store
 
 from viz.viz_dependencies import (
-    render_dependency_detection_chart,
+    render_dependency_detection_heatmap,
     render_iac_detection_chart,
     render_xeol_detection_chart,
     render_package_type_distribution_chart,
@@ -36,7 +36,7 @@ def register_dependencies_callbacks(app):
     @app.callback(Output("dep-detection-chart", "figure"), Input("default-filter-store", "data"))
     def update_dep_detection_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        return render_dependency_detection_chart(fetch_dependency_detection_coverage(filters))
+        return render_dependency_detection_heatmap(fetch_dependency_detection_by_language(filters))
 
     @app.callback(Output("iac-detection-chart", "figure"), Input("default-filter-store", "data"))
     def update_iac_detection_chart(store_data):

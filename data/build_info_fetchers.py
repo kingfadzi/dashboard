@@ -179,6 +179,7 @@ def fetch_runtime_build_coverage_by_language(filters=None):
                     WHEN LOWER(hr.main_language) = 'python' THEN 'python'
                     WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
                     WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                    WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
                     WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
                     WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
                     WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
@@ -206,6 +207,7 @@ def fetch_runtime_build_coverage_by_language(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 
 @cache.memoize()

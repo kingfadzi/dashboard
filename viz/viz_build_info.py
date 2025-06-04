@@ -232,20 +232,46 @@ def render_confidence_distribution_chart(df):
 
 # 8. Runtime Coverage Heatmap
 def render_runtime_build_heatmap(df):
-    # Pivot for heatmap
+    # 1) Define your canonical order
+    full_language_order = [
+        "no_language",
+        "markup_or_data",
+        "other_programming",
+        "dotnet",
+        "go",
+        "javascript",
+        "python",
+        "java",
+    ]
+    full_status_order = ["Only Build Tool", "Both Detected", "Only Runtime", "None Detected"]
+
+    # 2) Pivot
     heatmap_data = df.pivot_table(
         index="language_group",
         columns="detection_status",
         values="repo_count",
         aggfunc="sum",
+        fill_value=0,
+    )
+
+    # 3) Intersect with what actually exists
+    existing_languages = [lang for lang in full_language_order if lang in heatmap_data.index]
+    existing_statuses  = [st  for st  in full_status_order  if st  in heatmap_data.columns]
+
+    # 4) Reindex only on the intersection (fills missing combos with 0)
+    heatmap_data = heatmap_data.reindex(
+        index=existing_languages,
+        columns=existing_statuses,
         fill_value=0
     )
 
+    # 5) Now extract z/x/y and force integer labels
     z = heatmap_data.values
     x = heatmap_data.columns.tolist()
     y = heatmap_data.index.tolist()
-    text = np.vectorize(str)(z)
+    text = np.vectorize(lambda v: str(int(v)))(z)
 
+    # 6) Build the figure
     fig = go.Figure(go.Heatmap(
         z=z,
         x=x,
@@ -262,8 +288,10 @@ def render_runtime_build_heatmap(df):
         yaxis_title="Language Group",
         margin=dict(l=20, r=20, t=20, b=20)
     )
-
     return fig
+
+
+
 
 
 

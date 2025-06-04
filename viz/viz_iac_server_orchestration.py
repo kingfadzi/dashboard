@@ -22,12 +22,12 @@ def render_iac_server_orchestration_chart(df: pd.DataFrame):
         x="framework",
         y="repo_count",
         text="repo_count",
-        color="main_language",  # Language stripe
+        color="classification_label",  # Stripe by repo size
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         labels={
             "framework": "Framework",
             "repo_count": "Repository Count",
-            "main_language": "Main Language"
+            "classification_label": "Repo Size"
         },
         barmode="stack"
     )

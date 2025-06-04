@@ -7,30 +7,38 @@ from data.sql_filter_utils import build_repo_filter_conditions
 
 
 # 1. Syft Dependency Coverage
-def fetch_dependency_detection_coverage(filters=None):
+def fetch_dependency_detection_by_language(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT 
-                sub.status,
-                sub.main_language,
-                sub.classification_label,
-                COUNT(*) AS repo_count
-            FROM (
-                SELECT
-                    hr.repo_id,
-                    hr.main_language,
-                    hr.classification_label,
-                    CASE 
-                        WHEN sd.repo_id IS NULL THEN 'None'
-                        ELSE 'Detected'
-                    END AS status
-                FROM harvested_repositories hr
-                LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id  
-                {where_clause}
-                GROUP BY hr.repo_id, sd.repo_id, hr.main_language, hr.classification_label
-            ) sub
-            GROUP BY sub.status, sub.main_language, sub.classification_label
+            SELECT
+                CASE
+                  WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                  WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                  WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                  WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                  WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                  WHEN hr.main_language IS NULL OR LOWER(hr.main_language) = 'no language' THEN 'no_language'
+                  WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
+                  WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
+                  ELSE 'unknown'
+                END AS language_group,
+
+                -- 2) Determine detection status
+                CASE
+                  WHEN sd.repo_id IS NULL THEN 'None Detected'
+                  ELSE 'Detected'
+                END AS detection_status,
+
+                COUNT(DISTINCT hr.repo_id) AS repo_count
+
+            FROM harvested_repositories hr
+            LEFT JOIN syft_dependencies sd
+              ON hr.repo_id = sd.repo_id
+            LEFT JOIN languages l
+              ON LOWER(hr.main_language) = LOWER(l.name)
+            {where_clause}
+            GROUP BY language_group, detection_status
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -38,6 +46,7 @@ def fetch_dependency_detection_coverage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 
@@ -119,33 +128,54 @@ def fetch_package_type_distribution(filters=None):
 def fetch_subcategory_distribution(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            WITH subcat_totals AS (
+            WITH filtered_data AS (
                 SELECT 
                     sd.sub_category,
-                    COUNT(DISTINCT sd.repo_id) AS total_repo_count
+                    sd.package_type,
+                    sd.repo_id
                 FROM syft_dependencies sd
-                JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-                WHERE sd.sub_category IS NOT NULL AND sd.sub_category <> ''
-                {extra_where}
-                GROUP BY sd.sub_category
+                JOIN harvested_repositories hr 
+                  USING (repo_id)
+                WHERE 
+                    sd.sub_category <> ''
+                    AND sd.package_type <> ''
+                    AND LOWER(sd.category) NOT IN (
+                        'other',
+                        'utility libraries',
+                        'utilities & libraries',
+                        'serialization',
+                        'development tools',
+                        'development & testing tools',
+                        'developer tooling',
+                        'build, dependency management & deployment tools'
+                    )
+                    {extra_where}
             ),
+
+            subcat_totals AS (
+                SELECT 
+                    sub_category,
+                    COUNT(DISTINCT repo_id) AS total_repo_count
+                FROM filtered_data
+                GROUP BY sub_category
+            ),
+
             top_subcategories AS (
                 SELECT sub_category
                 FROM subcat_totals
                 ORDER BY total_repo_count DESC
                 LIMIT 15
             )
+
             SELECT 
-                sd.sub_category,
-                sd.package_type,
-                COUNT(DISTINCT sd.repo_id) AS repo_count
-            FROM syft_dependencies sd
-            JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
-            JOIN top_subcategories ts ON sd.sub_category = ts.sub_category
-            WHERE sd.package_type IS NOT NULL AND sd.package_type <> ''
-            {extra_where}
-            GROUP BY sd.sub_category, sd.package_type
-            ORDER BY sd.sub_category, repo_count DESC
+                fd.sub_category,
+                fd.package_type,
+                COUNT(DISTINCT fd.repo_id) AS repo_count
+            FROM filtered_data fd
+            JOIN top_subcategories ts 
+              USING (sub_category)
+            GROUP BY fd.sub_category, fd.package_type
+            ORDER BY fd.sub_category, repo_count DESC
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
@@ -153,36 +183,43 @@ def fetch_subcategory_distribution(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 @cache.memoize()
 def fetch_dependency_volume_buckets(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT
-                CASE
-                    WHEN dep_count = 0 THEN '0'
-                    WHEN dep_count <= 10 THEN '1–10'
-                    WHEN dep_count <= 50 THEN '11–50' 
-                    WHEN dep_count <= 100 THEN '51–100'
-                    ELSE '100+'
-                END AS dep_bucket,
-                main_language,
-                COUNT(*) AS repo_count
-            FROM (
+            WITH dependency_buckets AS (
                 SELECT 
                     hr.repo_id,
-                    hr.main_language,
-                    COUNT(sd.id) AS dep_count
+                    COUNT(sd.id) AS dep_count,
+                    CASE
+                        WHEN COUNT(sd.id) = 0 THEN '0'
+                        WHEN COUNT(sd.id) <= 10 THEN '1–10'
+                        WHEN COUNT(sd.id) <= 50 THEN '11–50'
+                        WHEN COUNT(sd.id) <= 100 THEN '51–100'
+                        ELSE '100+'
+                    END AS dep_bucket
                 FROM harvested_repositories hr
-                LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id
-                JOIN cloc_metrics cloc ON hr.repo_id = cloc.repo_id
+                LEFT JOIN syft_dependencies sd USING (repo_id)
+                JOIN cloc_metrics cloc USING (repo_id)
                 JOIN languages ON cloc.language = languages.name
-                WHERE languages.type = 'programming'
-                {extra_where}
-                GROUP BY hr.repo_id, hr.main_language
-            ) sub
-            GROUP BY dep_bucket, main_language
-            ORDER BY MIN(dep_count)
+                WHERE 
+                    languages.type = 'programming'
+                    {extra_where}
+                GROUP BY hr.repo_id
+            )
+
+            SELECT
+                db.dep_bucket,
+                COALESCE(sd.package_type, 'None') AS package_type,
+                COUNT(DISTINCT db.repo_id) AS repo_count
+            FROM dependency_buckets db
+            LEFT JOIN syft_dependencies sd USING (repo_id)
+            GROUP BY db.dep_bucket, sd.package_type
+            ORDER BY 
+                ARRAY_POSITION(ARRAY['0','1–10','11–50','51–100','100+'], db.dep_bucket),
+                repo_count DESC;
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
@@ -190,6 +227,7 @@ def fetch_dependency_volume_buckets(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 @cache.memoize()
