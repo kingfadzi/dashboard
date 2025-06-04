@@ -1,7 +1,8 @@
-from dash import Input, Output, State
+from dash import Input, Output, State, callback, no_update
+import dash
 
 def register_filter_value_callbacks(app):
-    # 1. Save user input
+    # ✅ 1. Save user input to the store
     @app.callback(
         Output("default-filter-store", "data"),
         [
@@ -24,7 +25,7 @@ def register_filter_value_callbacks(app):
             "app-id-filter": app_id,
         }
 
-    # 2. Restore values and trigger chart refresh
+    # ✅ 2. Restore values AND re-trigger charts by re-writing store
     @app.callback(
         [
             Output("host-name-filter", "value"),
@@ -33,7 +34,7 @@ def register_filter_value_callbacks(app):
             Output("language-filter", "value"),
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
-            Output("default-filter-store", "data"),  # this re-fires chart callbacks
+            Output("default-filter-store", "data"),  # used to trigger chart updates
         ],
         [
             Input("host-name-filter", "options"),
@@ -43,11 +44,13 @@ def register_filter_value_callbacks(app):
             Input("classification-filter", "options"),
         ],
         State("default-filter-store", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
+        allow_duplicate=True  # ✅ Required to reuse the same Output
     )
-    def load_filter_values(_, __, ___, ____, _____, data):
+    def restore_filter_values(*args):
+        data = args[-1]
         if not data:
-            return [None] * 6 + [dash.no_update]
+            return [None] * 6 + [no_update]
         return [
             data.get("host-name-filter"),
             data.get("activity-status-filter"),
@@ -55,5 +58,5 @@ def register_filter_value_callbacks(app):
             data.get("language-filter"),
             data.get("classification-filter"),
             data.get("app-id-filter"),
-            data,  # re-write the same data to trigger chart updates
+            data,  # ✅ Write same data back to trigger chart callbacks
         ]
