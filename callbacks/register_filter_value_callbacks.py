@@ -24,11 +24,11 @@ def register_filter_value_callbacks(app):
             Input("tc-filter", "options"),
             Input("language-filter", "options"),
             Input("classification-filter", "options"),
-            Input("_pages_location", "pathname"),  # page change
+            Input("_pages_location", "pathname"),
         ],
         State("default-filter-store", "data"),
         prevent_initial_call=True,
-        allow_duplicate=True  # needed for re-writing same store data
+        allow_duplicate=True
     )
     def sync_filter_state(
         hosts_val, activity_val, tc_val, lang_val, classif_val, app_id_val,
@@ -37,17 +37,25 @@ def register_filter_value_callbacks(app):
         store_data
     ):
         trigger = ctx.triggered_id
-
-        if trigger is None:
+        if not trigger:
             return [no_update] * 7
 
-        is_restore_trigger = trigger.endswith(".options")
-        is_page_trigger = trigger == "_pages_location"
+        is_restore_trigger = (
+            trigger.endswith(".options") or trigger == "_pages_location"
+        )
+        is_user_change = trigger.endswith(".value")
 
-        # 🟩 Restore filter UI from store
-        if is_restore_trigger:
-            if not store_data:
-                return [None] * 6 + [no_update]
+        if is_restore_trigger and store_data:
+            all_opts_ready = all([
+                isinstance(hosts_opts, list),
+                isinstance(activity_opts, list),
+                isinstance(tc_opts, list),
+                isinstance(lang_opts, list),
+                isinstance(classif_opts, list),
+            ])
+            if not all_opts_ready:
+                return [no_update] * 7
+
             return [
                 store_data.get("host-name-filter"),
                 store_data.get("activity-status-filter"),
@@ -55,24 +63,20 @@ def register_filter_value_callbacks(app):
                 store_data.get("language-filter"),
                 store_data.get("classification-filter"),
                 store_data.get("app-id-filter"),
-                store_data,
+                store_data,  # re-write to trigger chart updates
             ]
 
-        # 🟦 Refresh on page navigation
-        if is_page_trigger:
-            if not store_data:
-                return [no_update] * 7
-            return [no_update] * 6 + [store_data]
+        if is_user_change:
+            return [
+                no_update, no_update, no_update, no_update, no_update, no_update,
+                {
+                    "host-name-filter": hosts_val,
+                    "activity-status-filter": activity_val,
+                    "tc-filter": tc_val,
+                    "language-filter": lang_val,
+                    "classification-filter": classif_val,
+                    "app-id-filter": app_id_val,
+                },
+            ]
 
-        # 🟨 User input → update store
-        return [
-            no_update, no_update, no_update, no_update, no_update, no_update,
-            {
-                "host-name-filter": hosts_val,
-                "activity-status-filter": activity_val,
-                "tc-filter": tc_val,
-                "language-filter": lang_val,
-                "classification-filter": classif_val,
-                "app-id-filter": app_id_val,
-            },
-        ]
+        return [no_update] * 7
