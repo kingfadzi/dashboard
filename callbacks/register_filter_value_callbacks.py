@@ -1,75 +1,49 @@
-import json
-from dash import Input, Output, State, callback, ctx
-from dash.exceptions import PreventUpdate
-import dash
-from dash import html, dcc
+from dash import Input, Output, State, callback, no_update
 
 def register_filter_value_callbacks(app):
-    # 1. Define store with initial data
-    dcc.Store(
-        id="default-filter-store",
-        storage_type="local",
-        data={  # Initial structure
-            "host_name": [],
-            "activity_status": [],
-            "transaction_cycle": [],
-            "main_language": [],
-            "classification_label": [],
-            "app_id": ""
-        }
-    )
-    
-    # 2. Single callback for filter persistence
-    @app.callback(
-        Output("default-filter-store", "data"),
-        Input("activity-status-filter", "value"),
-        Input("tc-filter", "value"),
-        Input("language-filter", "value"),
-        Input("classification-filter", "value"),
-        Input("app-id-filter", "value"),
-        Input("host-name-filter", "value"),
-        State("default-filter-store", "data"),
-    )
-    def persist_filter_values(activity, tc, lang, classification, app_id, host, current_store):
-        # Only update if any value actually changed
-        if (activity != current_store["activity_status"] or
-            tc != current_store["transaction_cycle"] or
-            lang != current_store["main_language"] or
-            classification != current_store["classification_label"] or
-            app_id != current_store["app_id"] or
-            host != current_store["host_name"]):
-            
-            new_store = {
-                "host_name": host or [],
-                "activity_status": activity or [],
-                "transaction_cycle": tc or [],
-                "main_language": lang or [],
-                "classification_label": classification or [],
-                "app_id": app_id or ""
-            }
-            return new_store
-        
-        raise PreventUpdate
-    
-    # 3. Hydration callback (runs once when page loads)
+    # Load persisted values into filter components
     @app.callback(
         [
+            Output("host-name-filter", "value"),
             Output("activity-status-filter", "value"),
             Output("tc-filter", "value"),
             Output("language-filter", "value"),
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
-            Output("host-name-filter", "value"),
         ],
-        Input("default-filter-store", "data"),
+        Input("persistent-filter-store", "data"),
+    )
+    def load_filter_store(data):
+        if not data:
+            return [None] * 6
+        return [
+            data.get("host-name-filter"),
+            data.get("activity-status-filter"),
+            data.get("tc-filter"),
+            data.get("language-filter"),
+            data.get("classification-filter"),
+            data.get("app-id-filter"),
+        ]
+
+    # Save current selections into the store
+    @app.callback(
+        Output("persistent-filter-store", "data"),
+        [
+            Input("host-name-filter", "value"),
+            Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
+        ],
         prevent_initial_call=True
     )
-    def hydrate_filters(store_data):
-        return [
-            store_data["activity_status"],
-            store_data["transaction_cycle"],
-            store_data["main_language"],
-            store_data["classification_label"],
-            store_data["app_id"],
-            store_data["host_name"],
-        ]
+    def update_filter_store(hosts, activity, tc, lang, classif, app_id):
+        return {
+            "host-name-filter": hosts,
+            "activity-status-filter": activity,
+            "tc-filter": tc,
+            "language-filter": lang,
+            "classification-filter": classif,
+            "app-id-filter": app_id,
+        }
