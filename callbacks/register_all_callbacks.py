@@ -7,7 +7,6 @@ from .dependencies_callbacks import register_dependencies_callbacks
 from .dropdown_callbacks import register_dropdown_callbacks
 from .overview_callbacks import register_overview_callbacks
 from .register_filter_callbacks import register_filter_callbacks
-from .register_filter_value_callbacks import register_filter_value_callbacks
 from .repo_profile_callback import register_repo_profile_callbacks
 from .table_callbacks import register_table_callbacks
 from .kpi_callbacks import register_kpi_callbacks
