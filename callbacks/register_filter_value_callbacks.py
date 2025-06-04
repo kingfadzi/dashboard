@@ -1,7 +1,6 @@
-from dash import Input, Output, State, callback, no_update
+from dash import Input, Output
 
 def register_filter_value_callbacks(app):
-    # Load persisted values into filter components
     @app.callback(
         [
             Output("host-name-filter", "value"),
@@ -11,9 +10,9 @@ def register_filter_value_callbacks(app):
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
         ],
-        Input("persistent-filter-store", "data"),
+        Input("default-filter-store", "data"),
     )
-    def load_filter_store(data):
+    def load_filter_values(data):
         if not data:
             return [None] * 6
         return [
@@ -25,9 +24,8 @@ def register_filter_value_callbacks(app):
             data.get("app-id-filter"),
         ]
 
-    # Save current selections into the store
     @app.callback(
-        Output("persistent-filter-store", "data"),
+        Output("default-filter-store", "data"),
         [
             Input("host-name-filter", "value"),
             Input("activity-status-filter", "value"),
