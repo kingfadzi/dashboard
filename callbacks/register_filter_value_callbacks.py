@@ -1,7 +1,7 @@
 from dash import Input, Output, State, no_update
 
 def register_filter_value_callbacks(app):
-    # ✅ 1. Save filter values to local store (on user input)
+    # ✅ 1. Save filter values to store (on user input)
     @app.callback(
         Output("default-filter-store", "data"),
         [
@@ -24,7 +24,7 @@ def register_filter_value_callbacks(app):
             "app-id-filter": app_id,
         }
 
-    # ✅ 2. Restore filter values from store (on load/refresh)
+    # ✅ 2. Restore filter values *after* dropdown options are loaded
     @app.callback(
         [
             Output("host-name-filter", "value"),
@@ -34,7 +34,7 @@ def register_filter_value_callbacks(app):
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
         ],
-        Input("default-filter-store", "modified_timestamp"),
+        Input("host-name-filter", "options"),  # triggers after options are set
         State("default-filter-store", "data"),
         prevent_initial_call=True
     )
