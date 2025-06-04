@@ -25,23 +25,23 @@ def register_filter_value_callbacks(app):
             Input("tc-filter", "options"),
             Input("language-filter", "options"),
             Input("classification-filter", "options"),
-
-            Input("_pages_location", "pathname"),
         ],
         State("default-filter-store", "data"),
         prevent_initial_call=True,
         allow_duplicate=True
     )
-    def sync_filters(
+    def sync_filter(
         hosts_val, activity_val, tc_val, lang_val, classif_val, app_id_val,
         host_opts, activity_opts, tc_opts, lang_opts, classif_opts,
-        pathname,
         store_data
     ):
-        trigger = ctx.triggered_id
+        triggered = ctx.triggered_id
 
-        # ✅ User changed dropdown → update store
-        if trigger and trigger.endswith(".value"):
+        is_user_change = triggered and triggered.endswith(".value")
+        is_restore_trigger = triggered and triggered.endswith(".options")
+
+        # ✅ User is changing a filter
+        if is_user_change:
             return [
                 no_update, no_update, no_update, no_update, no_update, no_update,
                 {
@@ -51,13 +51,14 @@ def register_filter_value_callbacks(app):
                     "language-filter": lang_val,
                     "classification-filter": classif_val,
                     "app-id-filter": app_id_val,
-                },
+                }
             ]
 
-        # ✅ Dropdown options or page changed → restore + re-trigger charts
-        if store_data and (
-            trigger.endswith(".options") or trigger == "_pages_location"
-        ):
+        # ✅ Restore from store when options are ready
+        if is_restore_trigger and store_data:
+            if not all([host_opts, activity_opts, tc_opts, lang_opts, classif_opts]):
+                return [no_update] * 7
+
             return [
                 store_data.get("host-name-filter"),
                 store_data.get("activity-status-filter"),
@@ -65,7 +66,7 @@ def register_filter_value_callbacks(app):
                 store_data.get("language-filter"),
                 store_data.get("classification-filter"),
                 store_data.get("app-id-filter"),
-                store_data,  # force re-trigger of all chart/table callbacks
+                store_data  # ✅ triggers chart callbacks
             ]
 
         return [no_update] * 7
