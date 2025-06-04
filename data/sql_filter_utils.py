@@ -22,3 +22,18 @@ REPO_FILTER_FIELD_ALIAS_MAP = {
 
 def build_repo_filter_conditions(filters):
     return build_filter_conditions(filters, field_alias_map=REPO_FILTER_FIELD_ALIAS_MAP)
+
+def normalize_version_sql(column_expr: str) -> str:
+    return f"""
+    CASE
+      -- If it starts with digits-dot-digits, capture "major.minor" only:
+      WHEN {column_expr} ~ '^[0-9]+\\.[0-9]+' 
+        THEN regexp_replace({column_expr}, '^([0-9]+\\.[0-9]+).*$', '\\1')
+      -- Otherwise if it starts with just digits (e.g. "1" or "2rc"), append ".0"
+      WHEN {column_expr} ~ '^[0-9]+' 
+        THEN regexp_replace({column_expr}, '^([0-9]+).*$', '\\1') || '.0'
+      ELSE
+        'Unknown'
+    END
+    """
+

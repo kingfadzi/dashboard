@@ -3,6 +3,8 @@ from sqlalchemy import text
 from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
+from data.sql_filter_utils import normalize_version_sql
+
 
 # 1. Detection Coverage by Tool
 def fetch_detection_coverage_by_tool(filters=None):
@@ -77,20 +79,23 @@ def fetch_module_counts_per_repo(filters=None):
 
 
 # 3. Runtime Versions by Tool (fixed: includes variant)
+@cache.memoize()
 def fetch_runtime_versions_by_tool(filters=None):
-    @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
+        normalized = normalize_version_sql("bcc.runtime_version")
+
+        base_query = f"""
             SELECT
-                build_config_cache.tool,
-                build_config_cache.runtime_version,
-                build_config_cache.variant,
-                COUNT(DISTINCT build_config_cache.repo_id) AS repo_count
-            FROM build_config_cache
-            JOIN harvested_repositories hr ON build_config_cache.repo_id = hr.repo_id
-            WHERE build_config_cache.runtime_version IS NOT NULL
-            {extra_where}
-            GROUP BY build_config_cache.tool, build_config_cache.runtime_version, build_config_cache.variant
+                bcc.tool,
+                {normalized} AS runtime_version,
+                bcc.variant,
+                COUNT(DISTINCT bcc.repo_id) AS repo_count
+            FROM build_config_cache bcc
+            JOIN harvested_repositories hr ON bcc.repo_id = hr.repo_id
+            WHERE bcc.runtime_version IS NOT NULL
+            {{extra_where}}
+            GROUP BY bcc.tool, runtime_version, bcc.variant
+            ORDER BY bcc.tool, runtime_version, repo_count DESC
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(base_query.format(extra_where=extra_where))
@@ -98,6 +103,7 @@ def fetch_runtime_versions_by_tool(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 # 4. Status by Tool
 def fetch_status_by_tool(filters=None):
@@ -163,29 +169,36 @@ def fetch_confidence_distribution(filters=None):
 
 
 # 7. Runtime Coverage by Tool
-def fetch_runtime_coverage_by_tool(filters=None):
+def fetch_runtime_build_coverage_by_language(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
-                COALESCE(t.tool, 'unknown') AS tool,
-                COALESCE(t.runtime_status, 'None') AS runtime_status,
+                CASE
+                    WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                    WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                    WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                    WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                    WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+                    WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
+                    WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
+                    ELSE 'unknown'
+                END AS language_group,
+
+                CASE
+                    WHEN bcc.tool IS NOT NULL AND bcc.runtime_version IS NOT NULL THEN 'Both Detected'
+                    WHEN bcc.tool IS NOT NULL THEN 'Only Build Tool'
+                    WHEN bcc.runtime_version IS NOT NULL THEN 'Only Runtime'
+                    ELSE 'None Detected'
+                END AS detection_status,
+
                 COUNT(DISTINCT hr.repo_id) AS repo_count
+
             FROM harvested_repositories hr
-            LEFT JOIN (
-                SELECT
-                    repo_id,
-                    MAX(tool) AS tool,
-                    CASE
-                        WHEN MAX(runtime_version) IS NOT NULL THEN 'Detected'
-                        ELSE 'None'
-                    END AS runtime_status
-                FROM build_config_cache
-                GROUP BY repo_id
-            ) t ON hr.repo_id = t.repo_id
+            LEFT JOIN build_config_cache bcc ON hr.repo_id = bcc.repo_id
+            LEFT JOIN languages l ON LOWER(hr.main_language) = LOWER(l.name)
             {where_clause}
-            GROUP BY COALESCE(t.tool, 'unknown'), COALESCE(t.runtime_status, 'None')
-            ORDER BY tool, runtime_status
+            GROUP BY language_group, detection_status
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -195,20 +208,20 @@ def fetch_runtime_coverage_by_tool(filters=None):
     return query_data(condition_string, param_dict)
 
 
-def fetch_build_tool_variants_with_runtime(filters=None):
-    @cache.memoize()
+@cache.memoize()
+def fetch_build_tool_variants(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
                 bcc.variant,
-                COALESCE(bcc.runtime_version, 'Unknown') AS runtime_version,
                 COUNT(DISTINCT bcc.repo_id) AS repo_count
             FROM build_config_cache bcc
             JOIN harvested_repositories hr ON bcc.repo_id = hr.repo_id
             {where_clause}
             AND bcc.variant IS NOT NULL
-            GROUP BY bcc.variant, COALESCE(bcc.runtime_version, 'Unknown')
+            GROUP BY bcc.variant
             ORDER BY repo_count DESC
+            LIMIT 20
         """
         where_clause = f"WHERE {condition_string}" if condition_string else "WHERE TRUE"
         stmt = text(sql.format(where_clause=where_clause))

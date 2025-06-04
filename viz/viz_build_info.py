@@ -2,6 +2,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.graph_objects as go
 import numpy as np
+from sqlalchemy.dialects.mssql.information_schema import columns
 
 from components.chart_style import standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
@@ -147,6 +148,11 @@ def render_runtime_versions_chart(df):
         margin=dict(l=20, r=20, t=20, b=20)
     )
 
+    fig.update_yaxes(
+        tickformat="d"
+    )
+
+
     return fig
 
 
@@ -225,11 +231,11 @@ def render_confidence_distribution_chart(df):
 
 
 # 8. Runtime Coverage Heatmap
-def render_runtime_coverage_heatmap(df):
-    # Pivot: tool on Y-axis, runtime_status on X-axis
+def render_runtime_build_heatmap(df):
+    # Pivot for heatmap
     heatmap_data = df.pivot_table(
-        index="tool",
-        columns="runtime_status",
+        index="language_group",
+        columns="detection_status",
         values="repo_count",
         aggfunc="sum",
         fill_value=0
@@ -252,12 +258,13 @@ def render_runtime_coverage_heatmap(df):
     ))
 
     fig.update_layout(
-        xaxis_title="",
-        yaxis_title="",
+        xaxis_title="Detection Status",
+        yaxis_title="Language Group",
         margin=dict(l=20, r=20, t=20, b=20)
     )
 
     return fig
+
 
 
 @standard_chart_style
@@ -266,13 +273,12 @@ def render_build_tool_variant_chart(df):
         df,
         x="variant",
         y="repo_count",
+
         text="repo_count",
-        color="runtime_version",
         labels={
-            "repo_count": "Repository Count",
-            "runtime_version": "Runtime Version"
+            "variant": "Build Tool Variant",
+            "repo_count": "Repository Count"
         },
-        barmode="stack",
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
 
@@ -282,14 +288,23 @@ def render_build_tool_variant_chart(df):
         textangle=0,
         textfont_size=12
     )
-    fig.update_xaxes(showticklabels=True, title=None)  # Ensure title is suppressed
+    fig.update_xaxes(showticklabels=True, title=None)
     fig.update_layout(
-        xaxis_title=None,  # Explicitly remove x-axis title
+        xaxis_title=None,
         yaxis_title="Repositories",
-        legend_title="Runtime",
         margin=dict(l=20, r=20, t=20, b=20)
     )
 
     return fig
+
+
+
+
+
+
+
+
+
+
 
 

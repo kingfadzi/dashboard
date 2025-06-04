@@ -45,56 +45,67 @@ header_with_button = dbc.Row(
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
-
         header_with_button,
 
-        dbc.Row([
-            dbc.Col(card("Runtime Coverage by Tool", "build-runtime-coverage-chart"), width=4),
-            dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=4),
-            dbc.Col(card("Status by Tool", "status-by-tool-chart"), width=4),
-        ], className="mb-4"),
+        dbc.Row(
+            [
+                dbc.Col(card("Detection Status", "build-runtime-coverage-chart"), width=8),  # Renamed
+                dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=4),  # Swapped
+            ],
+            className="mb-4",
+        ),
 
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Label("Select Language Tool", className="fw-bold"),
+                        dcc.Dropdown(
+                            id="tool-selector",
+                            options=[],
+                            placeholder="Select a tool",
+                            clearable=True,
+                        ),
+                    ],
+                    width=3,
+                ),
+                dbc.Col([], width=9),
+            ],
+            className="mb-4",
+        ),
 
-        dbc.Row([
-            dbc.Col(card("Build Tool Variants (with Runtime)", "build-tool-variant-chart"), width=12),
-        ], className="mb-4"),
+        dbc.Row(
+            [
+                dbc.Col(card("Runtime Versions", "runtime-versions-chart"), width=12),
+            ],
+            className="mb-4",
+        ),
 
+        dbc.Row(
+            [
+                dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=12),
+            ],
+            className="mb-4",
+        ),
 
+        dbc.Row(
+            [
+                dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=4),
+                dbc.Col(card("Detection Status", "status-by-tool-chart"), width=4),
+                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
+            ],
+            className="mb-4",
+        ),
 
-        dbc.Row([
-            dbc.Col(
-                [
-                    html.Label("Select Language Tool", className="fw-bold"),
-                    dcc.Dropdown(
-                        id="tool-selector",
-                        options=[],
-                        placeholder="Select a tool",
-                        clearable=True,
-                    ),
-                ],
-                width=3,
-            ),
-            dbc.Col([], width=9),
-        ], className="mb-4"),
-
-        dbc.Row([
-            dbc.Col(card("Runtime Versions", "runtime-versions-chart"), width=12),
-        ], className="mb-4"),
-
-
-
-        dbc.Row([
-
-            dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=4),
-            dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=4),
-            dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
-        ], className="mb-4"),
-
-
-
+        # Detection Coverage moved to bottom
+        dbc.Row(
+            [
+                dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),
+            ],
+            className="mb-4",
+        ),
 
         modal_table(),
-
         dcc.Store(id="filters-applied-trigger"),
     ],
     fluid=True,

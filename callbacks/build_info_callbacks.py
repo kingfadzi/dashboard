@@ -6,7 +6,7 @@ from data.build_info_fetchers import (
     fetch_runtime_versions_by_tool,
     fetch_status_by_tool,
     fetch_runtime_fragmentation_by_tool,
-    fetch_confidence_distribution, fetch_runtime_coverage_by_tool, fetch_build_tool_variants_with_runtime,
+    fetch_confidence_distribution, fetch_runtime_build_coverage_by_language, fetch_build_tool_variants,
 )
 from callbacks.redirect_callbacks import generate_redirect_callbacks
 from viz.viz_build_info import (
@@ -15,7 +15,7 @@ from viz.viz_build_info import (
     render_runtime_versions_chart,
     render_status_by_tool_chart,
     render_runtime_fragmentation_chart,
-    render_confidence_distribution_chart, render_runtime_coverage_heatmap, render_build_tool_variant_chart,
+    render_confidence_distribution_chart, render_runtime_build_heatmap, render_build_tool_variant_chart,
 )
 from utils.filter_utils import extract_filter_dict_from_store
 
@@ -73,13 +73,13 @@ def register_build_info_callbacks(app):
     @app.callback(Output("build-runtime-coverage-chart", "figure"), Input("default-filter-store", "data"))
     def update_runtime_coverage_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        df = fetch_runtime_coverage_by_tool(filters)
-        return render_runtime_coverage_heatmap(df)
+        df = fetch_runtime_build_coverage_by_language(filters)
+        return render_runtime_build_heatmap(df)
 
     @app.callback(Output("build-tool-variant-chart", "figure"), Input("default-filter-store", "data"))
     def update_build_tool_variant_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        df = fetch_build_tool_variants_with_runtime(filters)
+        df = fetch_build_tool_variants(filters)
         return render_build_tool_variant_chart(df)
 
 

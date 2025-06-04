@@ -211,19 +211,21 @@ def render_iac_category_summary_chart(df):
 
 @standard_chart_style
 def render_iac_adoption_by_framework_count_chart(df):
+    # Ensure the buckets appear in the desired order:
+    category_order = ["0 (none)", "1", "2–4", "5–7", "8+"]
+
     fig = px.bar(
         df,
         x="framework_bucket",
         y="repo_count",
-        color="main_language",
+        color="classification_label",
         barmode="stack",
         text="repo_count",
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
-        category_orders={"framework_bucket": ["0", "1", "2–4", "5–7", "8+"]},
+        category_orders={"framework_bucket": category_order},
         labels={
             "framework_bucket": "Frameworks Used per Repository",
             "repo_count": "Repository Count",
-            "main_language": "Main Language"
+            "classification_label": "Classification"
         }
     )
 
@@ -243,6 +245,8 @@ def render_iac_adoption_by_framework_count_chart(df):
     fig.update_xaxes(showticklabels=True)
 
     return fig
+
+
 
 
 

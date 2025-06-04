@@ -248,11 +248,14 @@ def fetch_iac_category_summary(filters=None):
 def fetch_iac_adoption_by_framework_count(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT framework_bucket, main_language, COUNT(*) AS repo_count
+            SELECT
+                framework_bucket,
+                classification_label,
+                COUNT(*) AS repo_count
             FROM (
                 SELECT
                     hr.repo_id,
-                    hr.main_language,
+                    hr.classification_label,
                     COUNT(DISTINCT ic.framework) AS framework_count,
                     CASE
                         WHEN COUNT(DISTINCT ic.framework) = 0 THEN '0 (none)'
@@ -264,9 +267,9 @@ def fetch_iac_adoption_by_framework_count(filters=None):
                 FROM harvested_repositories hr
                 LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id
                 {where_clause}
-                GROUP BY hr.repo_id, hr.main_language
+                GROUP BY hr.repo_id, hr.classification_label
             ) sub
-            GROUP BY framework_bucket, main_language
+            GROUP BY framework_bucket, classification_label
             ORDER BY
                 CASE framework_bucket
                     WHEN '0 (none)' THEN 1
@@ -275,7 +278,7 @@ def fetch_iac_adoption_by_framework_count(filters=None):
                     WHEN '5–7' THEN 4
                     ELSE 5
                 END,
-                main_language
+                classification_label
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -283,7 +286,6 @@ def fetch_iac_adoption_by_framework_count(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
-
 
 
 
