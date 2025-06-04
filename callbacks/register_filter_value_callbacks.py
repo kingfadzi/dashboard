@@ -1,7 +1,7 @@
 from dash import Input, Output, State
 
 def register_filter_value_callbacks(app):
-    # ✅ 1. Save current filter values
+    # 1. Save user input
     @app.callback(
         Output("default-filter-store", "data"),
         [
@@ -24,7 +24,7 @@ def register_filter_value_callbacks(app):
             "app-id-filter": app_id,
         }
 
-    # ✅ 2. Restore values only after all dropdown options are populated
+    # 2. Restore values and trigger chart refresh
     @app.callback(
         [
             Output("host-name-filter", "value"),
@@ -33,6 +33,7 @@ def register_filter_value_callbacks(app):
             Output("language-filter", "value"),
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
+            Output("default-filter-store", "data"),  # this re-fires chart callbacks
         ],
         [
             Input("host-name-filter", "options"),
@@ -44,10 +45,9 @@ def register_filter_value_callbacks(app):
         State("default-filter-store", "data"),
         prevent_initial_call=True
     )
-    def load_filter_values(*args):
-        data = args[-1]  # last argument is the State
+    def load_filter_values(_, __, ___, ____, _____, data):
         if not data:
-            return [None] * 6
+            return [None] * 6 + [dash.no_update]
         return [
             data.get("host-name-filter"),
             data.get("activity-status-filter"),
@@ -55,4 +55,5 @@ def register_filter_value_callbacks(app):
             data.get("language-filter"),
             data.get("classification-filter"),
             data.get("app-id-filter"),
+            data,  # re-write the same data to trigger chart updates
         ]
