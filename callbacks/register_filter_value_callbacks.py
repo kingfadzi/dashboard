@@ -1,7 +1,7 @@
-from dash import Input, Output, State, no_update
+from dash import Input, Output, State
 
 def register_filter_value_callbacks(app):
-    # ✅ 1. Save filter values to store (on user input)
+    # ✅ 1. Save current filter values
     @app.callback(
         Output("default-filter-store", "data"),
         [
@@ -24,7 +24,7 @@ def register_filter_value_callbacks(app):
             "app-id-filter": app_id,
         }
 
-    # ✅ 2. Restore filter values *after* dropdown options are loaded
+    # ✅ 2. Restore values only after all dropdown options are populated
     @app.callback(
         [
             Output("host-name-filter", "value"),
@@ -34,11 +34,18 @@ def register_filter_value_callbacks(app):
             Output("classification-filter", "value"),
             Output("app-id-filter", "value"),
         ],
-        Input("host-name-filter", "options"),  # triggers after options are set
+        [
+            Input("host-name-filter", "options"),
+            Input("activity-status-filter", "options"),
+            Input("tc-filter", "options"),
+            Input("language-filter", "options"),
+            Input("classification-filter", "options"),
+        ],
         State("default-filter-store", "data"),
         prevent_initial_call=True
     )
-    def load_filter_values(_, data):
+    def load_filter_values(*args):
+        data = args[-1]  # last argument is the State
         if not data:
             return [None] * 6
         return [
