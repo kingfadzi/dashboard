@@ -110,6 +110,14 @@ layout = dbc.Container(
 
         dbc.Row(
             [
+                dbc.Col(card("Support Status (.NET)", "dotnet-support-status-chart"), width=12),
+            ],
+            className="mb-4",
+        ),
+
+
+        dbc.Row(
+            [
                 dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=12),
             ],
             className="mb-4",

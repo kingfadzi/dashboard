@@ -320,3 +320,46 @@ def fetch_no_buildtool_language_type_distribution(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
+@cache.memoize()
+def fetch_dotnet_support_status_summary(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                CASE
+                    WHEN b.runtime_version IN ('.NET 8', '.NET 9', '.NET Framework 4.8.1') THEN 'Active Support'
+                    WHEN b.runtime_version = '.NET Framework 4.8' THEN 'Maintenance Mode'
+                    WHEN b.runtime_version IN (
+                        '.NET 5', '.NET 6', '.NET 7',
+                        '.NET Core 1.0', '.NET Core 1.1',
+                        '.NET Core 2.0', '.NET Core 2.1',
+                        '.NET Core 3.0', '.NET Core 3.1',
+                        '.NET Framework 1.1', '.NET Framework 2.0',
+                        '.NET Framework 3.0', '.NET Framework 3.5',
+                        '.NET Framework 4.0', '.NET Framework 4.5', '.NET Framework 4.5.1',
+                        '.NET Framework 4.5.2', '.NET Framework 4.6', '.NET Framework 4.6.1',
+                        '.NET Framework 4.6.2', '.NET Framework 4.7', '.NET Framework 4.7.1',
+                        '.NET Framework 4.7.2'
+                    ) THEN 'Out of Support'
+                    WHEN b.runtime_version IN (
+                        '.NET Standard 1.0', '.NET Standard 1.1', '.NET Standard 1.2',
+                        '.NET Standard 1.3', '.NET Standard 1.4', '.NET Standard 1.5',
+                        '.NET Standard 1.6', '.NET Standard 2.0', '.NET Standard 2.1'
+                    ) THEN 'Deprecated'
+                    ELSE 'Unknown'
+                END AS support_status,
+                hr.classification_label,
+                COUNT(DISTINCT b.repo_id) AS repo_count
+            FROM build_config_cache b
+            JOIN harvested_repositories hr ON b.repo_id = hr.repo_id
+            WHERE b.runtime_version IS NOT NULL
+              AND b.tool = 'dotnet'
+              {extra_where}
+            GROUP BY support_status, hr.classification_label
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
+

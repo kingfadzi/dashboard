@@ -420,3 +420,45 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
 
     return fig
 
+@standard_chart_style
+def render_dotnet_support_status_chart(df):
+    fig = px.bar(
+        df,
+        x="support_status",
+        y="repo_count",
+        color="classification_label",
+        barmode="stack",
+        text="repo_count",
+        labels={
+            "support_status": "Support Status",
+            "repo_count": "Repository Count",
+            "classification_label": "Size"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(
+        textposition="inside",
+        texttemplate="%{text}"
+    )
+
+    fig.update_layout(
+        xaxis=dict(
+            type="category",
+            title=None,
+            tickangle=0,
+            showticklabels=True
+        ),
+        yaxis_title="Repository Count",
+        legend=dict(
+            orientation="h",
+            y=1.02,
+            x=0.5,
+            xanchor="center",
+            font=dict(size=10)
+        ),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
+
