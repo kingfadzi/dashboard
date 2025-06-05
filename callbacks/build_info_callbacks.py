@@ -8,6 +8,8 @@ from data.build_info_fetchers import (
     fetch_runtime_fragmentation_by_tool,
     fetch_confidence_distribution, fetch_runtime_build_coverage_by_language, fetch_build_tool_variants,
     fetch_no_buildtool_language_type_distribution, fetch_dotnet_support_status_summary,
+    fetch_java_support_status_summary, fetch_python_support_status_summary, fetch_js_support_status_summary,
+    fetch_go_support_status_summary,
 )
 from callbacks.redirect_callbacks import generate_redirect_callbacks
 from viz.viz_build_info import (
@@ -18,6 +20,8 @@ from viz.viz_build_info import (
     render_runtime_fragmentation_chart,
     render_confidence_distribution_chart, render_runtime_build_heatmap, render_build_tool_variant_chart,
     render_no_buildtool_language_type_distribution, render_dotnet_support_status_chart,
+    render_java_support_status_chart, render_python_support_status_chart, render_js_support_status_chart,
+    render_go_support_status_chart,
 )
 from utils.filter_utils import extract_filter_dict_from_store
 from dash import Output, Input
@@ -116,6 +120,45 @@ def register_build_info_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_dotnet_support_status_summary(filters)
         return render_dotnet_support_status_chart(df)
+
+    @app.callback(
+        Output("java-support-status-chart", "figure"),
+        Input("default-filter-store", "data")
+    )
+    def update_java_support_status_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        df = fetch_java_support_status_summary(filters)
+        return render_java_support_status_chart(df)
+
+
+    @app.callback(
+        Output("python-support-status-chart", "figure"),
+        Input("default-filter-store", "data")
+    )
+    def update_python_support_status_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        df = fetch_python_support_status_summary(filters)
+        return render_python_support_status_chart(df)
+
+
+    @app.callback(
+        Output("js-support-status-chart", "figure"),
+        Input("default-filter-store", "data")
+    )
+    def update_js_support_status_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        df = fetch_js_support_status_summary(filters)
+        return render_js_support_status_chart(df)
+
+    @app.callback(
+        Output("go-support-status-chart", "figure"),
+        Input("default-filter-store", "data")
+    )
+    def update_go_support_status_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        df = fetch_go_support_status_summary(filters)
+        return render_go_support_status_chart(df)
+
 
 
     generate_redirect_callbacks(

@@ -110,7 +110,112 @@ layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(card("Support Status (.NET)", "dotnet-support-status-chart"), width=12),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Support Status (.NET)", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="dotnet-support-status-chart",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=6,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Support Status (Java)", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="java-support-status-chart",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=6,
+                ),
+            ],
+            className="mb-4",
+        ),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Support Status (Python)", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="python-support-status-chart",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=4,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Support Status (JavaScript)", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="js-support-status-chart",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=4,
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("Support Status (Go)", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="go-support-status-chart",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=4,
+                ),
             ],
             className="mb-4",
         ),

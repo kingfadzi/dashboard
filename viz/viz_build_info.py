@@ -285,7 +285,7 @@ def render_runtime_build_heatmap(df):
     ))
 
     fig.update_layout(
-        xaxis_title="Detection Status",
+        xaxis_title="Build Tool/Runtime Detection Status",
         yaxis_title="Language Group",
         margin=dict(l=20, r=20, t=20, b=20)
     )
@@ -422,13 +422,22 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
 
 @standard_chart_style
 def render_dotnet_support_status_chart(df):
+    df["support_status_verbose"] = df["support_status"].map({
+        "Active Support": "Active Support (.NET 8, .NET 9, .NET Framework 4.8.1)",
+        "Maintenance Mode": "Maintenance Mode (.NET Framework 4.8)",
+        "Out of Support": "Out of Support (5–7, Core 2.x/3.x, Fx 4.0–4.7.2)",
+        "Deprecated": "Deprecated (.NET Standard 1.x–2.1)",
+        "Unknown": "Unknown"
+    })
+
     fig = px.bar(
         df,
-        x="support_status",
-        y="repo_count",
+        x="repo_count",
+        y="support_status",
         color="classification_label",
-        barmode="stack",
+        orientation="h",
         text="repo_count",
+        hover_name="support_status_verbose",
         labels={
             "support_status": "Support Status",
             "repo_count": "Repository Count",
@@ -443,13 +452,12 @@ def render_dotnet_support_status_chart(df):
     )
 
     fig.update_layout(
-        xaxis=dict(
+        yaxis=dict(
             type="category",
             title=None,
-            tickangle=0,
             showticklabels=True
         ),
-        yaxis_title="Repository Count",
+        xaxis_title="Repository Count",
         legend=dict(
             orientation="h",
             y=1.02,
@@ -462,3 +470,161 @@ def render_dotnet_support_status_chart(df):
 
     return fig
 
+@standard_chart_style
+def render_java_support_status_chart(df):
+    df["support_status_verbose"] = df["support_status"].map({
+        "Active Support": "Active Support (JDK 17, JDK 21)",
+        "Maintenance Mode": "Maintenance Mode (JDK 11)",
+        "Out of Support": "Out of Support (JDK 8)",
+        "Deprecated": "Deprecated (< JDK 8)",
+        "Unknown": "Unknown"
+    })
+
+    fig = px.bar(
+        df,
+        x="repo_count",
+        y="support_status",
+        color="classification_label",  # <-- stripes by size
+        orientation="h",
+        text="repo_count",
+        hover_name="support_status_verbose",
+        labels={
+            "support_status": "Support Status",
+            "repo_count": "Repository Count",
+            "classification_label": "Size"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(
+        textposition="inside",
+        texttemplate="%{text}"
+    )
+
+    fig.update_layout(
+        yaxis=dict(
+            type="category",
+            title=None,
+            showticklabels=True
+        ),
+        xaxis_title="Repository Count",
+        legend=dict(
+            title="Size",
+            orientation="h",
+            y=1.02,
+            x=0.5,
+            xanchor="center",
+            font=dict(size=10)
+        ),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
+
+@standard_chart_style
+def render_python_support_status_chart(df):
+    df["support_status_verbose"] = df["support_status"].map({
+        "Active Support": "Active Support (3.11, 3.12)",
+        "Maintenance Mode": "Maintenance Mode (3.10)",
+        "Out of Support": "Out of Support (3.9)",
+        "Deprecated": "Deprecated (< 3.9)",
+        "Unknown": "Unknown"
+    })
+
+    fig = px.bar(
+        df,
+        x="repo_count",
+        y="support_status",
+        color="classification_label",
+        orientation="h",
+        text="repo_count",
+        hover_name="support_status_verbose",
+        labels={
+            "support_status": "Support Status",
+            "repo_count": "Repository Count",
+            "classification_label": "Size"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(textposition="inside", texttemplate="%{text}")
+    fig.update_layout(
+        yaxis=dict(type="category", showticklabels=True),
+        xaxis_title="Repository Count",
+        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10)),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
+
+@standard_chart_style
+def render_js_support_status_chart(df):
+    df["support_status_verbose"] = df["support_status"].map({
+        "Active Support": "Active Support (Node 18, 20)",
+        "Maintenance Mode": "Maintenance Mode (Node 16)",
+        "Out of Support": "Out of Support (Node 14)",
+        "Deprecated": "Deprecated (< Node 14)",
+        "Unknown": "Unknown"
+    })
+
+    fig = px.bar(
+        df,
+        x="repo_count",
+        y="support_status",
+        color="classification_label",
+        orientation="h",
+        text="repo_count",
+        hover_name="support_status_verbose",
+        labels={
+            "support_status": "Support Status",
+            "repo_count": "Repository Count",
+            "classification_label": "Size"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(textposition="inside", texttemplate="%{text}")
+    fig.update_layout(
+        yaxis=dict(type="category", showticklabels=True),
+        xaxis_title="Repository Count",
+        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10)),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
+
+@standard_chart_style
+def render_go_support_status_chart(df):
+    df["support_status_verbose"] = df["support_status"].map({
+        "Active Support": "Active Support (Go 1.20–1.22)",
+        "Maintenance Mode": "Maintenance Mode (Go 1.19)",
+        "Out of Support": "Out of Support (Go 1.18)",
+        "Deprecated": "Deprecated (< Go 1.18)",
+        "Unknown": "Unknown"
+    })
+
+    fig = px.bar(
+        df,
+        x="repo_count",
+        y="support_status",
+        color="classification_label",
+        orientation="h",
+        text="repo_count",
+        hover_name="support_status_verbose",
+        labels={
+            "support_status": "Support Status",
+            "repo_count": "Repository Count",
+            "classification_label": "Size"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(textposition="inside", texttemplate="%{text}")
+    fig.update_layout(
+        yaxis=dict(type="category", showticklabels=True),
+        xaxis_title="Repository Count",
+        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10)),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig

@@ -363,3 +363,117 @@ def fetch_dotnet_support_status_summary(filters=None):
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
+@cache.memoize()
+def fetch_java_support_status_summary(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                CASE
+                    WHEN runtime_version IN ('jdk-17', 'jdk-21') THEN 'Active Support'
+                    WHEN runtime_version = 'jdk-11' THEN 'Maintenance Mode'
+                    WHEN runtime_version = 'jdk-8' THEN 'Out of Support'
+                    WHEN runtime_version ~ '^jdk-[0-9]+$' AND substring(runtime_version from 5)::int < 8 THEN 'Deprecated'
+                    ELSE 'Unknown'
+                END AS support_status,
+                hr.classification_label,
+                COUNT(DISTINCT b.repo_id) AS repo_count
+            FROM build_config_cache b
+            JOIN harvested_repositories hr ON b.repo_id = hr.repo_id
+            WHERE b.runtime_version IS NOT NULL
+              AND b.tool IN ('maven', 'gradle')
+              {extra_where}
+            GROUP BY support_status, hr.classification_label
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
+
+@cache.memoize()
+def fetch_python_support_status_summary(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                CASE
+                    WHEN regexp_replace(runtime_version, '[^0-9\\.]', '', 'g') IN ('3.11', '3.12') THEN 'Active Support'
+                    WHEN regexp_replace(runtime_version, '[^0-9\\.]', '', 'g') = '3.10' THEN 'Maintenance Mode'
+                    WHEN regexp_replace(runtime_version, '[^0-9\\.]', '', 'g') = '3.9' THEN 'Out of Support'
+                    WHEN regexp_replace(runtime_version, '[^0-9\\.]', '', 'g') ~ '^3\\.[0-8]$' THEN 'Deprecated'
+                    ELSE 'Unknown'
+                END AS support_status,
+                hr.classification_label,
+                COUNT(DISTINCT b.repo_id) AS repo_count
+            FROM build_config_cache b
+            JOIN harvested_repositories hr ON b.repo_id = hr.repo_id
+            WHERE b.runtime_version IS NOT NULL
+              AND b.runtime_version <> ''
+              AND b.tool = 'python'
+              {extra_where}
+            GROUP BY support_status, hr.classification_label
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
+
+@cache.memoize()
+def fetch_js_support_status_summary(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                CASE
+                    WHEN regexp_replace(runtime_version, '[^0-9]', '', 'g') ~ '^[0-9]+$' AND regexp_replace(runtime_version, '[^0-9]', '', 'g')::int >= 18 THEN 'Active Support'
+                    WHEN regexp_replace(runtime_version, '[^0-9]', '', 'g') = '16' THEN 'Maintenance Mode'
+                    WHEN regexp_replace(runtime_version, '[^0-9]', '', 'g') = '14' THEN 'Out of Support'
+                    WHEN regexp_replace(runtime_version, '[^0-9]', '', 'g') ~ '^[0-9]+$' AND regexp_replace(runtime_version, '[^0-9]', '', 'g')::int < 14 THEN 'Deprecated'
+                    ELSE 'Unknown'
+                END AS support_status,
+                hr.classification_label,
+                COUNT(DISTINCT b.repo_id) AS repo_count
+            FROM build_config_cache b
+            JOIN harvested_repositories hr ON b.repo_id = hr.repo_id
+            WHERE b.runtime_version IS NOT NULL
+              AND b.runtime_version <> ''
+              AND regexp_replace(runtime_version, '[^0-9]', '', 'g') <> ''
+              AND b.tool = 'javascript'
+              {extra_where}
+            GROUP BY support_status, hr.classification_label
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
+
+@cache.memoize()
+def fetch_go_support_status_summary(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                CASE
+                    WHEN substring(runtime_version from 3) IN ('1.20', '1.21', '1.22') THEN 'Active Support'
+                    WHEN substring(runtime_version from 3) = '1.19' THEN 'Maintenance Mode'
+                    WHEN substring(runtime_version from 3) = '1.18' THEN 'Out of Support'
+                    WHEN substring(runtime_version from 3)::float < 1.18 THEN 'Deprecated'
+                    ELSE 'Unknown'
+                END AS support_status,
+                hr.classification_label,
+                COUNT(DISTINCT b.repo_id) AS repo_count
+            FROM build_config_cache b
+            JOIN harvested_repositories hr ON b.repo_id = hr.repo_id
+            WHERE b.runtime_version IS NOT NULL
+              AND b.tool = 'golang'
+              {extra_where}
+            GROUP BY support_status, hr.classification_label
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
