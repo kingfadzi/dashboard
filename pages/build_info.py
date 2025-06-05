@@ -56,10 +56,26 @@ layout = dbc.Container(
         ),
         dbc.Row(
             dbc.Col(
-                card("No Build Tool: Size vs Commits", "no-buildtool-scatter", height=400),
-                width=12
+                dbc.Card(
+                    [
+                        dbc.CardHeader(html.B("No Build Tool: Size vs Commits", className="text-center"), className="bg-light"),
+                        dcc.Loading(
+                            dcc.Graph(
+                                id="no-buildtool-scatter",
+                                config={
+                                    "staticPlot": False,
+                                    "displayModeBar": False,
+                                    "scrollZoom": False,
+                                },
+                                style={"height": "400px"},
+                            )
+                        ),
+                    ],
+                    className="mb-4",
+                ),
+                width=12,
             ),
-            className="mb-4"
+            className="mb-4",
         ),
 
         dbc.Row(

@@ -325,9 +325,7 @@ def render_build_tool_variant_chart(df):
     )
 
     return fig
-    
 
-@standard_chart_style
 def render_no_buildtool_scatter(df: pd.DataFrame):
     if df.empty:
         fig = go.Figure()
@@ -341,9 +339,9 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
 
     fig = px.scatter(
         df,
-        x="dominant_file_count",  # updated from file_count
+        x="dominant_file_count",
         y="repo_size_mb",
-        color="dominant_language_type",  # updated from language_type
+        color="dominant_language_type",
         size="total_commits",
         hover_name="repo_id",
         hover_data=["contributor_count"],
@@ -358,8 +356,10 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
     )
 
     fig.update_traces(
-        marker=dict(sizemode="area", line=dict(width=0.5, color="DarkSlateGrey")),
-        textposition="top center"
+        marker=dict(
+            sizemode="area",
+            line=dict(width=0.5, color="DarkSlateGrey")
+        )
     )
 
     fig.update_layout(
@@ -367,18 +367,8 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
         yaxis_title="Repository Size (MB)",
         legend_title="Language Type",
         margin=dict(l=20, r=20, t=20, b=20),
-        dragmode=False,
-        xaxis_fixedrange=True,
-        yaxis_fixedrange=True
+        dragmode="zoom",  # Explicit interactive mode
     )
 
+    # Removed fixedrange=True to enable zoom/pan
     return fig
-
-
-
-
-
-
-
-
-

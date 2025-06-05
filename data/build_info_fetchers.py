@@ -3,7 +3,7 @@ from sqlalchemy import text
 from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
-from data.sql_filter_utils import normalize_version_sql
+from data.sql_filter_utils import normalize_version_sql, build_repo_filter_conditions
 
 
 # 1. Detection Coverage by Tool
@@ -231,46 +231,44 @@ def fetch_build_tool_variants(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
-    
-    
+
+
 @cache.memoize()
-def fetch_no_buildtool_scatter_data(filters=None):
+def fetch_no_buildtool_repo_scatter(filters=None):
     def query_data(condition_string, param_dict):
-        sql = """
-            WITH cloc_classified AS (
+        sql = f"""
+            WITH dominant_language AS (
                 SELECT
-                    cloc.repo_id,
-                    COALESCE(l.type, 'unknown') AS language_type,
-                    cloc.files
-                FROM cloc_metrics cloc
-                LEFT JOIN languages l ON LOWER(cloc.language) = LOWER(l.name)
+                    repo_id,
+                    language,
+                    SUM(files) AS file_count,
+                    RANK() OVER (PARTITION BY repo_id ORDER BY SUM(files) DESC) AS lang_rank
+                FROM cloc_metrics
+                GROUP BY repo_id, language
             ),
-            ranked AS (
-                SELECT *,
-                       ROW_NUMBER() OVER (PARTITION BY repo_id ORDER BY files DESC) AS rnk
-                FROM cloc_classified
-            ),
-            dominant_lang AS (
-                SELECT repo_id, language_type
-                FROM ranked
-                WHERE rnk = 1
+            lang_types AS (
+                SELECT
+                    name,
+                    type
+                FROM languages
             )
             SELECT
                 hr.repo_id,
-                dom.language_type AS dominant_language_type,
+                dom.file_count AS dominant_file_count,
                 ROUND((rm.repo_size_bytes / 1024.0 / 1024.0)::numeric, 2) AS repo_size_mb,
+                COALESCE(lt.type, 'unknown') AS dominant_language_type,
                 rm.total_commits,
                 rm.number_of_contributors AS contributor_count
             FROM harvested_repositories hr
             JOIN repo_metrics rm USING (repo_id)
             LEFT JOIN build_config_cache bcc USING (repo_id)
-            JOIN dominant_lang dom USING (repo_id)
+            JOIN dominant_language dom ON hr.repo_id = dom.repo_id AND dom.lang_rank = 1
+            LEFT JOIN lang_types lt ON LOWER(dom.language) = LOWER(lt.name)
             WHERE bcc.tool IS NULL AND bcc.runtime_version IS NULL
-                  {extra_where}
+            {f"AND {condition_string}" if condition_string else ""}
         """
-        extra_where = f"AND {condition_string}" if condition_string else ""
-        stmt = text(sql.format(extra_where=extra_where))
+        stmt = text(sql)
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)

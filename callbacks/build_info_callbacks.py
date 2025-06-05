@@ -19,7 +19,7 @@ from viz.viz_build_info import (
 )
 from utils.filter_utils import extract_filter_dict_from_store
 from dash import Output, Input
-from data.build_info_fetchers import fetch_no_buildtool_scatter_data
+from data.build_info_fetchers import fetch_no_buildtool_repo_scatter
 from viz.viz_build_info import render_no_buildtool_scatter
 
 
@@ -93,7 +93,7 @@ def register_build_info_callbacks(app):
         Input("default-filter-store", "data")
     )
     def update_no_buildtool_scatter(filters):
-        df = fetch_no_buildtool_scatter_data(filters)
+        df = fetch_no_buildtool_repo_scatter(filters)
         return render_no_buildtool_scatter(df)
 
 
