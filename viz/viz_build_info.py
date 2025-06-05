@@ -327,27 +327,28 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
         fig = go.Figure()
         fig.update_layout(
             title="No data available",
-            xaxis=dict(title="File Count", visible=True),
-            yaxis=dict(title="Repo Size (MB)", visible=True),
+            xaxis=dict(title="Contributors", visible=True),
+            yaxis=dict(title="Commits", visible=True),
             margin=dict(l=20, r=20, t=40, b=20),
         )
         return fig
 
     fig = px.scatter(
         df,
-        x="dominant_file_count",
-        y="repo_size_mb",
-        color="dominant_language_type",
-        size="total_commits",
+        x="contributor_count",
+        y="total_commits",
+        color="language_group",
+        size="repo_size_mb",
         hover_name="repo_id",
-        hover_data=["contributor_count"],
+        hover_data=["dominant_file_count", "repo_size_mb"],
         labels={
-            "dominant_file_count": "File Count",
-            "repo_size_mb": "Repo Size (MB)",
-            "dominant_language_type": "Language Type",
+            "contributor_count": "Contributors",
             "total_commits": "Commits",
-            "contributor_count": "Contributors"
+            "language_group": "Language",
+            "repo_size_mb": "Repo Size (MB)",
+            "dominant_file_count": "File Count"
         },
+        size_max=40,  
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
 
@@ -359,14 +360,15 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
     )
 
     fig.update_layout(
-        xaxis_title="File Count",
-        yaxis_title="Repository Size (MB)",
-        legend_title="Language Type",
+        xaxis_title="Number of Contributors",
+        yaxis_title="Total Commits",
+        legend_title="Language",
         margin=dict(l=20, r=20, t=20, b=20),
-        dragmode="zoom",  # Explicit interactive mode
+        dragmode="zoom",
     )
 
     return fig
+
 
 
 def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
@@ -536,7 +538,7 @@ def render_support_status_chart(
             x=0.5,
             y=0.5,
             showarrow=False,
-            font=dict(size=11, color="white"),
+            font=dict(size=11, color="black"),
             xanchor="center",
             yanchor="middle",
             textangle=-30        # diagonal for watermark effect

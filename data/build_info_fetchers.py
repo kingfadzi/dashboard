@@ -237,7 +237,6 @@ UPPER_PERCENTILE = 95
 
 @cache.memoize()
 def fetch_no_buildtool_repo_scatter(filters=None):
-
     def execute_query(condition_string, param_dict):
         """Inner function to execute the SQL query"""
         sql = f"""
@@ -257,9 +256,19 @@ def fetch_no_buildtool_repo_scatter(filters=None):
                 hr.repo_id,
                 dom.file_count AS dominant_file_count,
                 ROUND((rm.repo_size_bytes / 1048576.0)::numeric, 2) AS repo_size_mb,
-                COALESCE(lt.type, 'unknown') AS dominant_language_type,
                 rm.total_commits,
-                rm.number_of_contributors AS contributor_count
+                rm.number_of_contributors AS contributor_count,
+                CASE
+                    WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                    WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                    WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                    WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                    WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                    WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+                    WHEN LOWER(lt.type) IN ('markup', 'data') THEN 'markup_or_data'
+                    WHEN LOWER(lt.type) = 'programming' THEN 'other_programming'
+                    ELSE 'unknown'
+                END AS language_group
             FROM harvested_repositories hr
             JOIN repo_metrics rm USING (repo_id)
             LEFT JOIN build_config_cache bcc USING (repo_id)
@@ -268,8 +277,8 @@ def fetch_no_buildtool_repo_scatter(filters=None):
             LEFT JOIN lang_types lt
                 ON LOWER(dom.language) = LOWER(lt.name)
             WHERE bcc.tool IS NULL
-                AND bcc.runtime_version IS NULL
-            {"AND " + condition_string if condition_string else ""}
+              AND bcc.runtime_version IS NULL
+              {f"AND {condition_string}" if condition_string else ""}
         """
         return pd.read_sql(text(sql), engine, params=param_dict)
 
@@ -281,7 +290,7 @@ def fetch_no_buildtool_repo_scatter(filters=None):
     if len(df) < MIN_ROWS_TO_FILTER:
         return df.copy()
 
-    # Apply percentile-based outlier removal
+    # Apply percentile-based outlier removal (on dominant_file_count and repo_size_mb)
     df_filtered = df.copy()
     numeric_cols = ["dominant_file_count", "repo_size_mb"]
 
@@ -294,6 +303,7 @@ def fetch_no_buildtool_repo_scatter(filters=None):
             ]
 
     return df_filtered.reset_index(drop=True)
+
 
 
 @cache.memoize()

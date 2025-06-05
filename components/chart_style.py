@@ -105,9 +105,7 @@ def status_chart_style(func):
             "gridcolor": "#e5e5e5",
             "gridwidth": 1,
             "zeroline": False,
-            "tickmode": "linear",
-            "dtick": 1,
-            "showticklabels": xaxis_existing.get("showticklabels", True),
+
         }
 
         yaxis_style = {
