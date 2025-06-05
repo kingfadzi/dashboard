@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mssql.information_schema import columns
 
 from components.chart_style import standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
+import pandas as pd
 
 
 # 1. Detection Coverage by Tool
