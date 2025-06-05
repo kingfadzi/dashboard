@@ -54,6 +54,13 @@ layout = dbc.Container(
             ],
             className="mb-4",
         ),
+        dbc.Row(
+            dbc.Col(
+                card("No Build Tool: Size vs Commits", "no-buildtool-scatter", height=400),
+                width=12
+            ),
+            className="mb-4"
+        ),
 
         dbc.Row(
             [

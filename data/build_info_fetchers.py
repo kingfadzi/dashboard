@@ -231,3 +231,47 @@ def fetch_build_tool_variants(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+    
+    
+@cache.memoize()
+def fetch_no_buildtool_scatter_data(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            WITH cloc_classified AS (
+                SELECT
+                    cloc.repo_id,
+                    COALESCE(l.type, 'unknown') AS language_type,
+                    cloc.files
+                FROM cloc_metrics cloc
+                LEFT JOIN languages l ON LOWER(cloc.language) = LOWER(l.name)
+            ),
+            ranked AS (
+                SELECT *,
+                       ROW_NUMBER() OVER (PARTITION BY repo_id ORDER BY files DESC) AS rnk
+                FROM cloc_classified
+            ),
+            dominant_lang AS (
+                SELECT repo_id, language_type
+                FROM ranked
+                WHERE rnk = 1
+            )
+            SELECT
+                hr.repo_id,
+                dom.language_type AS dominant_language_type,
+                ROUND((rm.repo_size_bytes / 1024.0 / 1024.0)::numeric, 2) AS repo_size_mb,
+                rm.total_commits,
+                rm.number_of_contributors AS contributor_count
+            FROM harvested_repositories hr
+            JOIN repo_metrics rm USING (repo_id)
+            LEFT JOIN build_config_cache bcc USING (repo_id)
+            JOIN dominant_lang dom USING (repo_id)
+            WHERE bcc.tool IS NULL AND bcc.runtime_version IS NULL
+                  {extra_where}
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
+    

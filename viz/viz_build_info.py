@@ -324,6 +324,43 @@ def render_build_tool_variant_chart(df):
     )
 
     return fig
+    
+
+@standard_chart_style
+def render_no_buildtool_scatter(df: pd.DataFrame):
+    if df.empty:
+        return go.Figure().update_layout(
+            title="No data available",
+            xaxis_title="Repo Size (MB)",
+            yaxis_title="Total Commits"
+        )
+
+    fig = px.scatter(
+        df,
+        x="repo_size_mb",
+        y="total_commits",
+        color="dominant_language_type",
+        size="contributor_count",
+        hover_data=["repo_id", "repo_size_mb", "total_commits", "contributor_count"],
+        labels={
+            "repo_size_mb": "Repository Size (MB)",
+            "total_commits": "Total Commits",
+            "contributor_count": "Contributors",
+            "dominant_language_type": "Language Type"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_layout(
+        margin=dict(l=20, r=20, t=20, b=20),
+        xaxis=dict(title="Repository Size (MB)", fixedrange=False),
+        yaxis=dict(title="Total Commits", fixedrange=False),
+        dragmode="zoom",
+        legend_title="Language Type"
+    )
+
+    return fig
+    
 
 
 
