@@ -1,11 +1,9 @@
-import pandas as pd
-from sqlalchemy import text
 from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 from utils.sql_filter_utils import normalize_version_sql, build_repo_filter_conditions
+import numpy as np
 
-from sklearn.preprocessing import RobustScaler
 import pandas as pd
 from sqlalchemy.sql import text
 
@@ -78,8 +76,6 @@ def fetch_module_counts_per_repo(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
-
-
 
 # 3. Runtime Versions by Tool (fixed: includes variant)
 @cache.memoize()
@@ -235,9 +231,15 @@ def fetch_build_tool_variants(filters=None):
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
 
+MIN_ROWS_TO_FILTER = 10
+LOWER_PERCENTILE = 5
+UPPER_PERCENTILE = 95
+
 @cache.memoize()
 def fetch_no_buildtool_repo_scatter(filters=None):
-    def query_data(condition_string, param_dict):
+
+    def execute_query(condition_string, param_dict):
+        """Inner function to execute the SQL query"""
         sql = f"""
             WITH dominant_language AS (
                 SELECT
@@ -249,15 +251,12 @@ def fetch_no_buildtool_repo_scatter(filters=None):
                 GROUP BY repo_id, language
             ),
             lang_types AS (
-                SELECT
-                    name,
-                    type
-                FROM languages
+                SELECT name, type FROM languages
             )
             SELECT
                 hr.repo_id,
                 dom.file_count AS dominant_file_count,
-                ROUND((rm.repo_size_bytes / 1024.0 / 1024.0)::numeric, 2) AS repo_size_mb,
+                ROUND((rm.repo_size_bytes / 1048576.0)::numeric, 2) AS repo_size_mb,
                 COALESCE(lt.type, 'unknown') AS dominant_language_type,
                 rm.total_commits,
                 rm.number_of_contributors AS contributor_count
@@ -265,46 +264,36 @@ def fetch_no_buildtool_repo_scatter(filters=None):
             JOIN repo_metrics rm USING (repo_id)
             LEFT JOIN build_config_cache bcc USING (repo_id)
             JOIN dominant_language dom
-              ON hr.repo_id = dom.repo_id AND dom.lang_rank = 1
+                ON hr.repo_id = dom.repo_id AND dom.lang_rank = 1
             LEFT JOIN lang_types lt
-              ON LOWER(dom.language) = LOWER(lt.name)
+                ON LOWER(dom.language) = LOWER(lt.name)
             WHERE bcc.tool IS NULL
-              AND bcc.runtime_version IS NULL
-            {f"AND {condition_string}" if condition_string else ""}
+                AND bcc.runtime_version IS NULL
+            {"AND " + condition_string if condition_string else ""}
         """
-        stmt = text(sql)
-        return pd.read_sql(stmt, engine, params=param_dict)
+        return pd.read_sql(text(sql), engine, params=param_dict)
 
+    # Get filter conditions and execute query
     condition_string, param_dict = build_repo_filter_conditions(filters)
-    df = query_data(condition_string, param_dict)
+    df = execute_query(condition_string, param_dict)
 
-    # If there are no rows, just return immediately
-    if df.empty:
-        return df
+    # Early return for empty or small datasets
+    if len(df) < MIN_ROWS_TO_FILTER:
+        return df.copy()
 
-    # Use RobustScaler to compute “robust z-scores” for each numeric column
+    # Apply percentile-based outlier removal
+    df_filtered = df.copy()
     numeric_cols = ["dominant_file_count", "repo_size_mb"]
-    scaler = RobustScaler()
-    scaled_array = scaler.fit_transform(df[numeric_cols])
 
-    # Wrap the scaled array back into a DataFrame so we can build a mask
-    df_scaled = pd.DataFrame(
-        scaled_array,
-        columns=[f"{col}_robust_z" for col in numeric_cols],
-        index=df.index
-    )
+    for col in numeric_cols:
+        lower_bound = np.percentile(df[col], LOWER_PERCENTILE)
+        upper_bound = np.percentile(df[col], UPPER_PERCENTILE)
+        df_filtered = df_filtered[
+            (df_filtered[col] >= lower_bound) &
+            (df_filtered[col] <= upper_bound)
+            ]
 
-    # Define your outlier threshold—e.g., keep only |z| < 1.5
-    threshold = 1.5
-    mask = (
-            df_scaled["dominant_file_count_robust_z"].abs().lt(threshold) &
-            df_scaled["repo_size_mb_robust_z"].abs().lt(threshold)
-    )
-
-    # Filter the original DataFrame
-    df_filtered = df[mask].reset_index(drop=True)
-    return df_filtered
-
+    return df_filtered.reset_index(drop=True)
 
 
 @cache.memoize()
