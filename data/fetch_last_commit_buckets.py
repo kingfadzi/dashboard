@@ -2,7 +2,7 @@ from sqlalchemy import text
 import pandas as pd
 from data.cache_instance import cache
 from data.db_connection import engine
-from data.sql_filter_utils import build_repo_filter_conditions
+from utils.sql_filter_utils import build_repo_filter_conditions
 
 
 def fetch_last_commit_buckets(filters=None):

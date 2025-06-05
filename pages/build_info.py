@@ -115,18 +115,19 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Updated bottom two rows: two charts per row
         dbc.Row(
             [
-                dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=4),
-                dbc.Col(card("Detection Status", "status-by-tool-chart"), width=4),
-                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
+                dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
+                dbc.Col(card("Detection Status", "status-by-tool-chart"), width=6),
             ],
             className="mb-4",
         ),
 
         dbc.Row(
             [
-                dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),
+                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=6),
+                dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=6),
             ],
             className="mb-4",
         ),

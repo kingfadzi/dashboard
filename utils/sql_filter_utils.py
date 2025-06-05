@@ -32,8 +32,8 @@ def normalize_version_sql(column_expr: str) -> str:
       -- Otherwise if it starts with just digits (e.g. "1" or "2rc"), append ".0"
       WHEN {column_expr} ~ '^[0-9]+' 
         THEN regexp_replace({column_expr}, '^([0-9]+).*$', '\\1') || '.0'
-      ELSE
-        'Unknown'
+      -- Otherwise return the original value
+      ELSE {column_expr}
     END
     """
 

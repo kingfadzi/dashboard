@@ -3,7 +3,7 @@ from sqlalchemy import text
 from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
-from data.sql_filter_utils import normalize_version_sql, build_repo_filter_conditions
+from utils.sql_filter_utils import normalize_version_sql, build_repo_filter_conditions
 
 
 # 1. Detection Coverage by Tool

@@ -1,14 +1,9 @@
 # fetch_overview_metrics.py
 
-from sqlalchemy import text
-import pandas as pd
-from data.cache_instance import cache
-from data.db_connection import engine
-from data.build_filter_conditions import build_filter_conditions
 import logging
 
 from data.fetch_contributors_commits_size import human_readable_age
-from data.sql_filter_utils import build_repo_filter_conditions
+from utils.sql_filter_utils import build_repo_filter_conditions
 from utils.formattting import deduplicate_comma_separated_values
 
 logger = logging.getLogger(__name__)
@@ -33,12 +28,6 @@ def fetch_repo_status(filters=None):
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 # fetch_overview_metrics.py
-
-import pandas as pd
-from sqlalchemy import text
-from data.db_connection import engine
-from data.build_filter_conditions import build_filter_conditions
-from data.cache_instance import cache
 
 
 def _clean_classification_label(label):
