@@ -272,3 +272,41 @@ def fetch_no_buildtool_repo_scatter(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+
+@cache.memoize()
+def fetch_no_buildtool_language_type_distribution(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = f"""
+            WITH dominant_language_type AS (
+                SELECT
+                    hr.repo_id,
+                    hr.classification_label,
+                    l.type AS language_type,
+                    cloc.files,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY hr.repo_id
+                        ORDER BY cloc.files DESC
+                    ) AS rn
+                FROM harvested_repositories hr
+                JOIN cloc_metrics cloc USING (repo_id)
+                JOIN languages l ON LOWER(cloc.language) = LOWER(l.name)
+                LEFT JOIN build_config_cache bcc USING (repo_id)
+                WHERE bcc.tool IS NULL AND bcc.runtime_version IS NULL
+                {f"AND {condition_string}" if condition_string else ""}
+            )
+
+            SELECT
+                COALESCE(language_type, 'unknown') AS dominant_language_type,
+                COALESCE(classification_label, 'unknown') AS classification_label,
+                COUNT(DISTINCT repo_id) AS repo_count
+            FROM dominant_language_type
+            WHERE rn = 1
+            GROUP BY language_type, classification_label
+            ORDER BY dominant_language_type, classification_label
+        """
+
+        return pd.read_sql(text(sql), engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)

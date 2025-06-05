@@ -49,32 +49,36 @@ layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(card("Detection Status", "build-runtime-coverage-chart"), width=8),  # Renamed
-                dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=4),  # Swapped
+                dbc.Col(card("Detection Status", "build-runtime-coverage-chart"), width=8),
+                dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=4),
             ],
             className="mb-4",
         ),
+
         dbc.Row(
-            dbc.Col(
-                dbc.Card(
-                    [
-                        dbc.CardHeader(html.B("No Build Tool: Size vs Commits", className="text-center"), className="bg-light"),
-                        dcc.Loading(
-                            dcc.Graph(
-                                id="no-buildtool-scatter",
-                                config={
-                                    "staticPlot": False,
-                                    "displayModeBar": False,
-                                    "scrollZoom": False,
-                                },
-                                style={"height": "400px"},
-                            )
-                        ),
-                    ],
-                    className="mb-4",
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("No Build Tool: Size vs Commits", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="no-buildtool-scatter",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=8,
                 ),
-                width=12,
-            ),
+                dbc.Col(card("No Build Tool: Language Type Breakdown", "no-buildtool-language-distribution", height=400), width=4),
+            ],
             className="mb-4",
         ),
 
@@ -120,7 +124,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Detection Coverage moved to bottom
         dbc.Row(
             [
                 dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),

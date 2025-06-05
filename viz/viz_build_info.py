@@ -370,5 +370,44 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
         dragmode="zoom",  # Explicit interactive mode
     )
 
-    # Removed fixedrange=True to enable zoom/pan
+    return fig
+
+@standard_chart_style
+def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
+
+    if df.empty:
+        fig = go.Figure()
+        fig.update_layout(
+            title="No data available",
+            xaxis=dict(title="Language Type", visible=True),
+            yaxis=dict(title="Repository Count", visible=True),
+            margin=dict(l=20, r=20, t=40, b=20),
+        )
+        return fig
+
+    fig = px.bar(
+        df,
+        x="dominant_language_type",
+        y="repo_count",
+        color="classification_label",
+        text="repo_count",
+        labels={
+            "dominant_language_type": "Language Type",
+            "repo_count": "Repository Count",
+            "classification_label": "Size (T-Shirt)"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(textposition="inside", texttemplate="%{text}")
+
+    fig.update_layout(
+        xaxis_title="Language Type",
+        yaxis_title="Repository Count",
+        barmode="stack",
+        xaxis=dict(type="category", showticklabels=True, tickangle=0),
+        yaxis=dict(showticklabels=True),
+        margin=dict(l=20, r=20, t=20, b=20),
+    )
+
     return fig
