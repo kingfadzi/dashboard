@@ -368,12 +368,8 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
 
     return fig
 
-@standard_chart_style
+
 def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
-    """
-    Render a stacked bar chart for no-buildtool repositories by dominant language and size.
-    Expects columns: dominant_language, classification_label, repo_count
-    """
 
     if df.empty:
         fig = go.Figure()
@@ -385,29 +381,42 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
         )
         return fig
 
+
     fig = px.bar(
         df,
         x="dominant_language",
         y="repo_count",
         color="classification_label",
-        text="repo_count",
         labels={
             "dominant_language": "Language",
             "repo_count": "Repository Count",
             "classification_label": "Size (T-Shirt)"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
 
-    fig.update_traces(textposition="inside", texttemplate="%{text}")
+
+    totals = df.groupby("dominant_language")["repo_count"].sum().reset_index()
+
+    fig.add_trace(
+        go.Scatter(
+            x=totals["dominant_language"],
+            y=totals["repo_count"],
+            mode="text",
+            text=totals["repo_count"].astype(str),
+            textposition="top center",
+            showlegend=False
+        )
+    )
+
 
     fig.update_layout(
         xaxis_title="Language",
         yaxis_title="Repository Count",
-        barmode="stack",
-        xaxis=dict(type="category", showticklabels=True, tickangle=0),
-        yaxis=dict(showticklabels=True),
+        xaxis=dict(type="category", showticklabels=True, tickangle=-45),
         margin=dict(l=20, r=20, t=20, b=20),
     )
 
     return fig
+
