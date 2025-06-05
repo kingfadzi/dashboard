@@ -292,10 +292,6 @@ def render_runtime_build_heatmap(df):
     return fig
 
 
-
-
-
-
 @standard_chart_style
 def render_build_tool_variant_chart(df):
     fig = px.bar(
@@ -374,12 +370,16 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
 
 @standard_chart_style
 def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
+    """
+    Render a stacked bar chart for no-buildtool repositories by dominant language and size.
+    Expects columns: dominant_language, classification_label, repo_count
+    """
 
     if df.empty:
         fig = go.Figure()
         fig.update_layout(
             title="No data available",
-            xaxis=dict(title="Language Type", visible=True),
+            xaxis=dict(title="Language", visible=True),
             yaxis=dict(title="Repository Count", visible=True),
             margin=dict(l=20, r=20, t=40, b=20),
         )
@@ -387,12 +387,12 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
 
     fig = px.bar(
         df,
-        x="dominant_language_type",
+        x="dominant_language",
         y="repo_count",
         color="classification_label",
         text="repo_count",
         labels={
-            "dominant_language_type": "Language Type",
+            "dominant_language": "Language",
             "repo_count": "Repository Count",
             "classification_label": "Size (T-Shirt)"
         },
@@ -402,7 +402,7 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
     fig.update_traces(textposition="inside", texttemplate="%{text}")
 
     fig.update_layout(
-        xaxis_title="Language Type",
+        xaxis_title="Language",
         yaxis_title="Repository Count",
         barmode="stack",
         xaxis=dict(type="category", showticklabels=True, tickangle=0),

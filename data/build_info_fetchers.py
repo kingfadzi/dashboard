@@ -278,11 +278,21 @@ def fetch_no_buildtool_repo_scatter(filters=None):
 def fetch_no_buildtool_language_type_distribution(filters=None):
     def query_data(condition_string, param_dict):
         sql = f"""
-            WITH dominant_language_type AS (
+            WITH dominant_language_grouped AS (
                 SELECT
                     hr.repo_id,
                     hr.classification_label,
-                    l.type AS language_type,
+                    CASE
+                        WHEN LOWER(cloc.language) = 'java' THEN 'java'
+                        WHEN LOWER(cloc.language) = 'python' THEN 'python'
+                        WHEN LOWER(cloc.language) IN ('javascript', 'typescript') THEN 'javascript'
+                        WHEN LOWER(cloc.language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                        WHEN LOWER(cloc.language) IN ('go', 'golang') THEN 'go'
+                        WHEN LOWER(cloc.language) = 'no language' OR cloc.language IS NULL THEN 'no_language'
+                        WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
+                        WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
+                        ELSE 'unknown'
+                    END AS dominant_language,
                     cloc.files,
                     ROW_NUMBER() OVER (
                         PARTITION BY hr.repo_id
@@ -297,16 +307,16 @@ def fetch_no_buildtool_language_type_distribution(filters=None):
             )
 
             SELECT
-                COALESCE(language_type, 'unknown') AS dominant_language_type,
+                COALESCE(dominant_language, 'unknown') AS dominant_language,
                 COALESCE(classification_label, 'unknown') AS classification_label,
                 COUNT(DISTINCT repo_id) AS repo_count
-            FROM dominant_language_type
+            FROM dominant_language_grouped
             WHERE rn = 1
-            GROUP BY language_type, classification_label
-            ORDER BY dominant_language_type, classification_label
+            GROUP BY dominant_language, classification_label
+            ORDER BY dominant_language, classification_label
         """
-
         return pd.read_sql(text(sql), engine, params=param_dict)
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
