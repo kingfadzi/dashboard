@@ -272,6 +272,5 @@ def fetch_no_buildtool_scatter_data(filters=None):
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_repo_filter_conditions(filters)
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
-    
