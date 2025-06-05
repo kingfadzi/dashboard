@@ -5,6 +5,9 @@ from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 from utils.sql_filter_utils import normalize_version_sql, build_repo_filter_conditions
 
+from sklearn.preprocessing import RobustScaler
+import pandas as pd
+from sqlalchemy.sql import text
 
 # 1. Detection Coverage by Tool
 def fetch_detection_coverage_by_tool(filters=None):
@@ -232,7 +235,6 @@ def fetch_build_tool_variants(filters=None):
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
 
-
 @cache.memoize()
 def fetch_no_buildtool_repo_scatter(filters=None):
     def query_data(condition_string, param_dict):
@@ -262,16 +264,47 @@ def fetch_no_buildtool_repo_scatter(filters=None):
             FROM harvested_repositories hr
             JOIN repo_metrics rm USING (repo_id)
             LEFT JOIN build_config_cache bcc USING (repo_id)
-            JOIN dominant_language dom ON hr.repo_id = dom.repo_id AND dom.lang_rank = 1
-            LEFT JOIN lang_types lt ON LOWER(dom.language) = LOWER(lt.name)
-            WHERE bcc.tool IS NULL AND bcc.runtime_version IS NULL
+            JOIN dominant_language dom
+              ON hr.repo_id = dom.repo_id AND dom.lang_rank = 1
+            LEFT JOIN lang_types lt
+              ON LOWER(dom.language) = LOWER(lt.name)
+            WHERE bcc.tool IS NULL
+              AND bcc.runtime_version IS NULL
             {f"AND {condition_string}" if condition_string else ""}
         """
         stmt = text(sql)
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
-    return query_data(condition_string, param_dict)
+    df = query_data(condition_string, param_dict)
+
+    # If there are no rows, just return immediately
+    if df.empty:
+        return df
+
+    # Use RobustScaler to compute “robust z-scores” for each numeric column
+    numeric_cols = ["dominant_file_count", "repo_size_mb"]
+    scaler = RobustScaler()
+    scaled_array = scaler.fit_transform(df[numeric_cols])
+
+    # Wrap the scaled array back into a DataFrame so we can build a mask
+    df_scaled = pd.DataFrame(
+        scaled_array,
+        columns=[f"{col}_robust_z" for col in numeric_cols],
+        index=df.index
+    )
+
+    # Define your outlier threshold—e.g., keep only |z| < 1.5
+    threshold = 1.5
+    mask = (
+            df_scaled["dominant_file_count_robust_z"].abs().lt(threshold) &
+            df_scaled["repo_size_mb_robust_z"].abs().lt(threshold)
+    )
+
+    # Filter the original DataFrame
+    df_filtered = df[mask].reset_index(drop=True)
+    return df_filtered
+
 
 
 @cache.memoize()

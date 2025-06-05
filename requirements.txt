@@ -9,3 +9,4 @@ redis
 python-dotenv
 dash_ag_grid
 univers
+scikit-learn
