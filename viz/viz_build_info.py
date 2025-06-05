@@ -348,7 +348,7 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
             "repo_size_mb": "Repo Size (MB)",
             "dominant_file_count": "File Count"
         },
-        size_max=40,  
+        size_max=40,
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
 
