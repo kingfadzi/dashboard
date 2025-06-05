@@ -327,10 +327,6 @@ def render_build_tool_variant_chart(df):
     return fig
     
 
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
-
 @standard_chart_style
 def render_no_buildtool_scatter(df: pd.DataFrame):
     if df.empty:
@@ -345,16 +341,16 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
 
     fig = px.scatter(
         df,
-        x="file_count",
+        x="dominant_file_count",  # updated from file_count
         y="repo_size_mb",
-        color="language_type",
+        color="dominant_language_type",  # updated from language_type
         size="total_commits",
         hover_name="repo_id",
         hover_data=["contributor_count"],
         labels={
-            "file_count": "File Count",
+            "dominant_file_count": "File Count",
             "repo_size_mb": "Repo Size (MB)",
-            "language_type": "Language Type",
+            "dominant_language_type": "Language Type",
             "total_commits": "Commits",
             "contributor_count": "Contributors"
         },
@@ -377,8 +373,6 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
     )
 
     return fig
-
-
 
 
 
