@@ -420,7 +420,6 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
 
     return fig
 
-@standard_chart_style
 def render_dotnet_support_status_chart(df):
     df["support_status_verbose"] = df["support_status"].map({
         "Active Support": "Active Support (.NET 8, .NET 9, .NET Framework 4.8.1)",
@@ -429,48 +428,9 @@ def render_dotnet_support_status_chart(df):
         "Deprecated": "Deprecated (.NET Standard 1.x–2.1)",
         "Unknown": "Unknown"
     })
+    return render_support_status_chart(df)
 
-    fig = px.bar(
-        df,
-        x="repo_count",
-        y="support_status",
-        color="classification_label",
-        orientation="h",
-        text="repo_count",
-        hover_name="support_status_verbose",
-        labels={
-            "support_status": "Support Status",
-            "repo_count": "Repository Count",
-            "classification_label": "Size"
-        },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
-    )
 
-    fig.update_traces(
-        textposition="inside",
-        texttemplate="%{text}"
-    )
-
-    fig.update_layout(
-        yaxis=dict(
-            type="category",
-            title=None,
-            showticklabels=True
-        ),
-        xaxis_title="Repository Count",
-        legend=dict(
-            orientation="h",
-            y=1.02,
-            x=0.5,
-            xanchor="center",
-            font=dict(size=10)
-        ),
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-
-    return fig
-
-@standard_chart_style
 def render_java_support_status_chart(df):
     df["support_status_verbose"] = df["support_status"].map({
         "Active Support": "Active Support (JDK 17, JDK 21)",
@@ -480,48 +440,8 @@ def render_java_support_status_chart(df):
         "Unknown": "Unknown"
     })
 
-    fig = px.bar(
-        df,
-        x="repo_count",
-        y="support_status",
-        color="classification_label",  # <-- stripes by size
-        orientation="h",
-        text="repo_count",
-        hover_name="support_status_verbose",
-        labels={
-            "support_status": "Support Status",
-            "repo_count": "Repository Count",
-            "classification_label": "Size"
-        },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
-    )
+    return render_support_status_chart(df)
 
-    fig.update_traces(
-        textposition="inside",
-        texttemplate="%{text}"
-    )
-
-    fig.update_layout(
-        yaxis=dict(
-            type="category",
-            title=None,
-            showticklabels=True
-        ),
-        xaxis_title="Repository Count",
-        legend=dict(
-            title="Size",
-            orientation="h",
-            y=1.02,
-            x=0.5,
-            xanchor="center",
-            font=dict(size=10)
-        ),
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-
-    return fig
-
-@standard_chart_style
 def render_python_support_status_chart(df):
     df["support_status_verbose"] = df["support_status"].map({
         "Active Support": "Active Support (3.11, 3.12)",
@@ -531,33 +451,9 @@ def render_python_support_status_chart(df):
         "Unknown": "Unknown"
     })
 
-    fig = px.bar(
-        df,
-        x="repo_count",
-        y="support_status",
-        color="classification_label",
-        orientation="h",
-        text="repo_count",
-        hover_name="support_status_verbose",
-        labels={
-            "support_status": "Support Status",
-            "repo_count": "Repository Count",
-            "classification_label": "Size"
-        },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
-    )
+    annotation_text = "!️ Detection for Python versions may be incomplete."
+    return render_support_status_chart(df, annotation_text=annotation_text)
 
-    fig.update_traces(textposition="inside", texttemplate="%{text}")
-    fig.update_layout(
-        yaxis=dict(type="category", showticklabels=True),
-        xaxis_title="Repository Count",
-        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10)),
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-
-    return fig
-
-@standard_chart_style
 def render_js_support_status_chart(df):
     df["support_status_verbose"] = df["support_status"].map({
         "Active Support": "Active Support (Node 18, 20)",
@@ -567,33 +463,10 @@ def render_js_support_status_chart(df):
         "Unknown": "Unknown"
     })
 
-    fig = px.bar(
-        df,
-        x="repo_count",
-        y="support_status",
-        color="classification_label",
-        orientation="h",
-        text="repo_count",
-        hover_name="support_status_verbose",
-        labels={
-            "support_status": "Support Status",
-            "repo_count": "Repository Count",
-            "classification_label": "Size"
-        },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
-    )
+    annotation_text = "!️ Detection for JS versions may be incomplete."
+    return render_support_status_chart(df, annotation_text=annotation_text)
 
-    fig.update_traces(textposition="inside", texttemplate="%{text}")
-    fig.update_layout(
-        yaxis=dict(type="category", showticklabels=True),
-        xaxis_title="Repository Count",
-        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10)),
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
 
-    return fig
-
-@standard_chart_style
 def render_go_support_status_chart(df):
     df["support_status_verbose"] = df["support_status"].map({
         "Active Support": "Active Support (Go 1.20–1.22)",
@@ -603,28 +476,79 @@ def render_go_support_status_chart(df):
         "Unknown": "Unknown"
     })
 
+    return render_support_status_chart(df)
+
+def render_support_status_chart(df: pd.DataFrame, annotation_text: str = None) -> go.Figure:
+    hover_name = "support_status_verbose" if "support_status_verbose" in df.columns else "support_status"
+
     fig = px.bar(
         df,
         x="repo_count",
         y="support_status",
         color="classification_label",
         orientation="h",
-        text="repo_count",
-        hover_name="support_status_verbose",
+        hover_name=hover_name,
         labels={
-            "support_status": "Support Status",
+            "support_status": "",
             "repo_count": "Repository Count",
             "classification_label": "Size"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
 
-    fig.update_traces(textposition="inside", texttemplate="%{text}")
+    fig.update_traces(text=None, texttemplate=None, textposition=None)
+
+    totals = df.groupby("support_status")["repo_count"].sum().reset_index()
+    for _, row in totals.iterrows():
+        fig.add_trace(
+            go.Scatter(
+                x=[row["repo_count"]],
+                y=[row["support_status"]],
+                mode="text",
+                text=[str(row["repo_count"])],
+                textposition="middle right",
+                showlegend=False,
+                textfont=dict(size=12, color="black"),
+            )
+        )
+
+    if annotation_text:
+        fig.add_annotation(
+            text=annotation_text,
+            xref="paper",
+            yref="paper",
+            x=1.01,
+            y=1.03,
+            showarrow=False,
+            align="right",
+            font=dict(size=11, color="black"),
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="#cccccc",
+            borderwidth=0.5,
+        )
+
     fig.update_layout(
+        dragmode=False,
         yaxis=dict(type="category", showticklabels=True),
-        xaxis_title="Repository Count",
-        legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", font=dict(size=10)),
-        margin=dict(l=20, r=20, t=40, b=20)
+        xaxis=dict(
+            title="Repository Count",
+            tickmode="linear",
+            ticks="outside",
+            showline=True,
+            showticklabels=True
+        ),
+        legend=dict(
+            orientation="h",
+            x=1.0,
+            y=1.0,
+            xanchor="right",
+            yanchor="bottom",
+            font=dict(size=10),
+            title_text=""
+        ),
+        margin=dict(l=20, r=20, t=50, b=20),
+        barmode="stack"
     )
 
     return fig
+

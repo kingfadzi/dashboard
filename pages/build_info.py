@@ -13,7 +13,26 @@ def card(title, graph_id, height=400):
             dcc.Loading(
                 dcc.Graph(
                     id=graph_id,
-                    config={"staticPlot": True},
+                    config={"staticPlot": True},  # fully static (no hover)
+                    style={"height": f"{height}px"},
+                )
+            ),
+        ],
+        className="mb-4",
+    )
+
+def interactive_card(title, graph_id, height=400):
+    return dbc.Card(
+        [
+            dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
+            dcc.Loading(
+                dcc.Graph(
+                    id=graph_id,
+                    config={
+                        "staticPlot": False,       # enable hover
+                        "displayModeBar": False,   # hide toolbar
+                        "scrollZoom": False        # disable scroll-zoom
+                    },
                     style={"height": f"{height}px"},
                 )
             ),
@@ -47,6 +66,7 @@ layout = dbc.Container(
         dcc.Location(id="url", refresh=False),
         header_with_button,
 
+        # First row: Detection Status & Runtime Fragmentation
         dbc.Row(
             [
                 dbc.Col(card("Detection Status", "build-runtime-coverage-chart"), width=8),
@@ -55,6 +75,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Second row: No Build Tool scatter & language distribution
         dbc.Row(
             [
                 dbc.Col(
@@ -82,6 +103,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Third row: Tool selector
         dbc.Row(
             [
                 dbc.Col(
@@ -101,6 +123,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Fourth row: Runtime Versions
         dbc.Row(
             [
                 dbc.Col(card("Runtime Versions", "runtime-versions-chart"), width=12),
@@ -108,119 +131,26 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Fifth row: Support Status (.NET + Java) – interactive to allow hover
         dbc.Row(
             [
-                dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader(html.B("Support Status (.NET)", className="text-center"), className="bg-light"),
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="dotnet-support-status-chart",
-                                    config={
-                                        "staticPlot": False,
-                                        "displayModeBar": False,
-                                        "scrollZoom": False,
-                                    },
-                                    style={"height": "400px"},
-                                )
-                            ),
-                        ],
-                        className="mb-4",
-                    ),
-                    width=6,
-                ),
-                dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader(html.B("Support Status (Java)", className="text-center"), className="bg-light"),
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="java-support-status-chart",
-                                    config={
-                                        "staticPlot": False,
-                                        "displayModeBar": False,
-                                        "scrollZoom": False,
-                                    },
-                                    style={"height": "400px"},
-                                )
-                            ),
-                        ],
-                        className="mb-4",
-                    ),
-                    width=6,
-                ),
+                dbc.Col(interactive_card("Support Status (.NET)", "dotnet-support-status-chart"), width=6),
+                dbc.Col(interactive_card("Support Status (Java)", "java-support-status-chart"), width=6),
             ],
             className="mb-4",
         ),
 
+        # Sixth row: Support Status (Python + JavaScript + Go) – interactive for hover
         dbc.Row(
             [
-                dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader(html.B("Support Status (Python)", className="text-center"), className="bg-light"),
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="python-support-status-chart",
-                                    config={
-                                        "staticPlot": False,
-                                        "displayModeBar": False,
-                                        "scrollZoom": False,
-                                    },
-                                    style={"height": "400px"},
-                                )
-                            ),
-                        ],
-                        className="mb-4",
-                    ),
-                    width=4,
-                ),
-                dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader(html.B("Support Status (JavaScript)", className="text-center"), className="bg-light"),
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="js-support-status-chart",
-                                    config={
-                                        "staticPlot": False,
-                                        "displayModeBar": False,
-                                        "scrollZoom": False,
-                                    },
-                                    style={"height": "400px"},
-                                )
-                            ),
-                        ],
-                        className="mb-4",
-                    ),
-                    width=4,
-                ),
-                dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader(html.B("Support Status (Go)", className="text-center"), className="bg-light"),
-                            dcc.Loading(
-                                dcc.Graph(
-                                    id="go-support-status-chart",
-                                    config={
-                                        "staticPlot": False,
-                                        "displayModeBar": False,
-                                        "scrollZoom": False,
-                                    },
-                                    style={"height": "400px"},
-                                )
-                            ),
-                        ],
-                        className="mb-4",
-                    ),
-                    width=4,
-                ),
+                dbc.Col(interactive_card("Support Status (Python)", "python-support-status-chart"), width=4),
+                dbc.Col(interactive_card("Support Status (JavaScript)", "js-support-status-chart"), width=4),
+                dbc.Col(interactive_card("Support Status (Go)", "go-support-status-chart"), width=4),
             ],
             className="mb-4",
         ),
 
-
+        # Seventh row: Build Tools
         dbc.Row(
             [
                 dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=12),
@@ -228,7 +158,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Updated bottom two rows: two charts per row
+        # Eighth row: Confidence Distribution & Detection Status by Tool
         dbc.Row(
             [
                 dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
@@ -237,6 +167,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Ninth row: Module Count Per Repo & Detection Coverage
         dbc.Row(
             [
                 dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=6),

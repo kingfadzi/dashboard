@@ -456,10 +456,15 @@ def fetch_go_support_status_summary(filters=None):
         sql = """
             SELECT
                 CASE
-                    WHEN substring(runtime_version from 3) IN ('1.20', '1.21', '1.22') THEN 'Active Support'
-                    WHEN substring(runtime_version from 3) = '1.19' THEN 'Maintenance Mode'
-                    WHEN substring(runtime_version from 3) = '1.18' THEN 'Out of Support'
-                    WHEN substring(runtime_version from 3)::float < 1.18 THEN 'Deprecated'
+                    WHEN NULLIF(regexp_replace(runtime_version, '[^0-9.]', '', 'g'), '') IS NULL THEN 'Unknown'
+                    WHEN split_part(runtime_version, '.', 1)::int >= 1 THEN
+                        CASE
+                            WHEN split_part(runtime_version, '.', 2)::int >= 20 THEN 'Active Support'
+                            WHEN split_part(runtime_version, '.', 2)::int = 19 THEN 'Maintenance Mode'
+                            WHEN split_part(runtime_version, '.', 2)::int = 18 THEN 'Out of Support'
+                            WHEN split_part(runtime_version, '.', 2)::int < 18 THEN 'Deprecated'
+                            ELSE 'Unknown'
+                        END
                     ELSE 'Unknown'
                 END AS support_status,
                 hr.classification_label,
@@ -477,3 +482,4 @@ def fetch_go_support_status_summary(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
