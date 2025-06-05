@@ -390,7 +390,7 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
         labels={
             "dominant_language": "Language",
             "repo_count": "Repository Count",
-            "classification_label": "Size (T-Shirt)"
+            "classification_label": "Size"
         },
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         barmode="stack"
