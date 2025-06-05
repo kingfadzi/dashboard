@@ -327,42 +327,56 @@ def render_build_tool_variant_chart(df):
     return fig
     
 
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+
 @standard_chart_style
 def render_no_buildtool_scatter(df: pd.DataFrame):
     if df.empty:
-        return go.Figure().update_layout(
+        fig = go.Figure()
+        fig.update_layout(
             title="No data available",
-            xaxis_title="Repo Size (MB)",
-            yaxis_title="Total Commits"
+            xaxis=dict(title="File Count", visible=True),
+            yaxis=dict(title="Repo Size (MB)", visible=True),
+            margin=dict(l=20, r=20, t=40, b=20),
         )
+        return fig
 
     fig = px.scatter(
         df,
-        x="repo_size_mb",
-        y="total_commits",
-        color="dominant_language_type",
-        size="contributor_count",
-        hover_data=["repo_id", "repo_size_mb", "total_commits", "contributor_count"],
+        x="file_count",
+        y="repo_size_mb",
+        color="language_type",
+        size="total_commits",
+        hover_name="repo_id",
+        hover_data=["contributor_count"],
         labels={
-            "repo_size_mb": "Repository Size (MB)",
-            "total_commits": "Total Commits",
-            "contributor_count": "Contributors",
-            "dominant_language_type": "Language Type"
+            "file_count": "File Count",
+            "repo_size_mb": "Repo Size (MB)",
+            "language_type": "Language Type",
+            "total_commits": "Commits",
+            "contributor_count": "Contributors"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+    )
+
+    fig.update_traces(
+        marker=dict(sizemode="area", line=dict(width=0.5, color="DarkSlateGrey")),
+        textposition="top center"
     )
 
     fig.update_layout(
+        xaxis_title="File Count",
+        yaxis_title="Repository Size (MB)",
+        legend_title="Language Type",
         margin=dict(l=20, r=20, t=20, b=20),
-        xaxis=dict(title="Repository Size (MB)", fixedrange=False),
-        yaxis=dict(title="Total Commits", fixedrange=False),
-        dragmode="zoom",
-        legend_title="Language Type"
+        dragmode=False,
+        xaxis_fixedrange=True,
+        yaxis_fixedrange=True
     )
 
     return fig
-    
-
 
 
 
