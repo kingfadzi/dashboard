@@ -1,4 +1,4 @@
-from dash import Output, Input
+from dash import Input, Output
 from data.fetch_dropdown_options import fetch_dropdown_options
 
 def register_filter_callbacks(app):
@@ -8,7 +8,6 @@ def register_filter_callbacks(app):
             Output("activity-status-filter", "options"),
             Output("tc-filter", "options"),
             Output("language-filter", "options"),
-            Output("language-filter-real", "options"),
             Output("classification-filter", "options"),
         ],
         Input("_pages_location", "pathname"),
@@ -16,20 +15,20 @@ def register_filter_callbacks(app):
         prevent_initial_call=True,
     )
     def populate_dropdown_options(pathname):
+        print(f"[populate_dropdown_options] triggered with pathname: {pathname}")
         opts = fetch_dropdown_options()
-        host_names = opts.get("host_names", [])
-        statuses = opts.get("activity_statuses", [])
-        tcs = opts.get("tcs", [])
-        languages = opts.get("languages", [])
+        print(f"[populate_dropdown_options] fetch_dropdown_options returned: {opts!r}")
+        # Defensive defaults if keys missing
+        host_names   = opts.get("host_names", [])
+        statuses     = opts.get("activity_statuses", [])
+        tcs          = opts.get("tcs", [])
+        languages    = opts.get("languages", [])
         classifications = opts.get("classification_labels", [])
 
-        language_opts = [{"label": l, "value": l} for l in languages]
-
         return (
-            [{"label": h, "value": h} for h in host_names],
+            [{"label": n, "value": n} for n in host_names],
             [{"label": s, "value": s} for s in statuses],
             [{"label": tc, "value": tc} for tc in tcs],
-            language_opts,
-            language_opts,
-            [{"label": c, "value": c} for c in classifications],
+            [{"label": lg, "value": lg} for lg in languages],
+            [{"label": cl, "value": cl} for cl in classifications],
         )

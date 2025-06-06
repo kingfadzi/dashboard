@@ -1,44 +1,60 @@
+# dropdown_callbacks.py
+
 from dash import Input, Output, State, callback
 from dash.exceptions import PreventUpdate
 
-
 def register_dropdown_callbacks(app):
-    # Update store when any input changes
+
+    # ——————————————————————————————————————————————
+    # (A) When ANY of the six dropdowns changes, write to store
+    # ——————————————————————————————————————————————
     @app.callback(
         Output("default-filter-store", "data"),
         [
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),  # <-- only sync from visible
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-            Input("host-name-filter", "value"),
+            Input("activity-status-filter",   "value"),
+            Input("tc-filter",                "value"),
+            Input("language-filter",          "value"),
+            Input("classification-filter",    "value"),
+            Input("app-id-filter",            "value"),
+            Input("host-name-filter",         "value"),
         ],
         prevent_initial_call=True,
     )
     def update_filter_store(activity, tc, lang, classification, app_id, host):
         return {
-            "activity_status": activity,
+            "activity_status":   activity,
             "transaction_cycle": tc,
-            "main_language": lang,
+            "main_language":     lang,
             "classification_label": classification,
-            "app_id": app_id,
-            "host_name": host,
+            "app_id":            app_id,
+            "host_name":         host,
         }
 
-    # Restore all dropdowns except language
+
+    # ——————————————————————————————————————————————
+    # (B) When pathname starts with "/table-", initialize dropdowns from store
+    # ——————————————————————————————————————————————
     @callback(
-        Output("activity-status-filter", "value"),
-        Output("tc-filter", "value"),
-        Output("classification-filter", "value"),
-        Output("app-id-filter", "value"),
-        Output("host-name-filter", "value"),
+        Output("activity-status-filter",   "value"),
+        Output("tc-filter",                "value"),
+        Output("language-filter",          "value"),
+        Output("classification-filter",    "value"),
+        Output("app-id-filter",            "value"),
+        Output("host-name-filter",         "value"),
         Input("url", "pathname"),
         State("default-filter-store", "data"),
         prevent_initial_call="initial_duplicate",
     )
-    def initialize_other_dropdowns(pathname, store_data):
-        valid_prefixes = ("/table-", "/overview", "/build-info", "/code-insights", "/dependencies")
+    def initialize_dropdowns_from_store(pathname, store_data):
+        # only run on either a /table-… URL or on one of your chart pages
+        valid_prefixes = (
+            "/table-",
+            "/code-insights",
+            "/build-info",
+            "/dependencies",
+            "/overview",        # if you want overview‐page filters too
+            # add more if you have other filterable pages
+        )
         if not any(pathname.startswith(p) for p in valid_prefixes):
             raise PreventUpdate
 
@@ -46,34 +62,8 @@ def register_dropdown_callbacks(app):
         return (
             store_data.get("activity_status"),
             store_data.get("transaction_cycle"),
+            store_data.get("main_language"),
             store_data.get("classification_label"),
             store_data.get("app_id"),
             store_data.get("host_name"),
         )
-
-    # Restore language filter separately
-    @callback(
-        Output("language-filter", "value"),
-        Output("language-filter-real", "value"),
-        Input("url", "pathname"),
-        State("default-filter-store", "data"),
-        prevent_initial_call="initial_duplicate",
-        allow_duplicate=True
-    )
-    def initialize_language_dropdown(pathname, store_data):
-        valid_prefixes = ("/table-", "/overview", "/build-info", "/code-insights", "/dependencies")
-        if not any(pathname.startswith(p) for p in valid_prefixes):
-            raise PreventUpdate
-
-        store_data = store_data or {}
-        val = store_data.get("main_language")
-        return val, val
-
-    # Sync hidden real input → visible summary input
-    @callback(
-        Output("language-filter", "value"),
-        Input("language-filter-real", "value"),
-        allow_duplicate=True
-    )
-    def sync_real_to_display(value):
-        return value
