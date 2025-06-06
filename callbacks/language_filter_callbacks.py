@@ -1,7 +1,7 @@
 from dash import Input, Output, State, html
 
 def register_language_filter_callbacks(app):
-    # Toggle visibility of the real dropdown when summary is clicked
+    # Toggle visibility of real dropdown when the summary is clicked
     @app.callback(
         Output("language-filter-visible", "data"),
         Input("language-filter-display", "n_clicks"),
@@ -11,7 +11,7 @@ def register_language_filter_callbacks(app):
     def toggle_dropdown(n_clicks, visible):
         return not visible
 
-    # Show or hide the editable dropdown
+    # Show/hide the real dropdown based on visibility state
     @app.callback(
         Output("language-filter-dropdown-container", "style"),
         Input("language-filter-visible", "data")
@@ -19,16 +19,16 @@ def register_language_filter_callbacks(app):
     def show_real_dropdown(visible):
         return {"display": "block"} if visible else {"display": "none"}
 
-    # ✅ Sync real → hidden with allow_duplicate to prevent Dash error
+    # ✅ Sync real → hidden dropdown with allow_duplicate to avoid conflict
     @app.callback(
         Output("language-filter", "value"),
         Input("language-filter-real", "value"),
-        allow_duplicate=True
+        allow_duplicate=True  # ✅ REQUIRED because init callback also writes here
     )
     def sync_real_to_hidden(val):
         return val
 
-    # Render [X] [Y] [+N more] summary in compact display
+    # Render summary in [X] [Y] [+N more] format
     @app.callback(
         Output("language-filter-display", "children"),
         Input("language-filter", "value"),
