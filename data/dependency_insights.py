@@ -119,10 +119,6 @@ def fetch_avg_deps_per_package_type(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
-MIN_ROWS_TO_FILTER = 10
-LOWER_PERCENTILE = 5
-UPPER_PERCENTILE = 95
-
 @cache.memoize()
 def fetch_no_dependency_repo_scatter(filters=None):
     def execute_query(condition_string, param_dict):
@@ -181,16 +177,6 @@ def fetch_no_dependency_repo_scatter(filters=None):
         return pd.read_sql(text(sql), engine, params=param_dict)
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
-    df = execute_query(condition_string, param_dict)
+    return execute_query(condition_string, param_dict).reset_index(drop=True)
 
-    if len(df) < MIN_ROWS_TO_FILTER:
-        return df.copy()
-
-    df_filtered = df.copy()
-    for col in ["contributor_count", "total_commits"]:
-        lower = np.percentile(df[col], LOWER_PERCENTILE)
-        upper = np.percentile(df[col], UPPER_PERCENTILE)
-        df_filtered = df_filtered[(df_filtered[col] >= lower) & (df_filtered[col] <= upper)]
-
-    return df_filtered.reset_index(drop=True)
 

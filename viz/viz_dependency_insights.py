@@ -213,7 +213,7 @@ def render_no_dependency_repo_scatter(df):
     fig.update_traces(
         marker=dict(
             sizemode="area",
-            sizeref=2. * df["repo_size_mb"].max() / (100.0**2),
+            sizeref=2. * df["repo_size_mb"].max() / (50.0**2),
             sizemin=6,
             line=dict(width=0.5, color="DarkSlateGrey")
         )
