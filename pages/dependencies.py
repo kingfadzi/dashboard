@@ -85,9 +85,9 @@ layout = dbc.Container(
                         ],
                         className="mb-4",
                     ),
-                    width=8,
+                    width=12,
                 ),
-                dbc.Col(card("No Dependencies: Language Breakdown", "no-deps-language-distribution", height=400), width=4),
+
             ],
             className="mb-4",
         ),

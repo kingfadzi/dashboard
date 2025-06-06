@@ -187,7 +187,8 @@ def render_no_dependency_repo_scatter(df):
                 "contributor_count": "Contributors",
                 "total_commits": "Total Commits",
                 "repo_size_mb": "Repo Size (MB)",
-                "language_group": "Language Group"
+                "language_group": "Language Group",
+                "build_tools": "Build Tools"
             }
         )
 
@@ -198,19 +199,22 @@ def render_no_dependency_repo_scatter(df):
         size="repo_size_mb",
         color="language_group",
         hover_name="repo_id",
-        hover_data=["repo_size_mb"],
+        hover_data=["repo_size_mb", "build_tools"],
         labels={
             "contributor_count": "Contributors",
             "total_commits": "Total Commits",
             "repo_size_mb": "Repo Size (MB)",
-            "language_group": "Language Group"
+            "language_group": "Language Group",
+            "build_tools": "Build Tools"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
 
     fig.update_traces(
         marker=dict(
             sizemode="area",
+            sizeref=2. * df["repo_size_mb"].max() / (100.0**2),
+            sizemin=6,
             line=dict(width=0.5, color="DarkSlateGrey")
         )
     )

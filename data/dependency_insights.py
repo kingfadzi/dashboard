@@ -119,8 +119,6 @@ def fetch_avg_deps_per_package_type(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
-
-
 MIN_ROWS_TO_FILTER = 10
 LOWER_PERCENTILE = 5
 UPPER_PERCENTILE = 95
@@ -129,24 +127,54 @@ UPPER_PERCENTILE = 95
 def fetch_no_dependency_repo_scatter(filters=None):
     def execute_query(condition_string, param_dict):
         sql = f"""
+            WITH lang_groups AS (
+                SELECT 
+                    repo_id,
+                    CASE LOWER(main_language)
+                        WHEN 'java' THEN 'java'
+                        WHEN 'python' THEN 'python'
+                        WHEN 'javascript' THEN 'javascript'
+                        WHEN 'typescript' THEN 'javascript'
+                        WHEN 'c#' THEN 'dotnet'
+                        WHEN 'f#' THEN 'dotnet'
+                        WHEN 'vb.net' THEN 'dotnet'
+                        WHEN 'visual basic' THEN 'dotnet'
+                        WHEN 'go' THEN 'go'
+                        WHEN 'golang' THEN 'go'
+                        WHEN 'no language' THEN 'no_language'
+                        ELSE 'other_programming'
+                    END AS language_group
+                FROM harvested_repositories
+            ),
+            buildtools AS (
+                SELECT 
+                    repo_id, 
+                    STRING_AGG(
+                        DISTINCT
+                        CASE
+                            WHEN runtime_version IS NOT NULL AND runtime_version != ''
+                                THEN CONCAT(variant, ':', runtime_version)
+                            ELSE variant
+                        END,
+                        ', '
+                    ) AS build_tools
+                FROM build_config_cache
+                WHERE variant IS NOT NULL AND variant != ''
+                GROUP BY repo_id
+            )
             SELECT
                 hr.repo_id,
                 rm.number_of_contributors AS contributor_count,
                 rm.total_commits,
                 ROUND((rm.repo_size_bytes / 1048576.0)::numeric, 2) AS repo_size_mb,
-                CASE
-                    WHEN LOWER(hr.main_language) = 'java' THEN 'java'
-                    WHEN LOWER(hr.main_language) = 'python' THEN 'python'
-                    WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
-                    WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
-                    WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
-                    WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
-                    ELSE 'other_programming'
-                END AS language_group
+                COALESCE(bt.build_tools, 'None') AS build_tools,
+                lg.language_group
             FROM harvested_repositories hr
             JOIN repo_metrics rm USING (repo_id)
+            JOIN lang_groups lg USING (repo_id)
+            LEFT JOIN buildtools bt USING (repo_id)
             WHERE NOT EXISTS (
-                SELECT 1 FROM syft_dependencies sd WHERE sd.repo_id = hr.repo_id
+                SELECT 1 FROM syft_dependencies WHERE repo_id = hr.repo_id
             )
             {f"AND {condition_string}" if condition_string else ""}
         """
