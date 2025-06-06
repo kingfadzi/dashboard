@@ -1,62 +1,48 @@
-# components/react_select_dropdown.py
-
-from dash_extensions import ReactComponent
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def render_language_filter():
     return dbc.Col(
-        ReactComponent(
-            id="language-filter",
-            module="react-select",
-            props={
-                "isMulti": True,
-                "placeholder": "Select Language(s)",
-                "className": "react-select-container",
-                "classNamePrefix": "react-select",
-                "closeMenuOnSelect": False,
-                "hideSelectedOptions": False,
-                "components": {
-                    "MultiValue": {
-                        "custom": True,
-                        "function": """
-                            (props) => {
-                                const max = 2;
-                                const index = props.selectProps.value.findIndex(v => v.value === props.data.value);
-                                const visible = index < max;
-                                const total = props.selectProps.value.length;
+        html.Div([
+            dcc.Store(id="language-filter-visible", data=False),
 
-                                if (visible) {
-                                    return window.React.createElement(
-                                        window.Select.components.MultiValue,
-                                        props
-                                    );
-                                } else if (index === max) {
-                                    return window.React.createElement(
-                                        "div",
-                                        {
-                                            style: {
-                                                padding: "2px 8px",
-                                                fontSize: "0.75rem",
-                                                backgroundColor: "#ddd",
-                                                borderRadius: "4px",
-                                                margin: "2px",
-                                            }
-                                        },
-                                        `+${total - max} more`
-                                    );
-                                } else {
-                                    return null;
-                                }
-                            }
-                        """
-                    }
+            # Hidden actual dropdown
+            dcc.Dropdown(
+                id="language-filter",
+                options=[],
+                multi=True,
+                placeholder="Select Language(s)",
+                style={"display": "none"},
+                persistence=True,
+                persistence_type="local"
+            ),
+
+            # Visible summary display
+            html.Div(
+                id="language-filter-display",
+                className="form-control d-flex align-items-center",
+                style={
+                    "height": "38px",
+                    "overflow": "hidden",
+                    "cursor": "pointer",
+                    "fontSize": "14px"
                 },
-                "styles": {
-                    "control": {"fontSize": "14px", "minHeight": "38px"},
-                    "multiValue": {"maxWidth": "90px"},
-                    "multiValueLabel": {"overflow": "hidden", "textOverflow": "ellipsis"}
-                }
-            }
-        ),
+                n_clicks=0
+            ),
+
+            # Real editable dropdown (shown on click)
+            html.Div(
+                dcc.Dropdown(
+                    id="language-filter-real",
+                    options=[],
+                    multi=True,
+                    placeholder="Select Language(s)",
+                    persistence=True,
+                    persistence_type="local"
+                ),
+                id="language-filter-dropdown-container",
+                style={"display": "none"},
+            )
+        ]),
         width=2
     )

@@ -11,6 +11,7 @@ from .repo_profile_callback import register_repo_profile_callbacks
 from .table_callbacks import register_table_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .dependency_insights import register_dependency_insights_callbacks
+from callbacks.language_filter_callbacks import register_language_filter_callbacks
 
 
 def register_all_callbacks(app):
@@ -28,3 +29,5 @@ def register_all_callbacks(app):
     register_repo_profile_callbacks(app)
     register_dependency_insights_callbacks(app)
     register_dropdown_callbacks(app)
+
+    register_language_filter_callbacks(app)
