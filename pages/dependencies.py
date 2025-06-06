@@ -47,8 +47,7 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
-                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=4),
-                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
+                dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=8),
             ]
         ),
 
@@ -57,27 +56,22 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=6),
-                dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=6)
-            ]
-        ),
-
-
-        dbc.Row(
-            [
                 dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=6),
-                dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=6),
             ]
         ),
 
         dbc.Row(
             [
+                dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=6),
                 dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart"), width=6),
-                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=6),
             ]
         ),
 
         dbc.Row(
-            [dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=12)]
+            [
+                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=6),
+                dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
+            ]
         ),
 
         dbc.Row(
@@ -94,7 +88,6 @@ layout = dbc.Container(
             ]
         ),
 
-        # Side-by-side: Dependency Volume and Middleware Usage
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
@@ -120,8 +113,6 @@ layout = dbc.Container(
                                 ),
                                 className="bg-light"
                             ),
-
-
                             dbc.CardBody(
                                 dcc.Loading(
                                     dcc.Graph(
@@ -140,7 +131,14 @@ layout = dbc.Container(
             ]
         ),
 
-         dcc.Store(id="filters-applied-trigger"),
+        dbc.Row(
+            [
+                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=6),
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
+            ]
+        ),
+
+        dcc.Store(id="filters-applied-trigger"),
     ],
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},
