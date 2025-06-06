@@ -11,7 +11,7 @@ def register_dropdown_callbacks(app):
         [
             Input("activity-status-filter",   "value"),
             Input("tc-filter",                "value"),
-            Input("language-filter",          "value"),  # now works with ReactComponent
+            Input("language-filter",          "value"),
             Input("classification-filter",    "value"),
             Input("app-id-filter",            "value"),
             Input("host-name-filter",         "value"),
@@ -41,6 +41,7 @@ def register_dropdown_callbacks(app):
         Input("url", "pathname"),
         State("default-filter-store", "data"),
         prevent_initial_call="initial_duplicate",
+        allow_duplicate=True  # ✅ allow duplicate use of language-filter.value
     )
     def initialize_dropdowns_from_store(pathname, store_data):
         valid_prefixes = (
