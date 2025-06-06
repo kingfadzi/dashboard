@@ -1,12 +1,14 @@
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-
+from data.dependencies_fetchers import fetch_no_deps_heatmap_data
 from data.dependency_insights import (
     fetch_middleware_usage_detailed, fetch_middleware_usage_by_sub_category,
 )
 from utils.filter_utils import extract_filter_dict_from_store
 from viz.viz_dependencies import render_middleware_subcategory_chart
+from viz.viz_dependency_insights import render_no_deps_heatmap
+
 
 def register_dependency_insights_callbacks(app):
     @app.callback(
@@ -40,6 +42,9 @@ def register_dependency_insights_callbacks(app):
 
         return render_middleware_subcategory_chart(df)
 
-
+    @app.callback(Output("no-deps-heatmap", "figure"), Input("default-filter-store", "data"))
+    def update_no_deps_heatmap(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        return render_no_deps_heatmap(fetch_no_deps_heatmap_data(filters))
 
 

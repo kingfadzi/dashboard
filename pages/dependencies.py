@@ -55,6 +55,11 @@ layout = dbc.Container(
         html.Hr(),
 
         dbc.Row(
+            [dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=12)]
+        ),
+
+
+        dbc.Row(
             [
                 dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=6),
                 dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=6),
