@@ -144,10 +144,8 @@ def render_with_deps_by_variant(df):
 
     return fig
 
+@standard_chart_style
 def render_avg_deps_per_package_type_chart(df):
-    if df.empty:
-        return px.bar(title=None)
-
     df["package_type"] = df["package_type"].fillna("Unknown").replace("", "Unknown")
 
     fig = px.bar(
@@ -163,13 +161,20 @@ def render_avg_deps_per_package_type_chart(df):
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
 
-    fig.update_traces(texttemplate="%{text}", textposition="outside")
+    fig.update_traces(
+        texttemplate="%{text}",
+        textposition="outside"
+    )
+
     fig.update_layout(
-        xaxis=dict(categoryorder="total descending"),
         showlegend=False,
-        yaxis_title="Avg Dependencies / Repo",
-        xaxis_title="",
-        margin=dict(l=20, r=20, t=40, b=40)
+        xaxis=dict(
+            showticklabels=True,
+            title="",
+            categoryorder="total descending"
+        ),
+        yaxis=dict(title="Avg Dependencies / Repo")
     )
 
     return fig
+

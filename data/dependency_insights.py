@@ -104,7 +104,8 @@ def fetch_avg_deps_per_package_type(filters=None):
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
             {where_clause}
             GROUP BY sd.package_type
-            ORDER BY avg_dependencies_per_repo DESC;
+            ORDER BY avg_dependencies_per_repo DESC
+            LIMIT 5;
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -112,4 +113,5 @@ def fetch_avg_deps_per_package_type(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
