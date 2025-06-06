@@ -36,23 +36,33 @@ def render_middleware_subcategory_chart(df):
 
     return fig
 
+
 def render_no_deps_heatmap(df):
     if df.empty:
         fig = go.Figure()
         fig.update_layout(
-            title="Repositories Without Dependencies",
-            xaxis_title="Build Tool Variant",
+            title="No-dependency Repositories",
+            xaxis_title="Language Group",
             yaxis_title="Contributors Bucket",
             margin=dict(l=60, r=20, t=60, b=60),
         )
         return fig
 
     full_y_order = ['0', '1-5', '6-10', '11-20', '21+']
-    full_x_order = sorted(df['build_tool_variant'].dropna().unique().tolist())
+    full_x_order = [
+        "no_language",
+        "markup_or_data",
+        "other_programming",
+        "dotnet",
+        "go",
+        "javascript",
+        "python",
+        "java"
+    ]
 
     heatmap_df = df.pivot_table(
         index="contributors_bucket",
-        columns="build_tool_variant",
+        columns="language_group",
         values="repos_without_dependencies",
         aggfunc="sum",
         fill_value=0

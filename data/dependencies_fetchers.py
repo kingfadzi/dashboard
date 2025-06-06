@@ -354,7 +354,6 @@ def fetch_top_expired_xeol_products(filters=None):
     return query_data(condition_string, param_dict)
 
 
-
 @cache.memoize()
 def fetch_no_deps_heatmap_data(filters=None):
     def query_data(condition_string, param_dict):
@@ -373,23 +372,27 @@ def fetch_no_deps_heatmap_data(filters=None):
             )
 
             SELECT
-              bcc.variant AS build_tool_variant,
+              CASE
+                WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+                WHEN LOWER(lt.type) IN ('markup', 'data') THEN 'markup_or_data'
+                WHEN LOWER(lt.type) = 'programming' THEN 'other_programming'
+                ELSE 'unknown'
+              END AS language_group,
               cb.contributors_bucket,
-              COUNT(bcc.repo_id) AS repos_without_dependencies
-            FROM build_config_cache AS bcc
-            JOIN contributor_buckets AS cb
-              ON bcc.repo_id = cb.repo_id
-            LEFT JOIN syft_dependencies AS sd
-              ON bcc.repo_id = sd.repo_id
-            JOIN harvested_repositories AS hr
-              ON bcc.repo_id = hr.repo_id
+              COUNT(DISTINCT hr.repo_id) AS repos_without_dependencies
+            FROM harvested_repositories hr
+            JOIN contributor_buckets cb ON hr.repo_id = cb.repo_id
+            LEFT JOIN syft_dependencies sd ON hr.repo_id = sd.repo_id
+            LEFT JOIN languages lt ON LOWER(hr.main_language) = LOWER(lt.name)
             WHERE sd.repo_id IS NULL
             {extra_where}
-            GROUP BY 
-              bcc.variant,
-              cb.contributors_bucket
-            ORDER BY
-              bcc.variant,
+            GROUP BY language_group, cb.contributors_bucket
+            ORDER BY language_group,
               CASE cb.contributors_bucket
                 WHEN '0' THEN 0
                 WHEN '1-5' THEN 1
