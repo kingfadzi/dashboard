@@ -1,5 +1,7 @@
 import plotly.express as px
 
+import plotly.graph_objects as go
+import numpy as np
 from components.chart_style import standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 
@@ -34,48 +36,51 @@ def render_middleware_subcategory_chart(df):
 
     return fig
 
-import plotly.graph_objects as go
-import pandas as pd
-
-def render_no_deps_heatmap(df: pd.DataFrame):
-
+def render_no_deps_heatmap(df):
     if df.empty:
         fig = go.Figure()
         fig.update_layout(
-            title="No-dependency Repositories",
+            title="Repositories Without Dependencies",
             xaxis_title="Build Tool Variant",
             yaxis_title="Contributors Bucket",
             margin=dict(l=60, r=20, t=60, b=60),
         )
         return fig
 
-    # Pivot into 2D format: contributors_bucket (rows) × build_tool_variant (cols)
-    pivot_df = df.pivot(
+    full_y_order = ['0', '1-5', '6-10', '11-20', '21+']
+    full_x_order = sorted(df['build_tool_variant'].dropna().unique().tolist())
+
+    heatmap_df = df.pivot_table(
         index="contributors_bucket",
         columns="build_tool_variant",
-        values="repos_without_dependencies"
-    ).fillna(0)
-
-    # Ensure row and column order
-    pivot_df = pivot_df.reindex(['0', '1-5', '6-10', '11-20', '21+'], axis=0)
-    pivot_df = pivot_df.reindex(sorted(pivot_df.columns), axis=1)
-
-    fig = go.Figure(
-        data=go.Heatmap(
-            z=pivot_df.values,
-            x=pivot_df.columns.tolist(),
-            y=pivot_df.index.tolist(),
-            colorscale="Viridis",
-            colorbar=dict(title="# Repos (No Dependencies)"),
-            hovertemplate="<b>Variant:</b> %{x}<br><b>Contributors:</b> %{y}<br><b>Repos:</b> %{z}<extra></extra>"
-        )
+        values="repos_without_dependencies",
+        aggfunc="sum",
+        fill_value=0
     )
 
+    heatmap_df = heatmap_df.reindex(index=full_y_order, columns=full_x_order, fill_value=0)
+
+    z = heatmap_df.values
+    x = heatmap_df.columns.tolist()
+    y = heatmap_df.index.tolist()
+    text = np.vectorize(lambda v: str(int(v)))(z)
+
+    fig = go.Figure(go.Heatmap(
+        z=z,
+        x=x,
+        y=y,
+        text=text,
+        texttemplate="%{text}",
+        textfont={"size": 12},
+        colorscale=NEUTRAL_COLOR_SEQUENCE,
+        showscale=False
+    ))
+
     fig.update_layout(
-        title="Repositories Without Dependencies<br>(By Build Tool Variant & Contributors)",
-        xaxis_title="Build Tool Variant",
-        yaxis_title="Contributors Bucket",
-        margin=dict(l=60, r=20, t=80, b=60)
+        title="",
+        xaxis_title="",
+        yaxis_title="Number of Contributors",
+        margin=dict(l=20, r=20, t=40, b=40)
     )
 
     return fig
