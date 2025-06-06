@@ -248,14 +248,15 @@ def render_no_dependency_buildtool_summary_chart(df):
     fig.update_traces(textposition="inside", texttemplate="%{text}")
     fig.update_layout(
         showlegend=False,
+        xaxis_title="Build Tool",
+        yaxis_title="Repository Count",
         xaxis=dict(
-            title="",
-            showticklabels=True,
-            tickangle=0,
             type="category",
-            categoryorder="total descending"
-        ),
-        yaxis=dict(title="Repository Count")
+            categoryorder="total descending",
+            tickmode="linear",
+            showticklabels=True,  # ensure x-axis labels are shown
+            tickangle=0
+        )
     )
 
     return fig

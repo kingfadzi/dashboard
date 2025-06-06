@@ -183,33 +183,38 @@ def fetch_no_dependency_repo_scatter(filters=None):
 @cache.memoize()
 def fetch_no_dependency_buildtool_summary(filters=None):
     def query_data(condition_string, param_dict):
-        sql = """
-            WITH build_tools AS (
-                SELECT
-                    repo_id,
-                    COALESCE(NULLIF(variant, ''), 'no_build_tool') AS variant
-                FROM build_config_cache
-            ),
-            no_deps_repos AS (
-                SELECT repo_id
-                FROM harvested_repositories hr
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM syft_dependencies sd WHERE sd.repo_id = hr.repo_id
-                )
-            )
+        sql = f"""
             SELECT
-                COALESCE(bt.variant, 'no_build_tool') AS variant,
-                COUNT(DISTINCT nd.repo_id) AS repo_count
-            FROM no_deps_repos nd
-            LEFT JOIN build_tools bt USING (repo_id)
-            {where_clause}
-            GROUP BY COALESCE(bt.variant, 'no_build_tool')
+                COALESCE(bt.build_tools, 'no_build_tool') AS variant,
+                COUNT(DISTINCT hr.repo_id) AS repo_count
+            FROM harvested_repositories hr
+            LEFT JOIN (
+                SELECT 
+                    repo_id, 
+                    STRING_AGG(DISTINCT variant, ', ') AS build_tools
+                FROM build_config_cache
+                WHERE variant IS NOT NULL AND variant != ''
+                GROUP BY repo_id
+            ) bt ON hr.repo_id = bt.repo_id
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM syft_dependencies sd
+                WHERE sd.repo_id = hr.repo_id
+            )
+            AND EXISTS (
+                SELECT 1
+                FROM cloc_metrics cm
+                JOIN languages l ON LOWER(cm.language) = LOWER(l.name)
+                WHERE cm.repo_id = hr.repo_id
+                AND l.type = 'programming'
+            )
+            {f"AND {condition_string}" if condition_string else ""}
+            GROUP BY variant
             ORDER BY repo_count DESC
         """
-
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(sql.format(where_clause=where_clause))
+        stmt = text(sql)
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
