@@ -143,3 +143,33 @@ def render_with_deps_by_variant(df):
     )
 
     return fig
+
+def render_avg_deps_per_package_type_chart(df):
+    if df.empty:
+        return px.bar(title=None)
+
+    df["package_type"] = df["package_type"].fillna("Unknown").replace("", "Unknown")
+
+    fig = px.bar(
+        df,
+        x="package_type",
+        y="avg_dependencies_per_repo",
+        color="package_type",
+        text="avg_dependencies_per_repo",
+        labels={
+            "package_type": "Package Type",
+            "avg_dependencies_per_repo": "Avg Dependencies / Repo"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(texttemplate="%{text}", textposition="outside")
+    fig.update_layout(
+        xaxis=dict(categoryorder="total descending"),
+        showlegend=False,
+        yaxis_title="Avg Dependencies / Repo",
+        xaxis_title="",
+        margin=dict(l=20, r=20, t=40, b=40)
+    )
+
+    return fig

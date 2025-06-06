@@ -47,12 +47,12 @@ def render_xeol_detection_chart(df):
 def render_package_type_distribution_chart(df):
     fig = px.bar(
         df,
-        y="package_type",
-        x="repo_count",
+        x="package_type",
+        y="repo_count",
         color="package_type",
-        orientation="h",
+        orientation="v",
         text="repo_count",
-        labels={"package_type": "", "repo_count": "Repository Count"},
+        labels={"package_type": "Package Type", "repo_count": "Repository Count"},
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
 
@@ -60,8 +60,10 @@ def render_package_type_distribution_chart(df):
         showlegend=False,
         xaxis=dict(
             showticklabels=True,
-            title="Repository Count"
-        )
+            title="",
+            categoryorder="total descending"
+        ),
+        yaxis=dict(title="Repository Count")
     )
 
     return fig

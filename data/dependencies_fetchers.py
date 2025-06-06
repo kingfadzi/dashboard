@@ -115,6 +115,7 @@ def fetch_package_type_distribution(filters=None):
             {where_clause}
             GROUP BY sd.package_type
             ORDER BY repo_count DESC
+            LIMIT 5
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -122,6 +123,7 @@ def fetch_package_type_distribution(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 @cache.memoize()
@@ -201,13 +203,10 @@ def fetch_dependency_volume_buckets(filters=None):
                         ELSE '100+'
                     END AS dep_bucket
                 FROM harvested_repositories hr
-                LEFT JOIN syft_dependencies sd USING (repo_id)
-                JOIN cloc_metrics cloc USING (repo_id)
-                JOIN languages ON cloc.language = languages.name
-                WHERE 
-                    languages.type = 'programming'
-                    {extra_where}
+                JOIN syft_dependencies sd USING (repo_id)
+                {extra_where}
                 GROUP BY hr.repo_id
+                HAVING COUNT(sd.id) > 0
             )
 
             SELECT
@@ -215,13 +214,13 @@ def fetch_dependency_volume_buckets(filters=None):
                 COALESCE(sd.package_type, 'None') AS package_type,
                 COUNT(DISTINCT db.repo_id) AS repo_count
             FROM dependency_buckets db
-            LEFT JOIN syft_dependencies sd USING (repo_id)
+            JOIN syft_dependencies sd USING (repo_id)
             GROUP BY db.dep_bucket, sd.package_type
             ORDER BY 
                 ARRAY_POSITION(ARRAY['0','1–10','11–50','51–100','100+'], db.dep_bucket),
                 repo_count DESC;
         """
-        extra_where = f"AND {condition_string}" if condition_string else ""
+        extra_where = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
         return pd.read_sql(stmt, engine, params=param_dict)
 

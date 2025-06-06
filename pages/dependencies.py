@@ -49,7 +49,7 @@ layout = dbc.Container(
             [
                 dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
                 dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=4),
-                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),
+                dbc.Col(card("Average Dependencies / Repo", "avg-deps-per-package-type-chart"), width=4)
             ]
         ),
 
@@ -137,8 +137,9 @@ layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=6),
-                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
+                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),
+                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=4),
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
             ]
         ),
 
