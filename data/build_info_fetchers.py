@@ -290,9 +290,9 @@ def fetch_no_buildtool_repo_scatter(filters=None):
     if len(df) < MIN_ROWS_TO_FILTER:
         return df.copy()
 
-    # Apply percentile-based outlier removal (on dominant_file_count and repo_size_mb)
+    # Apply percentile-based outlier removal (on chart axes)
     df_filtered = df.copy()
-    numeric_cols = ["dominant_file_count", "repo_size_mb"]
+    numeric_cols = ["contributor_count", "total_commits"]
 
     for col in numeric_cols:
         lower_bound = np.percentile(df[col], LOWER_PERCENTILE)
@@ -301,6 +301,7 @@ def fetch_no_buildtool_repo_scatter(filters=None):
             (df_filtered[col] >= lower_bound) &
             (df_filtered[col] <= upper_bound)
             ]
+
 
     return df_filtered.reset_index(drop=True)
 
