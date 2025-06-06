@@ -1,14 +1,13 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
-
 def filter_layout():
     dropdown_style = {
         "fontSize": "14px",
-        "maxHeight": "40px",
-        "overflowY": "hidden",
-        "textOverflow": "ellipsis",
-        "whiteSpace": "nowrap",
+        "height": "40px",             # Fixed height
+        "overflow": "hidden",         # Prevent growth
+        "whiteSpace": "nowrap",       # Single line
+        "lineHeight": "24px",         # For consistent vertical centering
     }
 
     return dbc.Card(
