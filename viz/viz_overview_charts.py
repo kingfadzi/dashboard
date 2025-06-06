@@ -116,9 +116,12 @@ def render_package_type_chart(df):
     return px.bar(
         df,
         x="package_type",
-        y="package_count",
+        y="repo_count",
         color="package_type",
-        labels={"package_type": "Package Type", "package_count": "Package Count"},
+        labels={
+            "package_type": "Package Type",
+            "repo_count": "Repository Count"
+        },
     ).update_layout(
         xaxis=dict(categoryorder="total descending"),
         template="plotly_white",

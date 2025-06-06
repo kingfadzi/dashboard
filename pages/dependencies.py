@@ -44,20 +44,25 @@ layout = dbc.Container(
         dcc.Location(id="url", refresh=False),
         header_with_button,
 
+        # Row 1: detection + package type + volume
         dbc.Row(
             [
                 dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
-                dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=8),
+                dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=4),
+                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),
             ]
         ),
 
         html.Hr(),
 
+        # Row 2: Repos With Dependencies (full-width)
         dbc.Row(
-            [
-                dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=6),
-                dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=6),
-            ]
+            [dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=12)]
+        ),
+
+        # Row 3: Repos Without Dependencies (full-width)
+        dbc.Row(
+            [dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=12)]
         ),
 
         dbc.Row(
@@ -90,7 +95,6 @@ layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
                 dbc.Col(
                     dbc.Card(
                         [
@@ -126,7 +130,7 @@ layout = dbc.Container(
                         ],
                         className="mb-4",
                     ),
-                    width=6,
+                    width=12,
                 )
             ]
         ),

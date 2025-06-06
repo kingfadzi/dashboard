@@ -409,13 +409,13 @@ def fetch_language_distribution(filters=None):
     return query_data(condition_string, param_dict)
 
 
+@cache.memoize()
 def fetch_package_types(filters=None):
-    @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
                 sd.package_type,
-                COUNT(*) AS package_count
+                COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories crm ON crm.repo_id = sd.repo_id
         """
@@ -423,7 +423,7 @@ def fetch_package_types(filters=None):
         if condition_string:
             base_query += f" WHERE {condition_string}"
 
-        base_query += " GROUP BY sd.package_type ORDER BY package_count DESC"
+        base_query += " GROUP BY sd.package_type ORDER BY repo_count DESC"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
