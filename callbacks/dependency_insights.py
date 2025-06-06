@@ -3,11 +3,11 @@ from dash.exceptions import PreventUpdate
 
 from data.dependencies_fetchers import fetch_no_deps_heatmap_data
 from data.dependency_insights import (
-    fetch_middleware_usage_detailed, fetch_middleware_usage_by_sub_category,
+    fetch_middleware_usage_detailed, fetch_middleware_usage_by_sub_category, fetch_with_deps_by_variant,
 )
 from utils.filter_utils import extract_filter_dict_from_store
 from viz.viz_dependencies import render_middleware_subcategory_chart
-from viz.viz_dependency_insights import render_no_deps_heatmap
+from viz.viz_dependency_insights import render_no_deps_heatmap, render_with_deps_by_variant
 
 
 def register_dependency_insights_callbacks(app):
@@ -48,3 +48,7 @@ def register_dependency_insights_callbacks(app):
         return render_no_deps_heatmap(fetch_no_deps_heatmap_data(filters))
 
 
+    @app.callback(Output("with-deps-by-variant-heatmap", "figure"), Input("default-filter-store", "data"))
+    def update_with_deps_by_variant(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        return render_with_deps_by_variant(fetch_with_deps_by_variant(filters))

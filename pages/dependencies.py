@@ -55,7 +55,10 @@ layout = dbc.Container(
         html.Hr(),
 
         dbc.Row(
-            [dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=12)]
+            [
+                dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=6),
+                dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=6)
+            ]
         ),
 
 

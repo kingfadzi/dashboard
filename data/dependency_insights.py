@@ -47,3 +47,46 @@ def fetch_middleware_usage_by_sub_category(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+@cache.memoize()
+def fetch_with_deps_by_variant(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            WITH contributor_buckets AS (
+              SELECT
+                repo_id,
+                CASE
+                  WHEN number_of_contributors = 0 THEN '0'
+                  WHEN number_of_contributors BETWEEN 1 AND 5 THEN '1-5'
+                  WHEN number_of_contributors BETWEEN 6 AND 10 THEN '6-10'
+                  WHEN number_of_contributors BETWEEN 11 AND 20 THEN '11-20'
+                  ELSE '21+'
+                END AS contributors_bucket
+              FROM repo_metrics
+            )
+
+            SELECT
+              bcc.variant AS build_tool_variant,
+              cb.contributors_bucket,
+              COUNT(DISTINCT bcc.repo_id) AS repo_count
+            FROM build_config_cache bcc
+            JOIN contributor_buckets cb ON bcc.repo_id = cb.repo_id
+            JOIN syft_dependencies sd ON bcc.repo_id = sd.repo_id
+            JOIN harvested_repositories hr ON bcc.repo_id = hr.repo_id
+            {extra_where}
+            GROUP BY bcc.variant, cb.contributors_bucket
+            ORDER BY bcc.variant,
+              CASE cb.contributors_bucket
+                WHEN '0' THEN 0
+                WHEN '1-5' THEN 1
+                WHEN '6-10' THEN 2
+                WHEN '11-20' THEN 3
+                ELSE 4
+              END;
+        """
+        extra_where = f"WHERE {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
