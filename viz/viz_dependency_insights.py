@@ -178,3 +178,48 @@ def render_avg_deps_per_package_type_chart(df):
 
     return fig
 
+
+def render_no_dependency_repo_scatter(df):
+    if df.empty:
+        return px.scatter(
+            title="No data available",
+            labels={
+                "contributor_count": "Contributors",
+                "total_commits": "Total Commits",
+                "repo_size_mb": "Repo Size (MB)",
+                "language_group": "Language Group"
+            }
+        )
+
+    fig = px.scatter(
+        df,
+        x="contributor_count",
+        y="total_commits",
+        size="repo_size_mb",
+        color="language_group",
+        hover_name="repo_id",
+        hover_data=["repo_size_mb"],
+        labels={
+            "contributor_count": "Contributors",
+            "total_commits": "Total Commits",
+            "repo_size_mb": "Repo Size (MB)",
+            "language_group": "Language Group"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(
+        marker=dict(
+            sizemode="area",
+            line=dict(width=0.5, color="DarkSlateGrey")
+        )
+    )
+
+    fig.update_layout(
+        xaxis_title="Contributors",
+        yaxis_title="Total Commits",
+        showlegend=True,
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig

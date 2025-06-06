@@ -67,6 +67,35 @@ layout = dbc.Container(
 
         dbc.Row(
             [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(html.B("No Dependencies: Size vs Commits", className="text-center"), className="bg-light"),
+                            dcc.Loading(
+                                dcc.Graph(
+                                    id="no-deps-scatter-chart",
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
+                                    style={"height": "400px"},
+                                )
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=8,
+                ),
+                dbc.Col(card("No Dependencies: Language Breakdown", "no-deps-language-distribution", height=400), width=4),
+            ],
+            className="mb-4",
+        ),
+
+
+
+        dbc.Row(
+            [
                 dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=6),
                 dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart"), width=6),
             ]

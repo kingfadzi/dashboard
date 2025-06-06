@@ -3,6 +3,10 @@ from sqlalchemy import text
 from data.db_connection import engine
 from utils.sql_filter_utils import build_repo_filter_conditions
 from data.cache_instance import cache
+from sqlalchemy import text
+import pandas as pd
+import numpy as np
+from data.cache_instance import cache
 
 
 @cache.memoize()
@@ -116,4 +120,49 @@ def fetch_avg_deps_per_package_type(filters=None):
     return query_data(condition_string, param_dict)
 
 
+
+MIN_ROWS_TO_FILTER = 10
+LOWER_PERCENTILE = 5
+UPPER_PERCENTILE = 95
+
+@cache.memoize()
+def fetch_no_dependency_repo_scatter(filters=None):
+    def execute_query(condition_string, param_dict):
+        sql = f"""
+            SELECT
+                hr.repo_id,
+                rm.number_of_contributors AS contributor_count,
+                rm.total_commits,
+                ROUND((rm.repo_size_bytes / 1048576.0)::numeric, 2) AS repo_size_mb,
+                CASE
+                    WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                    WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                    WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                    WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                    WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                    WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+                    ELSE 'other_programming'
+                END AS language_group
+            FROM harvested_repositories hr
+            JOIN repo_metrics rm USING (repo_id)
+            WHERE NOT EXISTS (
+                SELECT 1 FROM syft_dependencies sd WHERE sd.repo_id = hr.repo_id
+            )
+            {f"AND {condition_string}" if condition_string else ""}
+        """
+        return pd.read_sql(text(sql), engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    df = execute_query(condition_string, param_dict)
+
+    if len(df) < MIN_ROWS_TO_FILTER:
+        return df.copy()
+
+    df_filtered = df.copy()
+    for col in ["contributor_count", "total_commits"]:
+        lower = np.percentile(df[col], LOWER_PERCENTILE)
+        upper = np.percentile(df[col], UPPER_PERCENTILE)
+        df_filtered = df_filtered[(df_filtered[col] >= lower) & (df_filtered[col] <= upper)]
+
+    return df_filtered.reset_index(drop=True)
 
