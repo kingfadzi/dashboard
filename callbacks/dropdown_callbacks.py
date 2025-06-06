@@ -1,7 +1,32 @@
 from dash import Input, Output, State, callback
 from dash.exceptions import PreventUpdate
 
+
 def register_dropdown_callbacks(app):
+    # Update store when any input changes
+    @app.callback(
+        Output("default-filter-store", "data"),
+        [
+            Input("activity-status-filter", "value"),
+            Input("tc-filter", "value"),
+            Input("language-filter", "value"),  # <-- only sync from visible
+            Input("classification-filter", "value"),
+            Input("app-id-filter", "value"),
+            Input("host-name-filter", "value"),
+        ],
+        prevent_initial_call=True,
+    )
+    def update_filter_store(activity, tc, lang, classification, app_id, host):
+        return {
+            "activity_status": activity,
+            "transaction_cycle": tc,
+            "main_language": lang,
+            "classification_label": classification,
+            "app_id": app_id,
+            "host_name": host,
+        }
+
+    # Restore all dropdowns except language
     @callback(
         Output("activity-status-filter", "value"),
         Output("tc-filter", "value"),
@@ -10,12 +35,10 @@ def register_dropdown_callbacks(app):
         Output("host-name-filter", "value"),
         Input("url", "pathname"),
         State("default-filter-store", "data"),
-        prevent_initial_call="initial_duplicate"
+        prevent_initial_call="initial_duplicate",
     )
-    def initialize_other_filters(pathname, store_data):
-        valid_prefixes = (
-            "/table-", "/code-insights", "/build-info", "/dependencies", "/overview"
-        )
+    def initialize_other_dropdowns(pathname, store_data):
+        valid_prefixes = ("/table-", "/overview", "/build-info", "/code-insights", "/dependencies")
         if not any(pathname.startswith(p) for p in valid_prefixes):
             raise PreventUpdate
 
@@ -28,44 +51,29 @@ def register_dropdown_callbacks(app):
             store_data.get("host_name"),
         )
 
-    # ✅ Separate callback for language filter only
+    # Restore language filter separately
     @callback(
         Output("language-filter", "value"),
         Output("language-filter-real", "value"),
         Input("url", "pathname"),
         State("default-filter-store", "data"),
-        allow_duplicate=True,
-        prevent_initial_call="initial_duplicate"
+        prevent_initial_call="initial_duplicate",
+        allow_duplicate=True
     )
-    def init_language_filter(pathname, store_data):
-        valid_prefixes = (
-            "/table-", "/code-insights", "/build-info", "/dependencies", "/overview"
-        )
+    def initialize_language_dropdown(pathname, store_data):
+        valid_prefixes = ("/table-", "/overview", "/build-info", "/code-insights", "/dependencies")
         if not any(pathname.startswith(p) for p in valid_prefixes):
             raise PreventUpdate
 
         store_data = store_data or {}
-        lang_val = store_data.get("main_language")
-        return lang_val, lang_val
+        val = store_data.get("main_language")
+        return val, val
 
-    @app.callback(
-        Output("default-filter-store", "data"),
-        [
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-            Input("host-name-filter", "value"),
-            Input("language-filter", "value")
-        ],
-        prevent_initial_call=True
+    # Sync hidden real input → visible summary input
+    @callback(
+        Output("language-filter", "value"),
+        Input("language-filter-real", "value"),
+        allow_duplicate=True
     )
-    def update_filter_store(activity, tc, classification, app_id, host, lang):
-        return {
-            "activity_status": activity,
-            "transaction_cycle": tc,
-            "classification_label": classification,
-            "app_id": app_id,
-            "host_name": host,
-            "main_language": lang
-        }
+    def sync_real_to_display(value):
+        return value

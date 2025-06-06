@@ -1,48 +1,40 @@
-from dash import html, dcc
-import dash_bootstrap_components as dbc
+from dash_extensions.enrich import DashProxy, ReactComponent
+from dash import html
+
+# Reference to react-select from unpkg
+ReactSelect = ReactComponent(
+    source="https://unpkg.com/react-select@5.7.3/dist/react-select.min.js",
+    module="default",
+    id="react-select"
+)
 
 def render_language_filter():
-    return dbc.Col(
-        html.Div([
-            dcc.Store(id="language-filter-visible", data=False),
-
-            # Hidden actual dropdown
-            dcc.Dropdown(
-                id="language-filter",
-                options=[],
+    return html.Div([
+        # Hidden value store: the "real" selection
+        html.Div(id="language-filter-real-container", children=[
+            ReactSelect(
+                id="language-filter-real",
                 multi=True,
                 placeholder="Select Language(s)",
-                style={"display": "none"},
-                persistence=True,
-                persistence_type="local"
-            ),
-
-            # Visible summary display
-            html.Div(
-                id="language-filter-display",
-                className="form-control d-flex align-items-center",
-                style={
-                    "height": "38px",
-                    "overflow": "hidden",
-                    "cursor": "pointer",
-                    "fontSize": "14px"
+                styles={
+                    "menu": {"zIndex": 9999},
+                    "valueContainer": {"maxHeight": "60px", "overflowY": "auto"},
                 },
-                n_clicks=0
-            ),
-
-            # Real editable dropdown (shown on click)
-            html.Div(
-                dcc.Dropdown(
-                    id="language-filter-real",
-                    options=[],
-                    multi=True,
-                    placeholder="Select Language(s)",
-                    persistence=True,
-                    persistence_type="local"
-                ),
-                id="language-filter-dropdown-container",
-                style={"display": "none"},
+                # Options will be populated dynamically by callback
+                options=[],
+                value=[]
             )
         ]),
-        width=2
-    )
+        # Proxy dcc.Dropdown to work with rest of app (real value gets copied here)
+        html.Div([
+            html.Div(
+                id="language-filter-wrapper",
+                style={"display": "none"},  # keep hidden but Dash needs it
+                children=[
+                    html.Div(id="language-filter", **{
+                        "data-dash-is-loading": "true"
+                    })
+                ]
+            )
+        ])
+    ])
