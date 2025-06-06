@@ -3,6 +3,14 @@ import dash_bootstrap_components as dbc
 
 
 def filter_layout():
+    dropdown_style = {
+        "fontSize": "14px",
+        "maxHeight": "40px",
+        "overflowY": "hidden",
+        "textOverflow": "ellipsis",
+        "whiteSpace": "nowrap",
+    }
+
     return dbc.Card(
         dbc.CardBody(
             dbc.Row(
@@ -14,10 +22,9 @@ def filter_layout():
                             multi=True,
                             placeholder="Select Host Name(s)",
                             clearable=True,
-                            style={"fontSize": "14px"},
+                            style=dropdown_style,
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -27,10 +34,9 @@ def filter_layout():
                             multi=True,
                             placeholder="Select Activity Status",
                             clearable=True,
-                            style={"fontSize": "14px"},
+                            style=dropdown_style,
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -40,10 +46,9 @@ def filter_layout():
                             multi=True,
                             placeholder="Select TC(s)",
                             clearable=True,
-                            style={"fontSize": "14px"},
+                            style=dropdown_style,
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -53,10 +58,9 @@ def filter_layout():
                             multi=True,
                             placeholder="Select Language(s)",
                             clearable=True,
-                            style={"fontSize": "14px"},
+                            style=dropdown_style,
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -66,10 +70,9 @@ def filter_layout():
                             multi=True,
                             placeholder="Select Classification(s)",
                             clearable=True,
-                            style={"fontSize": "14px"},
+                            style=dropdown_style,
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -82,7 +85,6 @@ def filter_layout():
                             style={"fontSize": "14px"},
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                 ],
@@ -92,4 +94,3 @@ def filter_layout():
         ),
         className="bg-light mb-4",
     )
-html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})
