@@ -50,14 +50,14 @@ def render_no_deps_heatmap(df):
 
     full_y_order = ['0', '1-5', '6-10', '11-20', '21+']
     full_x_order = [
-        "no_language",
-        "markup_or_data",
-        "other_programming",
-        "dotnet",
-        "go",
-        "javascript",
+        "java",
         "python",
-        "java"
+        "javascript",
+        "go",
+        "dotnet",
+        "other_programming",
+        "markup_or_data",
+        "no_language"
     ]
 
     heatmap_df = df.pivot_table(
