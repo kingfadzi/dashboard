@@ -1,5 +1,3 @@
-# dropdown_callbacks.py
-
 from dash import Input, Output, State, callback
 from dash.exceptions import PreventUpdate
 
@@ -13,7 +11,7 @@ def register_dropdown_callbacks(app):
         [
             Input("activity-status-filter",   "value"),
             Input("tc-filter",                "value"),
-            Input("language-filter",          "value"),
+            Input("language-filter",          "value"),  # now works with ReactComponent
             Input("classification-filter",    "value"),
             Input("app-id-filter",            "value"),
             Input("host-name-filter",         "value"),
@@ -22,14 +20,13 @@ def register_dropdown_callbacks(app):
     )
     def update_filter_store(activity, tc, lang, classification, app_id, host):
         return {
-            "activity_status":   activity,
-            "transaction_cycle": tc,
-            "main_language":     lang,
-            "classification_label": classification,
-            "app_id":            app_id,
-            "host_name":         host,
+            "activity_status":       activity,
+            "transaction_cycle":     tc,
+            "main_language":         lang,
+            "classification_label":  classification,
+            "app_id":                app_id,
+            "host_name":             host,
         }
-
 
     # ——————————————————————————————————————————————
     # (B) When pathname starts with "/table-", initialize dropdowns from store
@@ -46,14 +43,12 @@ def register_dropdown_callbacks(app):
         prevent_initial_call="initial_duplicate",
     )
     def initialize_dropdowns_from_store(pathname, store_data):
-        # only run on either a /table-… URL or on one of your chart pages
         valid_prefixes = (
             "/table-",
             "/code-insights",
             "/build-info",
             "/dependencies",
-            "/overview",        # if you want overview‐page filters too
-            # add more if you have other filterable pages
+            "/overview",
         )
         if not any(pathname.startswith(p) for p in valid_prefixes):
             raise PreventUpdate

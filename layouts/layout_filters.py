@@ -1,6 +1,6 @@
-from dash import dcc, html
+from dash import dcc
 import dash_bootstrap_components as dbc
-
+from components.react_select_dropdown import render_language_filter
 
 def filter_layout():
     return dbc.Card(
@@ -17,7 +17,6 @@ def filter_layout():
                             style={"fontSize": "14px"},
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -30,7 +29,6 @@ def filter_layout():
                             style={"fontSize": "14px"},
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -43,22 +41,9 @@ def filter_layout():
                             style={"fontSize": "14px"},
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
-                    dbc.Col(
-                        dcc.Dropdown(
-                            id="language-filter",
-                            options=[],
-                            multi=True,
-                            placeholder="Select Language(s)",
-                            clearable=True,
-                            style={"fontSize": "14px"},
-                            persistence=True,
-                            persistence_type="local",
-
-                        ), width=2
-                    ),
+                    render_language_filter(),  # ✅ REPLACED language-filter here
                     dbc.Col(
                         dcc.Dropdown(
                             id="classification-filter",
@@ -69,7 +54,6 @@ def filter_layout():
                             style={"fontSize": "14px"},
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                     dbc.Col(
@@ -82,7 +66,6 @@ def filter_layout():
                             style={"fontSize": "14px"},
                             persistence=True,
                             persistence_type="local",
-
                         ), width=2
                     ),
                 ],
@@ -92,4 +75,3 @@ def filter_layout():
         ),
         className="bg-light mb-4",
     )
-html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})
