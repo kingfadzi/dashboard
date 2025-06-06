@@ -1,6 +1,7 @@
-from dash import Input, Output, State
+from dash import Input, Output, State, html
 
 def register_language_filter_callbacks(app):
+    # Toggle dropdown visibility on summary click
     @app.callback(
         Output("language-filter-visible", "data"),
         Input("language-filter-display", "n_clicks"),
@@ -10,6 +11,7 @@ def register_language_filter_callbacks(app):
     def toggle_dropdown(n_clicks, visible):
         return not visible
 
+    # Show/hide the real dropdown
     @app.callback(
         Output("language-filter-dropdown-container", "style"),
         Input("language-filter-visible", "data")
@@ -17,6 +19,7 @@ def register_language_filter_callbacks(app):
     def show_real_dropdown(visible):
         return {"display": "block"} if visible else {"display": "none"}
 
+    # Sync real → hidden (only this direction!)
     @app.callback(
         Output("language-filter", "value"),
         Input("language-filter-real", "value")
@@ -24,13 +27,7 @@ def register_language_filter_callbacks(app):
     def sync_real_to_hidden(val):
         return val
 
-    @app.callback(
-        Output("language-filter-real", "value"),
-        Input("language-filter", "value")
-    )
-    def sync_hidden_to_real(val):
-        return val
-
+    # Display the compact summary: [X] [Y] [+N more]
     @app.callback(
         Output("language-filter-display", "children"),
         Input("language-filter", "value"),
