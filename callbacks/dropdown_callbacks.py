@@ -3,9 +3,9 @@ from dash.exceptions import PreventUpdate
 
 def register_dropdown_callbacks(app):
 
-    # ——————————————————————————————————————————————
-    # (A) When ANY of the six dropdowns changes, write to store
-    # ——————————————————————————————————————————————
+    # ————————————————————————————————————————————————————————
+    # (A) Store filter values when any dropdown changes
+    # ————————————————————————————————————————————————————————
     @app.callback(
         Output("default-filter-store", "data"),
         [
@@ -28,23 +28,21 @@ def register_dropdown_callbacks(app):
             "host_name":             host,
         }
 
-    # ——————————————————————————————————————————————
-    # (B) When pathname starts with "/table-", initialize dropdowns from store
-    # ——————————————————————————————————————————————
-    @callback(
+    # ————————————————————————————————————————————————————————
+    # (B) Initialize all dropdowns EXCEPT language-filter
+    # ————————————————————————————————————————————————————————
+    @app.callback(
         Output("activity-status-filter",   "value"),
         Output("tc-filter",                "value"),
-        Output("language-filter",          "value"),       # <== shared target
-        Output("language-filter-real",     "value"),       # <== separate visible dropdown
+        Output("language-filter-real",     "value"),  # only visible one
         Output("classification-filter",    "value"),
         Output("app-id-filter",            "value"),
         Output("host-name-filter",         "value"),
         Input("url", "pathname"),
         State("default-filter-store", "data"),
         prevent_initial_call="initial_duplicate",
-        allow_duplicate=True               # ✅ this is required!
     )
-    def initialize_dropdowns_from_store(pathname, store_data):
+    def init_dropdowns_excluding_language(pathname, store_data):
         valid_prefixes = (
             "/table-",
             "/code-insights",
@@ -56,14 +54,35 @@ def register_dropdown_callbacks(app):
             raise PreventUpdate
 
         store_data = store_data or {}
-        value = store_data.get("main_language")
-
         return (
             store_data.get("activity_status"),
             store_data.get("transaction_cycle"),
-            value,  # language-filter
-            value,  # language-filter-real
+            store_data.get("main_language"),   # goes to language-filter-real only
             store_data.get("classification_label"),
             store_data.get("app_id"),
             store_data.get("host_name"),
         )
+
+    # ————————————————————————————————————————————————————————
+    # (C) Initialize the hidden dropdown separately
+    # ————————————————————————————————————————————————————————
+    @app.callback(
+        Output("language-filter", "value"),
+        Input("url", "pathname"),
+        State("default-filter-store", "data"),
+        prevent_initial_call="initial_duplicate",
+        allow_duplicate=True  # ✅ REQUIRED because another callback also writes to this
+    )
+    def init_hidden_language_dropdown(pathname, store_data):
+        valid_prefixes = (
+            "/table-",
+            "/code-insights",
+            "/build-info",
+            "/dependencies",
+            "/overview",
+        )
+        if not any(pathname.startswith(p) for p in valid_prefixes):
+            raise PreventUpdate
+
+        store_data = store_data or {}
+        return store_data.get("main_language")
