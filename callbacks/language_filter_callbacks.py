@@ -1,51 +1,42 @@
 from dash import Input, Output, State, html
 
 def register_language_filter_callbacks(app):
-    # Toggle visibility of real dropdown when the summary is clicked
     @app.callback(
         Output("language-filter-visible", "data"),
         Input("language-filter-display", "n_clicks"),
         State("language-filter-visible", "data"),
         prevent_initial_call=True
     )
-    def toggle_dropdown(n_clicks, visible):
+    def toggle_visibility(n_clicks, visible):
         return not visible
 
-    # Show/hide the real dropdown based on visibility state
     @app.callback(
         Output("language-filter-dropdown-container", "style"),
         Input("language-filter-visible", "data")
     )
-    def show_real_dropdown(visible):
+    def show_dropdown(visible):
         return {"display": "block"} if visible else {"display": "none"}
 
-    # ✅ Sync real → hidden dropdown with allow_duplicate to avoid conflict
     @app.callback(
         Output("language-filter", "value"),
         Input("language-filter-real", "value"),
-        allow_duplicate=True  # ✅ REQUIRED because init callback also writes here
+        allow_duplicate=True
     )
-    def sync_real_to_hidden(val):
+    def sync_real_to_display(val):
         return val
 
-    # Render summary in [X] [Y] [+N more] format
     @app.callback(
         Output("language-filter-display", "children"),
         Input("language-filter", "value"),
         State("language-filter", "options")
     )
-    def show_display_summary(selected, options):
-        if not selected:
+    def render_summary(value, options):
+        if not value:
             return "Select Language(s) ▼"
-
         max_display = 2
-        labels = [next((o["label"] for o in options if o["value"] == v), v) for v in selected]
-        display_items = labels[:max_display]
-        extra_count = len(labels) - max_display
-
-        pills = [html.Span(l, className="badge bg-secondary me-1") for l in display_items]
-        if extra_count > 0:
-            pills.append(html.Span(f"+{extra_count} more", className="text-muted me-1"))
-
+        labels = [next((o["label"] for o in options if o["value"] == v), v) for v in value]
+        pills = [html.Span(label, className="badge bg-secondary me-1") for label in labels[:max_display]]
+        if len(labels) > max_display:
+            pills.append(html.Span(f"+{len(labels) - max_display} more", className="text-muted me-1"))
         pills.append(html.Span("▼", className="ms-auto"))
         return pills
