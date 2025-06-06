@@ -34,15 +34,15 @@ def register_dropdown_callbacks(app):
     @callback(
         Output("activity-status-filter",   "value"),
         Output("tc-filter",                "value"),
-        Output("language-filter",          "value"),
-        Output("language-filter-real",     "value"),  # ✅ sync directly here
+        Output("language-filter",          "value"),       # <== shared target
+        Output("language-filter-real",     "value"),       # <== separate visible dropdown
         Output("classification-filter",    "value"),
         Output("app-id-filter",            "value"),
         Output("host-name-filter",         "value"),
         Input("url", "pathname"),
         State("default-filter-store", "data"),
         prevent_initial_call="initial_duplicate",
-        allow_duplicate=True
+        allow_duplicate=True               # ✅ this is required!
     )
     def initialize_dropdowns_from_store(pathname, store_data):
         valid_prefixes = (
@@ -61,8 +61,8 @@ def register_dropdown_callbacks(app):
         return (
             store_data.get("activity_status"),
             store_data.get("transaction_cycle"),
-            value,
-            value,  # real dropdown gets same value
+            value,  # language-filter
+            value,  # language-filter-real
             store_data.get("classification_label"),
             store_data.get("app_id"),
             store_data.get("host_name"),
