@@ -227,3 +227,36 @@ def render_no_dependency_repo_scatter(df):
     )
 
     return fig
+
+@standard_chart_style
+def render_no_dependency_buildtool_summary_chart(df):
+    if df.empty:
+        return px.bar(title="No data available")
+
+    df["variant"] = df["variant"].fillna("no_build_tool")
+
+    fig = px.bar(
+        df,
+        x="variant",
+        y="repo_count",
+        text="repo_count",
+        labels={"variant": "Build Tool", "repo_count": "Repository Count"},
+        color="variant",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_traces(textposition="inside", texttemplate="%{text}")
+    fig.update_layout(
+        showlegend=False,
+        xaxis=dict(
+            title="",
+            showticklabels=True,
+            tickangle=0,
+            type="category",
+            categoryorder="total descending"
+        ),
+        yaxis=dict(title="Repository Count")
+    )
+
+    return fig
+

@@ -180,3 +180,36 @@ def fetch_no_dependency_repo_scatter(filters=None):
     return execute_query(condition_string, param_dict).reset_index(drop=True)
 
 
+@cache.memoize()
+def fetch_no_dependency_buildtool_summary(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            WITH build_tools AS (
+                SELECT
+                    repo_id,
+                    COALESCE(NULLIF(variant, ''), 'no_build_tool') AS variant
+                FROM build_config_cache
+            ),
+            no_deps_repos AS (
+                SELECT repo_id
+                FROM harvested_repositories hr
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM syft_dependencies sd WHERE sd.repo_id = hr.repo_id
+                )
+            )
+            SELECT
+                COALESCE(bt.variant, 'no_build_tool') AS variant,
+                COUNT(DISTINCT nd.repo_id) AS repo_count
+            FROM no_deps_repos nd
+            LEFT JOIN build_tools bt USING (repo_id)
+            {where_clause}
+            GROUP BY COALESCE(bt.variant, 'no_build_tool')
+            ORDER BY repo_count DESC
+        """
+
+        where_clause = f"WHERE {condition_string}" if condition_string else ""
+        stmt = text(sql.format(where_clause=where_clause))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)

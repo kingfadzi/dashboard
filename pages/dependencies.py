@@ -60,11 +60,6 @@ layout = dbc.Container(
             [dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=12)]
         ),
 
-        # Row 3: Repos Without Dependencies (full-width)
-        dbc.Row(
-            [dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=12)]
-        ),
-
         dbc.Row(
             [
                 dbc.Col(
@@ -85,12 +80,16 @@ layout = dbc.Container(
                         ],
                         className="mb-4",
                     ),
-                    width=12,
+                    width=8,
                 ),
-
+                dbc.Col(
+                    card("No Dependencies: Build Tool Summary", "no-deps-buildtool-summary-chart"),
+                    width=4,
+                ),
             ],
             className="mb-4",
         ),
+
 
 
 
