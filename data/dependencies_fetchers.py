@@ -48,9 +48,6 @@ def fetch_dependency_detection_by_language(filters=None):
     return query_data(condition_string, param_dict)
 
 
-
-
-
 # 2. IaC Component Coverage (striped by language group)
 def fetch_iac_detection_coverage(filters=None):
     @cache.memoize()
@@ -63,15 +60,12 @@ def fetch_iac_detection_coverage(filters=None):
                         SELECT 1
                         FROM iac_components ic 
                         WHERE ic.repo_id = hr.repo_id
-                        AND (
-                            ic.subcategory ILIKE 'compute services%%' OR
-                            ic.subcategory ILIKE 'container%%' OR
-                            ic.subcategory ILIKE 'kubernetes%%' OR
-                            ic.subcategory ILIKE 'network security controls%%' OR
-                            ic.subcategory ILIKE 'policy as code%%' OR
-                            ic.subcategory ILIKE 'scaling%%' OR
-                            ic.subcategory ILIKE 'storage services%%'
-                        )
+                          AND ic.framework NOT IN ('Redis', 'Elasticache', 'Chef')
+                          AND ic.category NOT IN (
+                              'Developer Platform and CI/CD',
+                              'Observability and Reliability Engineering'
+                          )
+                          AND ic.subcategory != 'Application Servers'
                         LIMIT 1
                     ) THEN 'IaC Detected' ELSE 'No IaC Detected' END AS status,
                     CASE
@@ -84,9 +78,11 @@ def fetch_iac_detection_coverage(filters=None):
                     END AS language_group
                 FROM harvested_repositories hr
                 WHERE 
-                    LOWER(hr.main_language) IN ('java', 'python', 'go', 'golang', 
-                                                 'javascript', 'typescript', 
-                                                 'c#', 'f#', 'vb.net', 'visual basic')
+                    LOWER(hr.main_language) IN (
+                        'java', 'python', 'go', 'golang', 
+                        'javascript', 'typescript', 
+                        'c#', 'f#', 'vb.net', 'visual basic'
+                    )
                     {condition_fragment}
             )
             SELECT
@@ -104,8 +100,6 @@ def fetch_iac_detection_coverage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
-
-
 
 
 
