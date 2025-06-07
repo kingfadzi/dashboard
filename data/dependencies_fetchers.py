@@ -51,25 +51,42 @@ def fetch_dependency_detection_by_language(filters=None):
 
 
 
-# 2. IaC Component Coverage
+# 2. IaC Component Coverage (striped by language group)
 def fetch_iac_detection_coverage(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT status, COUNT(*) AS repo_count
-            FROM (
+            WITH repo_language_group AS (
                 SELECT
                     hr.repo_id,
-                    CASE WHEN ic.repo_id IS NULL THEN 'No IaC Detected'
-                         ELSE 'IaC Detected'
-                    END AS status
+                    CASE
+                        WHEN ic.repo_id IS NULL THEN 'No IaC Detected'
+                        ELSE 'IaC Detected'
+                    END AS status,
+                    CASE
+                        WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                        WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                        WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                        WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                        WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                        WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+                        WHEN LOWER(lt.type) IN ('markup', 'data') THEN 'markup_or_data'
+                        WHEN LOWER(lt.type) = 'programming' THEN 'other_programming'
+                        ELSE 'unknown'
+                    END AS language_group
                 FROM harvested_repositories hr
                 LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id
-                LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
+                LEFT JOIN languages lt ON LOWER(hr.main_language) = LOWER(lt.name)
                 {where_clause}
-                GROUP BY hr.repo_id, ic.repo_id
-            ) sub
-            GROUP BY status
+            )
+            SELECT
+                status,
+                language_group,
+                COUNT(*) AS repo_count
+            FROM repo_language_group
+            WHERE language_group IN ('java', 'python', 'javascript', 'dotnet', 'go')
+            GROUP BY status, language_group
+            ORDER BY status, language_group
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
@@ -77,6 +94,7 @@ def fetch_iac_detection_coverage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 # 3. Xeol EOL Coverage
@@ -196,11 +214,13 @@ def fetch_dependency_volume_buckets(filters=None):
                     hr.repo_id,
                     COUNT(sd.id) AS dep_count,
                     CASE
-                        WHEN COUNT(sd.id) = 0 THEN '0'
-                        WHEN COUNT(sd.id) <= 10 THEN '1–10'
-                        WHEN COUNT(sd.id) <= 50 THEN '11–50'
-                        WHEN COUNT(sd.id) <= 100 THEN '51–100'
-                        ELSE '100+'
+                        WHEN COUNT(sd.id) BETWEEN 1 AND 10 THEN '1–10'
+                        WHEN COUNT(sd.id) BETWEEN 11 AND 20 THEN '11–20'
+                        WHEN COUNT(sd.id) BETWEEN 21 AND 30 THEN '21–30'
+                        WHEN COUNT(sd.id) BETWEEN 31 AND 40 THEN '31–40'
+                        WHEN COUNT(sd.id) BETWEEN 41 AND 50 THEN '41–50'
+                        WHEN COUNT(sd.id) BETWEEN 51 AND 100 THEN '51–100'
+                        ELSE '101+'
                     END AS dep_bucket
                 FROM harvested_repositories hr
                 JOIN syft_dependencies sd USING (repo_id)
@@ -217,7 +237,10 @@ def fetch_dependency_volume_buckets(filters=None):
             JOIN syft_dependencies sd USING (repo_id)
             GROUP BY db.dep_bucket, sd.package_type
             ORDER BY 
-                ARRAY_POSITION(ARRAY['0','1–10','11–50','51–100','100+'], db.dep_bucket),
+                ARRAY_POSITION(
+                    ARRAY['1–10', '11–20', '21–30', '31–40', '41–50', '51–100', '101+'],
+                    db.dep_bucket
+                ),
                 repo_count DESC;
         """
         extra_where = f"WHERE {condition_string}" if condition_string else ""
@@ -226,6 +249,7 @@ def fetch_dependency_volume_buckets(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 

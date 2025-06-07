@@ -18,14 +18,14 @@ def is_valid_version_string(v: str) -> bool:
 def get_version_bucket(version: str) -> str:
     if not is_valid_version_string(version):
         logger.warning(f"[Version] Unrecognized version format: {version!r}")
-        return "Invalid / Unrecognized"
+        return "Invalid"
 
     try:
         sv = SemverVersion(version)
         return f"{sv.major}.{sv.minor}"
     except Exception as e:
         logger.warning(f"[Version] Failed to parse version '{version}': {e}")
-        return "Invalid / Unrecognized"
+        return "Invalid"
 
 @cache.memoize()
 def fetch_spring_framework_versions(filters=None):

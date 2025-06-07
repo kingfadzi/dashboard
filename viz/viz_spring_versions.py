@@ -9,7 +9,7 @@ def render_spring_version_chart(df, title=None):
     df["version_bucket"] = (
         df["version_bucket"]
         .str.strip()
-        .fillna("Invalid / Unrecognized")
+        .fillna("Invalid")
     )
 
     df = df.groupby(["version_bucket", "host_name"], as_index=False)["repo_count"].sum()

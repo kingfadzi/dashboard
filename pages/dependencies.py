@@ -147,7 +147,7 @@ layout = dbc.Container(
         # Row 7: IaC Adoption + Dependency Volume
         dbc.Row(
             [
-                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
+                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=6),
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
             ],
             className="mb-4",
@@ -171,7 +171,7 @@ layout = dbc.Container(
         # Row 10
         dbc.Row(
             [
-                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=6),
+                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
                 dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
             ]
         ),

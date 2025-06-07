@@ -19,17 +19,22 @@ def render_dependency_detection_chart(df):
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
 
-@standard_chart_style
+@stacked_bar_chart_style(x_col="language_group", y_col="repo_count")
 def render_iac_detection_chart(df):
-    return px.bar(
+    fig = px.bar(
         df,
-        x="status",
+        x="language_group",
         y="repo_count",
-        text="repo_count",
         color="status",
-        labels={"status": "", "repo_count": "Repository Count"},
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        labels={
+            "language_group": "Language Group",
+            "repo_count": "Repository Count",
+            "status": "IaC Detection"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
+    return fig, df
 
 @standard_chart_style
 def render_xeol_detection_chart(df):
@@ -88,39 +93,23 @@ def render_subcategory_distribution_chart(df):
     )
     return fig, df
 
-@standard_chart_style
+
+@stacked_bar_chart_style(x_col="dep_bucket", y_col="repo_count")
 def render_dependency_volume_chart(df):
     fig = px.bar(
         df,
         x="dep_bucket",
         y="repo_count",
         color="package_type",  # now stripe by package_type
-        text="repo_count",
         labels={
             "dep_bucket": "Dependency Count",
             "repo_count": "Repository Count",
             "package_type": "Package Type"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
-    fig.update_layout(
-        xaxis_title="Dependency Count",
-        barmode="stack",
-        xaxis=dict(type="category", showticklabels=True),
-        legend=dict(
-            orientation="h",
-            y=1.02,
-            x=0.5,
-            xanchor="center",
-            font=dict(size=10)
-        )
-    )
-    fig.update_traces(
-        texttemplate="%{text}",
-        textposition="inside",
-        textfont_size=12
-    )
-    return fig
+    return fig, df
 
 
 
