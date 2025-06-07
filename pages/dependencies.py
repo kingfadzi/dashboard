@@ -44,7 +44,7 @@ layout = dbc.Container(
         dcc.Location(id="url", refresh=False),
         header_with_button,
 
-        # Row 1: detection + package type + volume
+        # Row 1
         dbc.Row(
             [
                 dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
@@ -55,12 +55,10 @@ layout = dbc.Container(
 
         html.Hr(),
 
-        # Row 2: Repos With Dependencies (full-width)
-        dbc.Row(
-            [dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=12)]
-        ),
+        # Row 2
+        dbc.Row([dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=12)]),
 
-        # Row 3: Repos Without Dependencies
+        # Row 3
         dbc.Row(
             [
                 dbc.Col(
@@ -83,15 +81,12 @@ layout = dbc.Container(
                     ),
                     width=6,
                 ),
-                dbc.Col(
-                    card("Repos Without Dependencies", "no-deps-heatmap"),
-                    width=6,
-                ),
+                dbc.Col(card("Repos Without Dependencies", "no-deps-heatmap"), width=6),
             ],
             className="mb-4",
         ),
 
-        # Row 4: EE Usage + Spring Charts
+        # Row 4
         dbc.Row(
             [
                 dbc.Col(card("EE API Usage (Jakarta vs Javax)", "ee-usage-chart"), width=4),
@@ -101,34 +96,14 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 5: Moved Framework Distribution
-        dbc.Row(
-            [dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=12)],
-            className="mb-4",
-        ),
+        # Row 5
+        dbc.Row([dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=12)], className="mb-4"),
 
-        # Row 6: IaC and EOL
+        # Row 6: Moved Middleware + IaC Adoption + App Servers
         dbc.Row(
             [
-                dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
-                dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=6),
-            ],
-            className="mb-4",
-        ),
-
-        # Row 7: More IaC and EOL
-        dbc.Row(
-            [
-                dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
-                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
-            ],
-            className="mb-4",
-        ),
-
-        # Row 8: Middleware + Server/Orchestration
-        dbc.Row(
-            [
-                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=6),
+                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=4),
+                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=4),
                 dbc.Col(
                     dbc.Card(
                         [
@@ -164,12 +139,31 @@ layout = dbc.Container(
                         ],
                         className="mb-4",
                     ),
-                    width=6,
+                    width=4,
                 ),
-            ]
+            ],
+            className="mb-4",
         ),
 
-        # Row 9: Detection Summary
+        # Row 7
+        dbc.Row(
+            [
+                dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
+                dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=6),
+            ],
+            className="mb-4",
+        ),
+
+        # Row 8
+        dbc.Row(
+            [
+                dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
+                # removed IaC Adoption and App Servers from here
+            ],
+            className="mb-4",
+        ),
+
+        # Row 9
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),
