@@ -23,6 +23,8 @@ def fetch_middleware_usage_detailed(filters=None):
             WHERE sd.category ILIKE 'middleware'
             {extra_where}
             GROUP BY sd.sub_category, sd.framework, hr.main_language
+            ORDER BY repo_count DESC
+            LIMIT 10
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
@@ -30,6 +32,7 @@ def fetch_middleware_usage_detailed(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 @cache.memoize()
 def fetch_middleware_usage_by_sub_category(filters=None):

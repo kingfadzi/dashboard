@@ -52,6 +52,7 @@ def fetch_iac_server_orchestration_usage(filters=None):
             {f"AND {condition_string}" if condition_string else ""}
             GROUP BY ic.framework, hr.classification_label
             ORDER BY repo_count DESC
+            LIMIT 10 
         """
 
         logger.debug("Executing IaC server/orchestration query:")
@@ -63,4 +64,5 @@ def fetch_iac_server_orchestration_usage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
