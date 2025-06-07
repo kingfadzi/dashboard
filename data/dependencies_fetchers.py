@@ -59,53 +59,52 @@ def fetch_iac_detection_coverage(filters=None):
             WITH repo_language_group AS (
                 SELECT
                     hr.repo_id,
-                    CASE
-                        WHEN EXISTS (
-                            SELECT 1
-                            FROM iac_components ic
-                            WHERE ic.repo_id = hr.repo_id
-                              AND (
-                                  ic.subcategory ILIKE 'compute services'
-                                  OR ic.subcategory ILIKE 'container%%'
-                                  OR ic.subcategory ILIKE 'kubernetes%%'
-                                  OR ic.subcategory ILIKE 'network security controls'
-                                  OR ic.subcategory ILIKE 'policy as code%%'
-                                  OR ic.subcategory ILIKE 'scaling%%'
-                                  OR ic.subcategory ILIKE 'storage services'
-                              )
-                        ) THEN 'IaC Detected'
-                        ELSE 'No IaC Detected'
-                    END AS status,
+                    CASE WHEN EXISTS (
+                        SELECT 1
+                        FROM iac_components ic 
+                        WHERE ic.repo_id = hr.repo_id
+                        AND (
+                            ic.subcategory ILIKE 'compute services%%' OR
+                            ic.subcategory ILIKE 'container%%' OR
+                            ic.subcategory ILIKE 'kubernetes%%' OR
+                            ic.subcategory ILIKE 'network security controls%%' OR
+                            ic.subcategory ILIKE 'policy as code%%' OR
+                            ic.subcategory ILIKE 'scaling%%' OR
+                            ic.subcategory ILIKE 'storage services%%'
+                        )
+                        LIMIT 1
+                    ) THEN 'IaC Detected' ELSE 'No IaC Detected' END AS status,
                     CASE
                         WHEN LOWER(hr.main_language) = 'java' THEN 'java'
                         WHEN LOWER(hr.main_language) = 'python' THEN 'python'
                         WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
                         WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
                         WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
-                        WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
-                        WHEN LOWER(lt.type) IN ('markup', 'data') THEN 'markup_or_data'
-                        WHEN LOWER(lt.type) = 'programming' THEN 'other_programming'
-                        ELSE 'unknown'
+                        ELSE NULL
                     END AS language_group
                 FROM harvested_repositories hr
-                LEFT JOIN languages lt ON LOWER(hr.main_language) = LOWER(lt.name)
-                {where_clause}
+                WHERE 
+                    LOWER(hr.main_language) IN ('java', 'python', 'go', 'golang', 
+                                                 'javascript', 'typescript', 
+                                                 'c#', 'f#', 'vb.net', 'visual basic')
+                    {condition_fragment}
             )
             SELECT
                 status,
                 language_group,
                 COUNT(*) AS repo_count
             FROM repo_language_group
-            WHERE language_group IN ('java', 'python', 'javascript', 'dotnet', 'go')
+            WHERE language_group IS NOT NULL
             GROUP BY status, language_group
             ORDER BY status, language_group
         """
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(sql.format(where_clause=where_clause))
+        condition_fragment = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(condition_fragment=condition_fragment))
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 
