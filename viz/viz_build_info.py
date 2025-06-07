@@ -129,7 +129,7 @@ def render_runtime_versions_chart(df):
         y="repo_count",
         color="variant",
         labels={
-            "runtime_version": "",
+            "runtime_version": "Runtime Version",
             "variant": "Build Tool Variant",
             "repo_count": "Repository Count"
         },
@@ -376,7 +376,7 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
         y="repo_count",
         color="classification_label",
         labels={
-            "dominant_language": "Language",
+            "dominant_language": "",
             "repo_count": "Repository Count",
             "classification_label": "Size"
         },

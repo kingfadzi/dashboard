@@ -103,6 +103,17 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+
+
+        # Combined row: Build Tools + Module Count
+        dbc.Row(
+            [
+                dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=8),
+                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
+            ],
+            className="mb-4",
+        ),
+
         # Third row: Tool selector
         dbc.Row(
             [
@@ -123,6 +134,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+
         # Fourth row: Runtime Versions
         dbc.Row(
             [
@@ -130,6 +142,8 @@ layout = dbc.Container(
             ],
             className="mb-4",
         ),
+
+
 
         # Fifth row: Support Status (.NET + Java)
         dbc.Row(
@@ -150,14 +164,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Combined row: Build Tools + Module Count
-        dbc.Row(
-            [
-                dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=8),
-                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
-            ],
-            className="mb-4",
-        ),
+
 
         # Detection Coverage as standalone
         dbc.Row(
