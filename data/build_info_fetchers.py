@@ -93,7 +93,7 @@ def fetch_runtime_versions_by_tool(filters=None):
         base_query = f"""
             SELECT
                 bcc.tool,
-                {normalized} AS runtime_version,
+                CAST({normalized} AS TEXT) AS runtime_version,
                 bcc.variant,
                 COUNT(DISTINCT bcc.repo_id) AS repo_count
             FROM build_config_cache bcc

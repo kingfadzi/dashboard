@@ -1,3 +1,5 @@
+import re
+
 from dash import Input, Output
 
 from data.build_info_fetchers import (
@@ -62,6 +64,7 @@ def register_build_info_callbacks(app):
         df = fetch_confidence_distribution(filters)
         return render_confidence_distribution_chart(df)
 
+
     @app.callback(
         Output("runtime-versions-chart", "figure"),
         Output("tool-selector", "options"),
@@ -71,6 +74,7 @@ def register_build_info_callbacks(app):
     def update_runtime_versions_chart(selected_tool, store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_runtime_versions_by_tool(filters)
+
         all_tools = sorted(df["tool"].dropna().unique())
         options = [{"label": t, "value": t} for t in all_tools]
 
@@ -78,7 +82,17 @@ def register_build_info_callbacks(app):
             df = df[df["tool"] == selected_tool]
 
         df = df.sort_values("repo_count", ascending=False).head(TOP_RUNTIMES)
+
+        #  Only prefix purely numeric versions (e.g., '8', '11', '3.10') with 'v'
+        def safe_prefix(val):
+            val_str = str(val).strip()
+            return f"v{val_str}" if re.fullmatch(r"\d+(\.\d+)*", val_str) else val_str
+
+        df["runtime_version"] = df["runtime_version"].apply(safe_prefix)
+
         return render_runtime_versions_chart(df), options
+
+
 
     @app.callback(Output("build-runtime-coverage-chart", "figure"), Input("default-filter-store", "data"))
     def update_runtime_coverage_chart(store_data):

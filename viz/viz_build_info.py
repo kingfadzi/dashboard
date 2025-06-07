@@ -116,49 +116,32 @@ def render_status_by_tool_chart(df):
     return fig
 
 
-@standard_chart_style
+@stacked_bar_chart_style(x_col="runtime_version", y_col="repo_count")
 def render_runtime_versions_chart(df):
     df = df.sort_values("repo_count", ascending=False)
+
+    # Ensure values are strings
+    df["runtime_version"] = df["runtime_version"].astype(str)
 
     fig = px.bar(
         df,
         x="runtime_version",
         y="repo_count",
         color="variant",
-        barmode="stack",
         labels={
             "runtime_version": "",
             "variant": "Build Tool Variant",
             "repo_count": "Repository Count"
         },
-        text="repo_count",
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
-    )
-
-    fig.update_traces(
-        texttemplate="%{text}",
-        textposition="inside",
-        textangle=0,
-        textfont_size=12
-    )
-
-    fig.update_xaxes(
-        showticklabels=True,
-        tickangle=45,
-        title=None
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
 
     fig.update_layout(
-        title=None,
-        margin=dict(l=20, r=20, t=20, b=20)
+        xaxis=dict(type="category", tickangle=45)
     )
 
-    fig.update_yaxes(
-        tickformat="d"
-    )
-
-
-    return fig
+    return fig, df
 
 
 # 6. Runtime Fragmentation by Tool
