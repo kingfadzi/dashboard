@@ -46,6 +46,7 @@ def fetch_middleware_usage_by_sub_category(filters=None):
             FROM syft_dependencies sd
             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
             WHERE sd.category ILIKE 'middleware'
+              AND sd.sub_category NOT ILIKE 'application servers'
               AND sd.framework IS NOT NULL
               {f"AND {condition_string}" if condition_string else ""}
             GROUP BY sd.sub_category, sd.framework, hr.main_language
@@ -56,6 +57,7 @@ def fetch_middleware_usage_by_sub_category(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 @cache.memoize()
