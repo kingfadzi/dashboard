@@ -99,11 +99,10 @@ layout = dbc.Container(
         # Row 5
         dbc.Row([dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=12)], className="mb-4"),
 
-        # Row 6: Moved Middleware + IaC Adoption + App Servers
+        # Row 6: Middleware + App Servers
         dbc.Row(
             [
-                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=4),
-                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=4),
+                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=6),
                 dbc.Col(
                     dbc.Card(
                         [
@@ -139,13 +138,19 @@ layout = dbc.Container(
                         ],
                         className="mb-4",
                     ),
-                    width=4,
+                    width=6,
                 ),
             ],
             className="mb-4",
         ),
 
-        # Row 7
+        # Row 7: IaC Adoption alone
+        dbc.Row(
+            [dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=12)],
+            className="mb-4",
+        ),
+
+        # Row 8
         dbc.Row(
             [
                 dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
@@ -154,16 +159,15 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 8
+        # Row 9
         dbc.Row(
             [
                 dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
-                # removed IaC Adoption and App Servers from here
             ],
             className="mb-4",
         ),
 
-        # Row 9
+        # Row 10
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),
