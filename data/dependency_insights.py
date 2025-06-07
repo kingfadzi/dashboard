@@ -218,3 +218,37 @@ def fetch_no_dependency_buildtool_summary(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
+@cache.memoize()
+def fetch_ee_usage_by_repo(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = """
+            SELECT
+                sd.repo_id,
+                CASE
+                    WHEN COUNT(*) FILTER (
+                        WHERE sd.package_name ILIKE 'javax.%'
+                    ) > 0 AND COUNT(*) FILTER (
+                        WHERE sd.package_name ILIKE 'jakarta.%'
+                    ) > 0 THEN 'mixed'
+                    WHEN COUNT(*) FILTER (
+                        WHERE sd.package_name ILIKE 'javax.%'
+                    ) > 0 THEN 'javax'
+                    WHEN COUNT(*) FILTER (
+                        WHERE sd.package_name ILIKE 'jakarta.%'
+                    ) > 0 THEN 'jakarta'
+                END AS ee_usage
+            FROM syft_dependencies sd
+            JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
+            WHERE sd.package_type = 'java-archive'
+              {extra_where}
+            GROUP BY sd.repo_id
+            HAVING COUNT(*) FILTER (
+                WHERE sd.package_name ILIKE 'javax.%' OR sd.package_name ILIKE 'jakarta.%'
+            ) > 0
+        """
+        extra_where = f"AND {condition_string}" if condition_string else ""
+        stmt = text(sql.format(extra_where=extra_where))
+        return pd.read_sql(stmt, engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)

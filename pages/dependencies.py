@@ -60,6 +60,7 @@ layout = dbc.Container(
             [dbc.Col(card("Repos With Dependencies", "with-deps-by-variant-heatmap"), width=12)]
         ),
 
+        # Row 3: Repos Without Dependencies
         dbc.Row(
             [
                 dbc.Col(
@@ -90,39 +91,44 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-
-
-
+        # Row 4: EE Usage + Spring Charts
         dbc.Row(
             [
-                dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=6),
-                dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart"), width=6),
-            ]
+                dbc.Col(card("EE API Usage (Jakarta vs Javax)", "ee-usage-chart"), width=4),
+                dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart"), width=4),
+                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=4),
+            ],
+            className="mb-4",
         ),
 
+        # Row 5: Moved Framework Distribution
+        dbc.Row(
+            [dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=12)],
+            className="mb-4",
+        ),
+
+        # Row 6: IaC and EOL
         dbc.Row(
             [
-                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=6),
                 dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
-            ]
-        ),
-
-        dbc.Row(
-            [
                 dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=6),
+            ],
+            className="mb-4",
+        ),
+
+        # Row 7: More IaC and EOL
+        dbc.Row(
+            [
                 dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
-            ]
-        ),
-
-        dbc.Row(
-            [
                 dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
-                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=6),
-            ]
+            ],
+            className="mb-4",
         ),
 
+        # Row 8: Middleware + Server/Orchestration
         dbc.Row(
             [
+                dbc.Col(card("Application Servers / Orchestration Frameworks", "iac-server-orchestration-chart"), width=6),
                 dbc.Col(
                     dbc.Card(
                         [
@@ -158,11 +164,12 @@ layout = dbc.Container(
                         ],
                         className="mb-4",
                     ),
-                    width=12,
-                )
+                    width=6,
+                ),
             ]
         ),
 
+        # Row 9: Detection Summary
         dbc.Row(
             [
                 dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),

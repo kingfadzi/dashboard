@@ -261,3 +261,36 @@ def render_no_dependency_buildtool_summary_chart(df):
 
     return fig
 
+
+@standard_chart_style
+def render_ee_usage_chart(df):
+    if df.empty:
+        return px.bar(title="No data available")
+
+    df["repo_count"] = 1
+    df = df.groupby("ee_usage", as_index=False)["repo_count"].sum()
+
+    fig = px.bar(
+        df,
+        x="ee_usage",
+        y="repo_count",
+        text="repo_count",
+        labels={
+            "ee_usage": "EE API Type",
+            "repo_count": "Repository Count"
+        },
+        color="ee_usage",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+    )
+
+    fig.update_traces(textposition="outside")
+
+    fig.update_layout(
+        xaxis=dict(
+            type="category",
+            showticklabels=True,
+            tickangle=0
+        )
+    )
+
+    return fig
