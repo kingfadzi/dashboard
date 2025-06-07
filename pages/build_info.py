@@ -131,7 +131,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Fifth row: Support Status (.NET + Java) – interactive to allow hover
+        # Fifth row: Support Status (.NET + Java)
         dbc.Row(
             [
                 dbc.Col(interactive_card("Support Status (.NET)", "dotnet-support-status-chart"), width=6),
@@ -140,7 +140,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Sixth row: Support Status (Python + JavaScript + Go) – interactive for hover
+        # Sixth row: Support Status (Python + JavaScript + Go)
         dbc.Row(
             [
                 dbc.Col(interactive_card("Support Status (Python)", "python-support-status-chart"), width=4),
@@ -150,28 +150,28 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Seventh row: Build Tools
+        # Combined row: Build Tools + Module Count
         dbc.Row(
             [
-                dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=12),
+                dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=8),
+                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=4),
             ],
             className="mb-4",
         ),
 
-        # Eighth row: Confidence Distribution & Detection Status by Tool
+        # Detection Coverage as standalone
+        dbc.Row(
+            [
+                dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),
+            ],
+            className="mb-4",
+        ),
+
+        # Confidence Distribution & Detection Status by Tool
         dbc.Row(
             [
                 dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
                 dbc.Col(card("Detection Status", "status-by-tool-chart"), width=6),
-            ],
-            className="mb-4",
-        ),
-
-        # Ninth row: Module Count Per Repo & Detection Coverage
-        dbc.Row(
-            [
-                dbc.Col(card("Module Count Per Repo", "module-count-chart"), width=6),
-                dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=6),
             ],
             className="mb-4",
         ),

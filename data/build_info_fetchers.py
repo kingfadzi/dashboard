@@ -44,38 +44,45 @@ def fetch_detection_coverage_by_tool(filters=None):
     return query_data(condition_string, param_dict)
 
 
+@cache.memoize()
 def fetch_module_counts_per_repo(filters=None):
-    @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
-            SELECT
-                CASE
-                    WHEN module_count = 1 THEN '1'
-                    WHEN module_count BETWEEN 2 AND 5 THEN '2–5'
-                    WHEN module_count BETWEEN 6 AND 10 THEN '6–10'
-                    ELSE '10+'
-                END AS module_bucket,
-                classification_label,
-                COUNT(*) AS repo_count
-            FROM (
+        sql = """
+            WITH module_counts AS (
                 SELECT
-                    build_config_cache.repo_id,
-                    COUNT(*) AS module_count,
-                    hr.classification_label
-                FROM build_config_cache
-                JOIN harvested_repositories hr ON build_config_cache.repo_id = hr.repo_id
-                {where_clause}
-                GROUP BY build_config_cache.repo_id, hr.classification_label
-            ) sub
-            GROUP BY module_bucket, classification_label
-            ORDER BY module_bucket, classification_label
+                    CASE
+                        WHEN module_count = 1 THEN '1'
+                        WHEN module_count BETWEEN 2 AND 5 THEN '2–5'
+                        WHEN module_count BETWEEN 6 AND 10 THEN '6–10'
+                        ELSE '10+'
+                    END AS module_bucket,
+                    classification_label,
+                    COUNT(*) AS repo_count
+                FROM (
+                    SELECT
+                        build_config_cache.repo_id,
+                        COUNT(*) AS module_count,
+                        hr.classification_label
+                    FROM build_config_cache
+                    JOIN harvested_repositories hr ON build_config_cache.repo_id = hr.repo_id
+                    {where_clause}
+                    GROUP BY build_config_cache.repo_id, hr.classification_label
+                ) sub
+                GROUP BY classification_label, module_bucket
+            )
+            SELECT *
+            FROM module_counts
+            ORDER BY 
+                ARRAY_POSITION(ARRAY['1', '2–5', '6–10', '10+'], module_bucket),
+                classification_label
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(base_query.format(where_clause=where_clause))
+        stmt = text(sql.format(where_clause=where_clause))
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 # 3. Runtime Versions by Tool (fixed: includes variant)
 @cache.memoize()
@@ -287,23 +294,25 @@ def fetch_no_buildtool_repo_scatter(filters=None):
     df = execute_query(condition_string, param_dict)
 
     # Early return for empty or small datasets
-    if len(df) < MIN_ROWS_TO_FILTER:
-        return df.copy()
+    # if len(df) < MIN_ROWS_TO_FILTER:
+    #     return df.copy()
 
     # Apply percentile-based outlier removal (on chart axes)
-    df_filtered = df.copy()
-    numeric_cols = ["contributor_count", "total_commits"]
+    # df_filtered = df.copy()
+    # numeric_cols = ["contributor_count", "total_commits"]
 
-    for col in numeric_cols:
-        lower_bound = np.percentile(df[col], LOWER_PERCENTILE)
-        upper_bound = np.percentile(df[col], UPPER_PERCENTILE)
-        df_filtered = df_filtered[
-            (df_filtered[col] >= lower_bound) &
-            (df_filtered[col] <= upper_bound)
-            ]
+    # for col in numeric_cols:
+    #     lower_bound = np.percentile(df[col], LOWER_PERCENTILE)
+    #     upper_bound = np.percentile(df[col], UPPER_PERCENTILE)
+    #     df_filtered = df_filtered[
+    #         (df_filtered[col] >= lower_bound) &
+    #         (df_filtered[col] <= upper_bound)
+    #     ]
 
+    # return df_filtered.reset_index(drop=True)
 
-    return df_filtered.reset_index(drop=True)
+    return df.reset_index(drop=True)
+
 
 
 

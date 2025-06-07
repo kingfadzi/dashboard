@@ -156,18 +156,22 @@ def status_chart_style(func):
         return fig
 
     return wrapper
-    
-    
-    
+
+
 def stacked_bar_chart_style(x_col="x", y_col="y"):
-    """Decorator for consistent styling of stacked bar charts with bar totals."""
+    """Decorator for consistent styling of stacked bar charts with bar totals and optional category ordering."""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Generate figure and get the dataframe from the calling function
             fig, df = func(*args, **kwargs)
 
-            # Basic layout styling
+            # Determine if x_col is a categorical type
+            categoryarray = (
+                df[x_col].cat.categories.tolist()
+                if pd.api.types.is_categorical_dtype(df[x_col])
+                else None
+            )
+
             fig.update_layout(
                 font=dict(family='Arial', size=12),
                 margin=dict(t=40, b=20, l=20, r=20),
@@ -185,7 +189,9 @@ def stacked_bar_chart_style(x_col="x", y_col="y"):
                     showgrid=False,
                     zeroline=False,
                     showticklabels=True,
-                    title_standoff=15
+                    title_standoff=15,
+                    categoryorder="array" if categoryarray else "trace",
+                    categoryarray=categoryarray
                 ),
                 yaxis=dict(
                     showline=True,
@@ -218,10 +224,10 @@ def stacked_bar_chart_style(x_col="x", y_col="y"):
                 title=None
             )
 
-            # Hide per-segment text
+            # Hide per-segment bar text
             fig.update_traces(text=None)
 
-            # Add total annotations per x-group
+            # Add top-of-bar totals
             totals = df.groupby(x_col)[y_col].sum().reset_index()
 
             for _, row in totals.iterrows():

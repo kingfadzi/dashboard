@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import numpy as np
 from sqlalchemy.dialects.mssql.information_schema import columns
 
-from components.chart_style import standard_chart_style, status_chart_style
+from components.chart_style import standard_chart_style, status_chart_style, stacked_bar_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 import pandas as pd
 
@@ -44,35 +44,39 @@ def render_detection_coverage_chart(df):
 
     return fig
 
-@standard_chart_style
+@stacked_bar_chart_style(x_col="module_bucket", y_col="repo_count")
 def render_module_count_chart(df):
+    # Normalize raw bucket labels
+    df["module_bucket"] = df["module_bucket"].replace({
+        "1": "Single",
+        "2-5": "2–5",
+        "6-10": "6–10"
+    })
+
+    # Set categorical ordering
+    df["module_bucket"] = pd.Categorical(
+        df["module_bucket"],
+        categories=["Single", "2–5", "6–10", "10+"],
+        ordered=True
+    )
+
     fig = px.bar(
         df,
         x="module_bucket",
         y="repo_count",
         color="classification_label",
-        text="repo_count",
         labels={
-            "module_bucket": "Module Count Range",
-            "repo_count": "Repository Count",
+            "module_bucket": "Build Tool Count Range",
+            "repo_count": "Number of Repositories",
             "classification_label": "Classification"
         },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         barmode="stack"
     )
 
-    fig.update_traces(
-        texttemplate="%{text}",
-        textposition="inside",
-        textfont_size=12
-    )
+    return fig, df
 
-    fig.update_layout(
-        title=None,
-        margin=dict(l=20, r=20, t=20, b=20)
-    )
-    fig.update_xaxes(showticklabels=True)
 
-    return fig
 
 # 3. Repos per Tool and Variant
 def render_repos_per_tool_variant_chart(df):
@@ -371,8 +375,8 @@ def render_no_buildtool_scatter(df: pd.DataFrame):
 
 
 
+@stacked_bar_chart_style(x_col="dominant_language", y_col="repo_count")
 def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
-
     if df.empty:
         fig = go.Figure()
         fig.update_layout(
@@ -381,8 +385,7 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
             yaxis=dict(title="Repository Count", visible=True),
             margin=dict(l=20, r=20, t=40, b=20),
         )
-        return fig
-
+        return fig, df
 
     fig = px.bar(
         df,
@@ -398,7 +401,7 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
         barmode="stack"
     )
 
-
+    # Totals per language
     totals = df.groupby("dominant_language")["repo_count"].sum().reset_index()
 
     fig.add_trace(
@@ -412,15 +415,8 @@ def render_no_buildtool_language_type_distribution(df: pd.DataFrame):
         )
     )
 
+    return fig, df
 
-    fig.update_layout(
-        xaxis_title="Language",
-        yaxis_title="Repository Count",
-        xaxis=dict(type="category", showticklabels=True, tickangle=-45),
-        margin=dict(l=20, r=20, t=20, b=20),
-    )
-
-    return fig
 
 def render_dotnet_support_status_chart(df):
     df["support_status_verbose"] = df["support_status"].map({
