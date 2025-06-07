@@ -49,7 +49,7 @@ layout = dbc.Container(
             [
                 dbc.Col(card("Dependency Detection Coverage", "dep-detection-chart"), width=4),
                 dbc.Col(card("Package Type Distribution", "package-type-distribution-chart"), width=4),
-                dbc.Col(card("Average Dependencies / Repo", "avg-deps-per-package-type-chart"), width=4)
+                dbc.Col(card("Average Dependencies / Repo", "avg-deps-per-package-type-chart"), width=4),
             ]
         ),
 
@@ -116,14 +116,14 @@ layout = dbc.Container(
                                                 placeholder="Select Middleware Category",
                                                 clearable=True,
                                                 value=None,
-                                                style={"width": "250px", "fontSize": "14px"}
+                                                style={"width": "250px", "fontSize": "14px"},
                                             ),
-                                            width="auto"
-                                        )
+                                            width="auto",
+                                        ),
                                     ],
-                                    className="align-items-center justify-content-between"
+                                    className="align-items-center justify-content-between",
                                 ),
-                                className="bg-light"
+                                className="bg-light",
                             ),
                             dbc.CardBody(
                                 dcc.Loading(
@@ -144,9 +144,12 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 7: IaC Adoption alone
+        # Row 7: IaC Adoption + Dependency Volume
         dbc.Row(
-            [dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=12)],
+            [
+                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
+                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=6),
+            ],
             className="mb-4",
         ),
 
@@ -161,18 +164,15 @@ layout = dbc.Container(
 
         # Row 9
         dbc.Row(
-            [
-                dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
-            ],
+            [dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6)],
             className="mb-4",
         ),
 
         # Row 10
         dbc.Row(
             [
-                dbc.Col(card("Dependency Volume", "dependency-volume-chart"), width=4),
-                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=4),
-                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
+                dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=6),
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
             ]
         ),
 
