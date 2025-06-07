@@ -1,4 +1,5 @@
 from components.chart_style import standard_chart_style
+from components.chart_style import stacked_bar_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 import plotly.express as px
 import plotly.graph_objects as go
@@ -69,13 +70,14 @@ def render_package_type_distribution_chart(df):
     return fig
 
 
-@standard_chart_style
+
+
+@stacked_bar_chart_style(x_col="sub_category", y_col="repo_count")
 def render_subcategory_distribution_chart(df):
     fig = px.bar(
         df,
         x="sub_category",
         y="repo_count",
-        text="repo_count",
         color="package_type",
         labels={
             "sub_category": "",
@@ -84,8 +86,7 @@ def render_subcategory_distribution_chart(df):
         },
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
-    fig.update_xaxes(showticklabels=True)
-    return fig
+    return fig, df
 
 @standard_chart_style
 def render_dependency_volume_chart(df):

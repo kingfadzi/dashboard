@@ -1,5 +1,8 @@
 from functools import wraps
 from components.colors import NEUTRAL_COLOR_SEQUENCE
+import plotly.graph_objects as go
+import pandas as pd
+
 
 def standard_chart_style(func):
     """Decorator to apply consistent styling to Plotly charts"""
@@ -153,3 +156,85 @@ def status_chart_style(func):
         return fig
 
     return wrapper
+    
+    
+    
+def stacked_bar_chart_style(x_col="x", y_col="y"):
+    """Decorator for consistent styling of stacked bar charts with bar totals."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Generate figure and get the dataframe from the calling function
+            fig, df = func(*args, **kwargs)
+
+            # Basic layout styling
+            fig.update_layout(
+                font=dict(family='Arial', size=12),
+                margin=dict(t=40, b=20, l=20, r=20),
+                plot_bgcolor='white',
+                paper_bgcolor='white',
+                colorway=NEUTRAL_COLOR_SEQUENCE,
+                barmode='stack',
+                xaxis=dict(
+                    showline=True,
+                    linewidth=1,
+                    mirror=True,
+                    ticks="outside",
+                    ticklen=6,
+                    fixedrange=True,
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=True,
+                    title_standoff=15
+                ),
+                yaxis=dict(
+                    showline=True,
+                    linewidth=1,
+                    mirror=True,
+                    ticks="outside",
+                    ticklen=6,
+                    fixedrange=True,
+                    showgrid=True,
+                    gridcolor="#e5e5e5",
+                    gridwidth=1,
+                    zeroline=False,
+                    title_standoff=15
+                ),
+                legend=dict(
+                    orientation='h',
+                    yanchor='bottom',
+                    y=1.02,
+                    xanchor='right',
+                    x=1,
+                    title_text="",
+                    font_size=10
+                ),
+                hoverlabel=dict(
+                    bgcolor='white',
+                    font_size=12,
+                    bordercolor='#cccccc'
+                ),
+                dragmode=False,
+                title=None
+            )
+
+            # Hide per-segment text
+            fig.update_traces(text=None)
+
+            # Add total annotations per x-group
+            totals = df.groupby(x_col)[y_col].sum().reset_index()
+
+            for _, row in totals.iterrows():
+                fig.add_annotation(
+                    x=row[x_col],
+                    y=row[y_col],
+                    text=str(row[y_col]),
+                    showarrow=False,
+                    yshift=5,
+                    font=dict(size=12),
+                )
+
+            return fig
+
+        return wrapper
+    return decorator
