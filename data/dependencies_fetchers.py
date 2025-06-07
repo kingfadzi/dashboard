@@ -60,8 +60,21 @@ def fetch_iac_detection_coverage(filters=None):
                 SELECT
                     hr.repo_id,
                     CASE
-                        WHEN ic.repo_id IS NULL THEN 'No IaC Detected'
-                        ELSE 'IaC Detected'
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM iac_components ic
+                            WHERE ic.repo_id = hr.repo_id
+                              AND (
+                                  ic.subcategory ILIKE 'compute services'
+                                  OR ic.subcategory ILIKE 'container%%'
+                                  OR ic.subcategory ILIKE 'kubernetes%%'
+                                  OR ic.subcategory ILIKE 'network security controls'
+                                  OR ic.subcategory ILIKE 'policy as code%%'
+                                  OR ic.subcategory ILIKE 'scaling%%'
+                                  OR ic.subcategory ILIKE 'storage services'
+                              )
+                        ) THEN 'IaC Detected'
+                        ELSE 'No IaC Detected'
                     END AS status,
                     CASE
                         WHEN LOWER(hr.main_language) = 'java' THEN 'java'
@@ -75,7 +88,6 @@ def fetch_iac_detection_coverage(filters=None):
                         ELSE 'unknown'
                     END AS language_group
                 FROM harvested_repositories hr
-                LEFT JOIN iac_components ic ON hr.repo_id = ic.repo_id
                 LEFT JOIN languages lt ON LOWER(hr.main_language) = LOWER(lt.name)
                 {where_clause}
             )
@@ -94,6 +106,7 @@ def fetch_iac_detection_coverage(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 
