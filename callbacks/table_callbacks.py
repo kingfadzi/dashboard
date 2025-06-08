@@ -1,22 +1,21 @@
+# table_callbacks.py
+
 from dash import Input, Output, callback, State
 import urllib.parse
+
 from dash.exceptions import PreventUpdate
 
 from data.fetch_table_data import fetch_table_data
-from components.table_column_map import TABLE_COLUMN_DEFS_BY_ID
-
-TABLE_IDS = ["overview", "build-info", "code-insights", "dependencies"]
-
 
 def get_table_outputs_from_store(store_data, table_id=None):
-    filters = {k: v for k, v in (store_data or {}).items() if v not in (None, "")}
-    df, _ = fetch_table_data(filters, 0, 1000, table_id=table_id)
+    filters = { k: v for k, v in (store_data or {}).items() if v not in (None, "") }
+    df, _ = fetch_table_data(filters, 0, 1000)
     table_data = df.to_dict("records")
 
+    # Build a “returnUrl” for any link in the table (optional)
     return_url = f"/table-{table_id}"
     encoded_return_url = urllib.parse.quote(return_url)
 
-    # Core columns always shown
     column_defs = [
         {
             "headerName": "Repo Name",
@@ -43,15 +42,28 @@ def get_table_outputs_from_store(store_data, table_id=None):
             "filterValueGetter": {"function": "params.data.app_id"},
             "cellRendererParams": {"linkTarget": "_blank", "html": True},
         },
+        {"headerName": "Status", "field": "activity_status"},
+        {"headerName": "Size", "field": "classification_label"},
+        {"headerName": "Age", "field": "repo_age_days", "type": "numericColumn"},
+        {"headerName": "Language", "field": "all_languages"},
+        {"headerName": "Scope", "field": "scope"},
+        {"headerName": "Commits", "field": "total_commits", "type": "numericColumn"},
+        {"headerName": "Contributors", "field": "number_of_contributors", "type": "numericColumn"},
+        {
+            "headerName": "Last Commit",
+            "field": "last_commit_date",
+            "valueFormatter": {
+                "function": "params.value ? new Date(params.value).toLocaleDateString() : ''"
+            },
+        },
     ]
 
-    # Append per-table field definitions
-    column_defs.extend(TABLE_COLUMN_DEFS_BY_ID.get(table_id, []))
     return table_data, column_defs
 
 
 def register_table_callbacks(app):
-    for table_id in TABLE_IDS:
+    # For each of the four “table” pages, only run when pathname matches
+    for table_id in ["overview", "build-info", "code-insights", "dependencies"]:
         @app.callback(
             Output(f"{table_id}-table", "rowData"),
             Output(f"{table_id}-table", "columnDefs"),
@@ -65,7 +77,8 @@ def register_table_callbacks(app):
             table_data, column_defs = get_table_outputs_from_store(store_data, table_id=table_id)
             return table_data, column_defs
 
-    for table_id in TABLE_IDS:
+    # Build each “Table” button’s href from the current dropdown values
+    for table_id in ["overview", "build-info", "code-insights", "dependencies"]:
         @app.callback(
             Output(f"{table_id}-table-btn", "href"),
             [
