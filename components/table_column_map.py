@@ -1,6 +1,6 @@
 # components/table_column_map.py
 
-# Optional repo_catalog (rc) columns used to enrich different table views
+# Optional repo_catalog (rc) and repo_metrics (rm) columns used to enrich different table views
 
 RC_COLUMNS_BY_TABLE_ID = {
     "overview": [
@@ -11,11 +11,10 @@ RC_COLUMNS_BY_TABLE_ID = {
         "rc.package_types",
         "rc.top_packages",
         "rc.iac_frameworks",
-        # Repo metrics fields
-        "rm.total_commits",
-        "rm.number_of_contributors",
-        "rm.repo_age_days",
-        "rm.last_commit_date",
+        "rm_total_commits",
+        "rm_number_of_contributors",
+        "rm_repo_age_days",
+        "rm_last_commit_date",
     ],
     "build-info": [
         "rc.runtime_version",
@@ -23,11 +22,10 @@ RC_COLUMNS_BY_TABLE_ID = {
         "rc.repo_size_bytes",
         "rc.file_count",
         "rc.code_size_bytes",
-        # Repo metrics fields
-        "rm.total_commits",
-        "rm.number_of_contributors",
-        "rm.repo_age_days",
-        "rm.last_commit_date",
+        "rm_total_commits",
+        "rm_number_of_contributors",
+        "rm_repo_age_days",
+        "rm_last_commit_date",
     ],
     "code-insights": [
         "rc.total_blank",
@@ -44,11 +42,10 @@ RC_COLUMNS_BY_TABLE_ID = {
         "rc.cat_security",
         "rc.lizard_total_nloc",
         "rc.lizard_total_ccn",
-        # Repo metrics fields
-        "rm.total_commits",
-        "rm.number_of_contributors",
-        "rm.repo_age_days",
-        "rm.last_commit_date",
+        "rm_total_commits",
+        "rm_number_of_contributors",
+        "rm_repo_age_days",
+        "rm_last_commit_date",
     ],
     "dependencies": [
         "rc.grype_total_vulns",
@@ -66,13 +63,13 @@ RC_COLUMNS_BY_TABLE_ID = {
         "rc.xeol_earliest_eol_date",
         "rc.eol_package_count",
         "rc.earliest_eol_date",
-        # Repo metrics fields
-        "rm.total_commits",
-        "rm.number_of_contributors",
-        "rm.repo_age_days",
-        "rm.last_commit_date",
+        "rm_total_commits",
+        "rm_number_of_contributors",
+        "rm_repo_age_days",
+        "rm_last_commit_date",
     ]
 }
+
 
 TABLE_COLUMN_DEFS_BY_ID = {
     "overview": [
