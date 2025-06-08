@@ -39,8 +39,8 @@ def classify_language_from_db(language: str) -> str:
             CASE
                 WHEN LOWER(:language) = 'java' THEN 'java'
                 WHEN LOWER(:language) = 'python' THEN 'python'
-                WHEN LOWER(:language) IN ('javascript', 'typescript') THEN 'javascript'
-                WHEN LOWER(:language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                WHEN LOWER(:language) IN ('javascript', 'typescript', 'tsx') THEN 'javascript'
+                WHEN LOWER(:language) IN ('c#', 'f#', 'vb.net', 'visual basic','visual basic.net') THEN 'dotnet'
                 WHEN LOWER(:language) IN ('go', 'golang') THEN 'go'
                 WHEN LOWER(:language) = 'no language' THEN 'no_language'
                 WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'

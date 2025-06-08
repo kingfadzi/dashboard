@@ -92,13 +92,22 @@ def highlight_active_tab(pathname):
 # Toggle filter visibility
 @app.callback(
     Output("filter-collapse", "is_open"),
+    Input("url", "pathname"),
     Input("toggle-filters-btn", "n_clicks"),
     State("filter-collapse", "is_open"),
 )
-def toggle_filter_collapse(n_clicks, is_open):
+def toggle_filter_visibility(pathname, n_clicks, is_open):
+    # Pages that should not show the filter
+    pages_without_filter = ["/repo"]
+
+    if pathname in pages_without_filter:
+        return False  # Force collapse
+
+    # Allow toggle only on pages that support filters
     if n_clicks:
         return not is_open
     return is_open
+
 
 # Register app callbacks
 register_all_callbacks(app)

@@ -16,6 +16,8 @@ import profile.sections.section_dependency_risk_summary as section_dependency_ri
 import profile.sections.section_eol_risks as section_eol_risks
 
 from data.fetch_repo_profile import fetch_repo_profile, fetch_harvested_repo, classify_language_from_db
+from profile.sections import section_non_code
+
 
 def register_repo_profile_callbacks(app):
     @app.callback(
@@ -54,7 +56,15 @@ def register_repo_profile_callbacks(app):
 
         children.append(section_kpis.render(profile_data))
 
-        if language_group not in {"no_language", "markup_or_data", "other_programming"}:
+        if language_group in {"no_language", "markup_or_data", "other_programming", "unknown"}:
+            children.append(
+                section_non_code.render(
+                    profile_data,
+                    main_language=main_language,
+                    language_type=language_group
+                )
+            )
+        else:
             children.extend([
                 section_modernization.render(profile_data),
                 section_tech_stack.render(profile_data),
@@ -63,5 +73,6 @@ def register_repo_profile_callbacks(app):
                 section_dependency_risk_summary.render(profile_data),
                 section_eol_risks.render(profile_data),
             ])
+
 
         return html.Div(children, style={"padding": "20px"})
