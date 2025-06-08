@@ -69,7 +69,8 @@ layout = dbc.Container(
         # First row: Detection Status & Runtime Fragmentation
         dbc.Row(
             [
-                dbc.Col(card("Detection Status", "build-runtime-coverage-chart"), width=8),
+                dbc.Col(card("Build Tool/Runtime Detection Coverage", "build-runtime-coverage-chart"), width=4),
+                dbc.Col(card("Build Tool Detection Status", "status-by-tool-chart"), width=4),
                 dbc.Col(card("Runtime Fragmentation", "runtime-fragmentation-chart"), width=4),
             ],
             className="mb-4",
@@ -178,7 +179,7 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
-                dbc.Col(card("Detection Status", "status-by-tool-chart"), width=6),
+
             ],
             className="mb-4",
         ),
