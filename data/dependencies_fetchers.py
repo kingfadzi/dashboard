@@ -177,7 +177,9 @@ def fetch_subcategory_distribution(filters=None):
                     AND sd.package_type <> ''
                     AND LOWER(sd.sub_category) NOT IN (
                         'logging',
-                        'logging & monitoring'
+                        'logging & monitoring',
+                        'component models',
+                        'application servers'
                     )
                     AND LOWER(sd.category) NOT IN (
                         'other',
