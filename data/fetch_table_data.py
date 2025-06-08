@@ -37,8 +37,8 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
             SELECT
                 hr.repo_id,
                 hr.browse_url,
-                hr.transaction_cycle,
-                COALESCE(NULLIF(hr.app_id, ''), 'Unknown') AS app_id,
+                COALESCE(NULLIF(hr.transaction_cycle, ''), '-None-') AS transaction_cycle,
+                COALESCE(NULLIF(hr.app_id, ''), '-None-') AS app_id,
                 hr.scope,
                 hr.all_languages,
                 hr.main_language,

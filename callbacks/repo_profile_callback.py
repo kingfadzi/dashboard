@@ -15,6 +15,8 @@ import profile.sections.section_git_activity_hygiene as section_git_activity_hyg
 import profile.sections.section_dependency_risk_summary as section_dependency_risk_summary
 import profile.sections.section_eol_risks as section_eol_risks
 
+from data.fetch_repo_profile import fetch_repo_profile, fetch_harvested_repo, classify_language_from_db
+
 def register_repo_profile_callbacks(app):
     @app.callback(
         Output("repo-profile-content", "children"),
@@ -35,19 +37,31 @@ def register_repo_profile_callbacks(app):
 
         try:
             profile_data = fetch_repo_profile(repo_id)
+            harvested_repo = fetch_harvested_repo(repo_id)
+            app_id = harvested_repo.get("app_id")
+            main_language = harvested_repo.get("main_language")
+            language_group = classify_language_from_db(main_language)
         except Exception as e:
             return html.Div([
                 html.H3("Error loading profile"),
                 html.Pre(str(e))
             ])
 
-        return html.Div([
-            bio.render(profile_data),
-            section_kpis.render(profile_data),
-            section_modernization.render(profile_data),
-            section_tech_stack.render(profile_data),
-            section_code_quality.render(profile_data),
-            section_git_activity_hygiene.render(profile_data),
-            section_dependency_risk_summary.render(profile_data),
-            section_eol_risks.render(profile_data),
-        ], style={"padding": "20px"})
+        children = []
+
+        if app_id:
+            children.append(bio.render(profile_data))
+
+        children.append(section_kpis.render(profile_data))
+
+        if language_group not in {"no_language", "markup_or_data", "other_programming"}:
+            children.extend([
+                section_modernization.render(profile_data),
+                section_tech_stack.render(profile_data),
+                section_code_quality.render(profile_data),
+                section_git_activity_hygiene.render(profile_data),
+                section_dependency_risk_summary.render(profile_data),
+                section_eol_risks.render(profile_data),
+            ])
+
+        return html.Div(children, style={"padding": "20px"})
