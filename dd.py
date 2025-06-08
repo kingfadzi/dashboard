@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 
-# Sample DataFrame
+# Sample data
 df = px.data.gapminder().query("year == 2007")
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -58,4 +58,4 @@ def toggle_modal(click_data, close_clicks, is_open):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(host="0.0.0.0", port=8050, debug=True)
