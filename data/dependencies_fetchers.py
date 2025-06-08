@@ -388,7 +388,7 @@ def fetch_top_expired_xeol_products(filters=None):
               {extra_where}
             GROUP BY x.artifact_name, x.artifact_type
             ORDER BY repo_count DESC
-         
+            LIMIT 10
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
