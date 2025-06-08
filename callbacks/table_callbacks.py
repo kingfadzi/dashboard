@@ -29,6 +29,16 @@ def get_table_outputs_from_store(store_data, table_id=None):
             },
             "filterValueGetter": {"function": "params.data.repo_id"},
             "cellRendererParams": {"linkTarget": "_self", "html": True},
+            # Constrain displayed length with ellipsis
+            "minWidth": 200,
+            "maxWidth": 300,
+            "cellStyle": {
+                "whiteSpace": "nowrap",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis"
+            },
+            # Show full text on hover
+            "tooltipField": "repo_id",
         },
         {
             "headerName": "App ID",
@@ -42,6 +52,7 @@ def get_table_outputs_from_store(store_data, table_id=None):
             "filterValueGetter": {"function": "params.data.app_id"},
             "cellRendererParams": {"linkTarget": "_blank", "html": True},
         },
+        {"headerName": "TC", "field": "transaction_cycle"},
         {"headerName": "Status", "field": "activity_status"},
         {"headerName": "Size", "field": "classification_label"},
         {"headerName": "Age", "field": "repo_age_days", "type": "numericColumn"},
