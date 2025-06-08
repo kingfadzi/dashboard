@@ -13,7 +13,7 @@ layout = html.Div([
         n_clicks=0
     ),
     html.Div(id="repo-profile-content"),
-    html.Div(id="dummy-output", style={"display": "none"})  # Hidden dummy component
+    html.Div(id="dummy-output", style={"display": "none"})
 ])
 
 clientside_callback(
