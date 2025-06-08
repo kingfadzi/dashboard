@@ -379,7 +379,6 @@ def fetch_top_expired_xeol_products(filters=None):
             SELECT
                 x.artifact_name,
                 x.artifact_type,
-                x.artifact_version,  -- NEW
                 COUNT(DISTINCT x.repo_id) AS repo_count
             FROM xeol_results x
             JOIN harvested_repositories hr ON x.repo_id = hr.repo_id
@@ -387,9 +386,9 @@ def fetch_top_expired_xeol_products(filters=None):
               AND x.eol_date IS NOT NULL
               AND CAST(x.eol_date AS DATE) < CURRENT_DATE
               {extra_where}
-            GROUP BY x.artifact_name, x.artifact_type, x.artifact_version  
+            GROUP BY x.artifact_name, x.artifact_type
             ORDER BY repo_count DESC
-            LIMIT 10
+         
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))

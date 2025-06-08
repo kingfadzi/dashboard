@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-
+from plotly.graph_objects import Figure, Bar
 
 @standard_chart_style
 def render_dependency_detection_chart(df):
@@ -119,30 +119,24 @@ def render_dependency_volume_chart(df):
 
 
 
-@standard_chart_style
+@stacked_bar_chart_style(x_col="eol_state", y_col="repo_count")
 def render_xeol_top_products_chart(df):
     fig = px.bar(
         df,
         x="eol_state",
         y="repo_count",
         color="artifact_type",
-        text="repo_count",
         labels={
             "eol_state": "EOL Status",
             "repo_count": "Repository Count",
             "artifact_type": "Artifact Type"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
+    return fig, df
 
-    fig.update_layout(
-        barmode="stack",
-        xaxis=dict(type="category", showticklabels=True)
-    )
 
-    return fig
-
-from plotly.graph_objects import Figure, Bar
 
 @standard_chart_style
 def render_iac_category_summary_chart(df):
@@ -260,42 +254,37 @@ from components.chart_style import standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 import plotly.express as px
 
-@standard_chart_style
+@stacked_bar_chart_style(x_col="artifact_label", y_col="repo_count")
 def render_top_expired_xeol_products_chart(df):
-    df["product_label"] = df["artifact_name"].apply(
-        lambda x: x if len(x) <= 40 else x[:37] + "..."
+    df = df.copy()
+
+    df["artifact_label"] = df["artifact_name"].apply(
+        lambda name: name if len(name) <= 40 else name[:37] + "..."
     )
-    df.loc[df["artifact_name"].str.len() == 40, "product_label"] = df["artifact_name"]
 
     fig = px.bar(
         df,
-        y="product_label",
-        x="repo_count",
-        color="artifact_type",  # Back to artifact_type
-        orientation="h",
-        text="repo_count",
-        custom_data=["artifact_name"],
+        x="artifact_label",
+        y="repo_count",
+        color="artifact_type",
         labels={
-            "product_label": "",
+            "artifact_label": "Dependency",
             "repo_count": "Repository Count",
             "artifact_type": "Artifact Type"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack",
+        custom_data=["artifact_name"]  # optional: keep full name for hover
     )
 
     fig.update_traces(
-        hovertemplate=(
-            "<b>%{customdata[0]}</b><br>"
-            "Type: %{marker.color}<br>"
-            "Repositories: %{x}<br>"
-            "<extra></extra>"
-        )
+        hovertemplate="<b>%{customdata[0]}</b><br>Repositories: %{y}<br><extra></extra>"
     )
 
-    fig.update_layout(barmode="stack")
-    fig.update_yaxes(automargin=True, tickfont=dict(size=12))
+    return fig, df
 
-    return fig
+
+
 
 
 def render_dependency_detection_heatmap(df):
