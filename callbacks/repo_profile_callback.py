@@ -51,7 +51,7 @@ def register_repo_profile_callbacks(app):
 
         children = []
 
-        if app_id:
+        if app_id and str(app_id).lower() not in ('-none-', 'none'):
             children.append(bio.render(profile_data))
 
         children.append(section_kpis.render(profile_data))
