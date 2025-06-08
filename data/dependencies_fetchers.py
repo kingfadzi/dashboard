@@ -183,6 +183,8 @@ def fetch_subcategory_distribution(filters=None):
                         'development tools',
                         'development & testing tools',
                         'developer tooling',
+                        'logging',
+                        'logging & monitoring',
                         'build, dependency management & deployment tools'
                     )
                     {extra_where}
