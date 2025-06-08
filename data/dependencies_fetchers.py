@@ -175,6 +175,10 @@ def fetch_subcategory_distribution(filters=None):
                 WHERE 
                     sd.sub_category <> ''
                     AND sd.package_type <> ''
+                    AND LOWER(sd.sub_category) NOT IN (
+                        'logging',
+                        'logging & monitoring'
+                    )
                     AND LOWER(sd.category) NOT IN (
                         'other',
                         'utility libraries',
@@ -183,8 +187,6 @@ def fetch_subcategory_distribution(filters=None):
                         'development tools',
                         'development & testing tools',
                         'developer tooling',
-                        'logging',
-                        'logging & monitoring',
                         'build, dependency management & deployment tools'
                     )
                     {extra_where}
