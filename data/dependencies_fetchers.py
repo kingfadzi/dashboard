@@ -108,19 +108,29 @@ def fetch_xeol_detection_coverage(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = """
-            SELECT status, COUNT(*) AS repo_count
+            SELECT
+                sub.language_group,
+                sub.classification_label AS size,
+                COUNT(*) AS repo_count
             FROM (
                 SELECT
                     hr.repo_id,
-                    CASE WHEN x.repo_id IS NULL THEN 'No EOL Detected'
-                         ELSE 'EOL Artifacts Detected'
-                    END AS status
+                    hr.classification_label,
+                    CASE
+                        WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                        WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                        WHEN LOWER(hr.main_language) IN ('javascript', 'typescript', 'tsx') THEN 'javascript'
+                        WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic', 'asp.net', 'visual basic.net') THEN 'dotnet'
+                        WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                        ELSE NULL
+                    END AS language_group
                 FROM harvested_repositories hr
-                LEFT JOIN xeol_results x ON hr.repo_id = x.repo_id
+                JOIN xeol_results x ON hr.repo_id = x.repo_id
                 {where_clause}
-                GROUP BY hr.repo_id, x.repo_id
             ) sub
-            GROUP BY status
+            WHERE sub.language_group IS NOT NULL
+            GROUP BY sub.language_group, sub.classification_label
+            ORDER BY sub.language_group, sub.classification_label
         """
         where_clause = f"WHERE {condition_string}" if condition_string else ""
         stmt = text(sql.format(where_clause=where_clause))
