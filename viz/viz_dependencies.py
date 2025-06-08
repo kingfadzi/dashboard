@@ -36,18 +36,24 @@ def render_iac_detection_chart(df):
     )
     return fig, df
 
-@standard_chart_style
-def render_xeol_detection_chart(df):
-    return px.bar(
-        df,
-        x="status",
-        y="repo_count",
-        color="status",
-        text="repo_count",
-        labels={"status": "", "repo_count": "Repository Count"},
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
-    )
 
+
+@stacked_bar_chart_style(x_col="language_group", y_col="repo_count")
+def render_xeol_detection_chart(df):
+    fig = px.bar(
+        df,
+        x="language_group",
+        y="repo_count",
+        color="size",
+        labels={
+            "language_group": "Language",
+            "size": "Repo Size",
+            "repo_count": "Repository Count"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
+    )
+    return fig, df
 
 @standard_chart_style
 def render_package_type_distribution_chart(df):
