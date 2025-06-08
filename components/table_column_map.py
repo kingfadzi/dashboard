@@ -63,3 +63,51 @@ RC_COLUMNS_BY_TABLE_ID = {
         "rc.earliest_eol_date",
     ],
 }
+
+
+TABLE_COLUMN_DEFS_BY_ID = {
+    "overview": [
+        {"headerName": "Status", "field": "activity_status"},
+        {"headerName": "Size", "field": "classification_label"},
+        {"headerName": "Age", "field": "repo_age_days", "type": "numericColumn"},
+        {"headerName": "Language", "field": "all_languages"},
+        {"headerName": "Scope", "field": "scope"},
+        {"headerName": "Commits", "field": "total_commits", "type": "numericColumn"},
+        {"headerName": "Contributors", "field": "number_of_contributors", "type": "numericColumn"},
+        {
+            "headerName": "Last Commit",
+            "field": "last_commit_date",
+            "valueFormatter": {
+                "function": "params.value ? new Date(params.value).toLocaleDateString() : ''"
+            },
+        },
+    ],
+    "build-info": [
+        {"headerName": "Tool Version", "field": "build_tool_version"},
+        {"headerName": "Runtime Version", "field": "runtime_version"},
+        {"headerName": "Modules", "field": "project_count", "type": "numericColumn"},
+    ],
+    "code-insights": [
+        {"headerName": "Files", "field": "file_count", "type": "numericColumn"},
+        {"headerName": "Size (Bytes)", "field": "code_size_bytes", "type": "numericColumn"},
+        {"headerName": "LOC", "field": "total_lines_of_code", "type": "numericColumn"},
+        {"headerName": "Blank", "field": "total_blank", "type": "numericColumn"},
+        {"headerName": "Comment", "field": "total_comment", "type": "numericColumn"},
+        {"headerName": "NLOC", "field": "lizard_total_nloc", "type": "numericColumn"},
+        {"headerName": "CCN", "field": "lizard_total_ccn", "type": "numericColumn"},
+        {"headerName": "Semgrep", "field": "total_semgrep_findings", "type": "numericColumn"},
+        {"headerName": "Correctness", "field": "cat_correctness"},
+        {"headerName": "Security", "field": "cat_security"},
+    ],
+    "dependencies": [
+        {"headerName": "Packages", "field": "dependency_count", "type": "numericColumn"},
+        {"headerName": "Types", "field": "package_types"},
+        {"headerName": "Top Packages", "field": "top_packages"},
+        {"headerName": "IaC", "field": "iac_frameworks"},
+        {"headerName": "Critical", "field": "trivy_critical"},
+        {"headerName": "High", "field": "trivy_high"},
+        {"headerName": "Medium", "field": "trivy_medium"},
+        {"headerName": "Low", "field": "trivy_low"},
+        {"headerName": "EOL Pkgs", "field": "xeol_eol_package_count"},
+    ],
+}
