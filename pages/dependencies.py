@@ -153,27 +153,22 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 8: EOL Charts
+        # Row 8: All EOL Charts
         dbc.Row(
             [
-                dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=6),
-                dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
+                dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=4),
+                dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=4),
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
             ],
             className="mb-4",
         ),
 
-        # Row 9: EOL Detection + IaC Category Summary
+        # Row 9: IaC Category Summary + Adoption
         dbc.Row(
             [
-                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
                 dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
+                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
             ],
-            className="mb-4",
-        ),
-
-        # Row 10: IaC Adoption
-        dbc.Row(
-            [dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6)],
             className="mb-4",
         ),
 
