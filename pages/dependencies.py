@@ -144,7 +144,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 7: IaC Adoption + Dependency Volume
+        # Row 7: IaC Detection + Dependency Volume
         dbc.Row(
             [
                 dbc.Col(card("IaC Detection Coverage", "iac-detection-chart"), width=6),
@@ -153,27 +153,28 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 8
+        # Row 8: EOL Charts
         dbc.Row(
             [
-                dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
                 dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=6),
+                dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6),
             ],
             className="mb-4",
         ),
 
-        # Row 9
+        # Row 9: EOL Detection + IaC Category Summary
         dbc.Row(
-            [dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=6)],
+            [
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
+                dbc.Col(card("IaC Category Summary", "iac-category-summary-chart"), width=6),
+            ],
             className="mb-4",
         ),
 
-        # Row 10
+        # Row 10: IaC Adoption
         dbc.Row(
-            [
-                dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6),
-                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=6),
-            ]
+            [dbc.Col(card("IaC Adoption", "iac-adoption-chart"), width=6)],
+            className="mb-4",
         ),
 
         dcc.Store(id="filters-applied-trigger"),
