@@ -61,6 +61,7 @@ header_with_button = dbc.Row(
     className="mb-2 align-items-center",
 )
 
+
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
