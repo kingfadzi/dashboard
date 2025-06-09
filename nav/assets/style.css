@@ -1,0 +1,27 @@
+/* Prevent dropdown from growing */
+.fixed-multiselect .Select__control {
+  height: 38px;
+  min-height: 38px;
+  overflow: hidden;
+}
+
+/* Keep selected items on one line */
+.fixed-multiselect .Select__value-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+.fixed-multiselect .Select__value-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Chips inside the dropdown */
+.fixed-multiselect .Select__multi-value {
+  margin: 2px 4px 2px 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
