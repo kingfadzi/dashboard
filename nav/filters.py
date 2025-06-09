@@ -1,6 +1,7 @@
 import yaml
 import dash_mantine_components as dmc
 from dash import html
+import dash_bootstrap_components as dbc
 from pathlib import Path
 
 FILTER_YAML_PATH = Path("filters.yaml")
@@ -17,13 +18,10 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
-# Shared style for scrollable MultiSelect fields
-SELECT_STYLE = {
-    "width": "100%",
-    "maxHeight": "72px",      # limit vertical growth
-    "overflowY": "auto",      # enable scroll
-    "flexWrap": "wrap",
-    "display": "flex"
+# Used to limit selected tag display height (vertical scroll only)
+TAG_STYLE = {
+    "maxHeight": 60,
+    "overflowY": "auto"
 }
 
 def filter_layout():
@@ -35,7 +33,9 @@ def filter_layout():
             searchable=True,
             clearable=True,
             maxDropdownHeight=150,
-            style=SELECT_STYLE,
+            value=[],
+            style={"width": "100%"},
+            classNames={"values": TAG_STYLE},
             persistence=True,
         )
 
@@ -47,17 +47,18 @@ def filter_layout():
             persistence=True,
         )
 
-    return html.Div([
-        html.Div(make_multiselect("host-name-filter", "Select Host Name(s)"),
-                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-        html.Div(make_multiselect("activity-status-filter", "Select Activity Status"),
-                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-        html.Div(make_multiselect("tc-filter", "Select TC(s)"),
-                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-        html.Div(make_multiselect("language-filter", "Select Language(s)"),
-                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-        html.Div(make_multiselect("classification-filter", "Select Classification(s)"),
-                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-        html.Div(make_textinput("app-id-filter", "Enter App ID or Repo Slug"),
-                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-    ])
+    return dbc.Card(
+        dbc.CardBody(
+            dbc.Row([
+                dbc.Col(make_multiselect("host-name-filter", "Select Host Name(s)"), width=2),
+                dbc.Col(make_multiselect("activity-status-filter", "Select Activity Status"), width=2),
+                dbc.Col(make_multiselect("tc-filter", "Select TC(s)"), width=2),
+                dbc.Col(make_multiselect("language-filter", "Select Language(s)"), width=2),
+                dbc.Col(make_multiselect("classification-filter", "Select Classification(s)"), width=2),
+                dbc.Col(make_textinput("app-id-filter", "Enter App ID or Repo Slug"), width=2),
+            ],
+            className="g-3",
+            align="center")
+        ),
+        className="bg-light mb-4",
+    )
