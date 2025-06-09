@@ -1,60 +1,25 @@
-filters:
-  host-name-filter:
-    placeholder: "Select Host Name(s)"
-    options:
-      - label: Host A
-        value: host_a
-      - label: Host B
-        value: host_b
-      - label: Host C
-        value: host_c
-      - label: Host D
-        value: host_d
+host-name-filter:
+  - host-a
+  - host-b
+  - host-c
+  - host-d
 
-  activity-status-filter:
-    placeholder: "Select Activity Status"
-    options:
-      - label: Active
-        value: active
-      - label: Inactive
-        value: inactive
-      - label: Suspended
-        value: suspended
-      - label: Archived
-        value: archived
+activity-status-filter:
+  - active
+  - inactive
 
-  tc-filter:
-    placeholder: "Select TC(s)"
-    options:
-      - label: TC1
-        value: tc1
-      - label: TC2
-        value: tc2
-      - label: TC3
-        value: tc3
-      - label: TC4
-        value: tc4
+tc-filter:
+  - tc1
+  - tc2
+  - tc3
 
-  language-filter:
-    placeholder: "Select Language(s)"
-    options:
-      - label: Python
-        value: python
-      - label: Java
-        value: java
-      - label: JavaScript
-        value: javascript
-      - label: Go
-        value: go
+language-filter:
+  - Python
+  - Java
+  - JavaScript
+  - Go
 
-  classification-filter:
-    placeholder: "Select Classification(s)"
-    options:
-      - label: Core
-        value: core
-      - label: Support
-        value: support
-      - label: Deprecated
-        value: deprecated
-      - label: Experimental
-        value: experimental
+classification-filter:
+  - Business App
+  - Internal Tool
+  - Library

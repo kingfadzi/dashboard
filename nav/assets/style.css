@@ -1,8 +1,0 @@
-.Select--multi .Select-value-container {
-  max-height: 72px !important;
-  overflow-y: auto !important;
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  padding-right: 5px;
-}

@@ -1,113 +1,98 @@
 import yaml
-import json
-from dash import dcc, html, callback, Input, Output
-import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
+from dash import html
+from pathlib import Path
 
-# Load options from YAML
-with open("filters.yaml") as f:
-    FILTERS = yaml.safe_load(f)["filters"]
+FILTER_YAML_PATH = Path("filters.yaml")
 
-FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
+# Load from YAML
+with open(FILTER_YAML_PATH) as f:
+    yaml_data = yaml.safe_load(f)
 
-DROPDOWN_STYLE = {
-    "fontSize": "14px",
-    "minWidth": "100%",
-}
+# Define IDs
+FILTER_IDS = [
+    "host-name-filter",
+    "activity-status-filter",
+    "tc-filter",
+    "language-filter",
+    "classification-filter",
+    "app-id-filter",
+]
 
+# Create component map
 def filter_layout():
     return html.Div([
-        dbc.Card(
-            dbc.CardBody(
-                dbc.Row([
-                    dbc.Col(dcc.Dropdown(
-                        id="host-name-filter",
-                        options=FILTERS["host-name-filter"]["options"],
-                        placeholder=FILTERS["host-name-filter"]["placeholder"],
-                        multi=True,
-                        clearable=True,
-                        value=[],
-                        style=DROPDOWN_STYLE,
-                        persistence=True,
-                        persistence_type="local",
-                    ), width=2),
-
-                    dbc.Col(dcc.Dropdown(
-                        id="activity-status-filter",
-                        options=FILTERS["activity-status-filter"]["options"],
-                        placeholder=FILTERS["activity-status-filter"]["placeholder"],
-                        multi=True,
-                        clearable=True,
-                        value=[],
-                        style=DROPDOWN_STYLE,
-                        persistence=True,
-                        persistence_type="local",
-                    ), width=2),
-
-                    dbc.Col(dcc.Dropdown(
-                        id="tc-filter",
-                        options=FILTERS["tc-filter"]["options"],
-                        placeholder=FILTERS["tc-filter"]["placeholder"],
-                        multi=True,
-                        clearable=True,
-                        value=[],
-                        style=DROPDOWN_STYLE,
-                        persistence=True,
-                        persistence_type="local",
-                    ), width=2),
-
-                    dbc.Col(dcc.Dropdown(
-                        id="language-filter",
-                        options=FILTERS["language-filter"]["options"],
-                        placeholder=FILTERS["language-filter"]["placeholder"],
-                        multi=True,
-                        clearable=True,
-                        value=[],
-                        style=DROPDOWN_STYLE,
-                        persistence=True,
-                        persistence_type="local",
-                    ), width=2),
-
-                    dbc.Col(dcc.Dropdown(
-                        id="classification-filter",
-                        options=FILTERS["classification-filter"]["options"],
-                        placeholder=FILTERS["classification-filter"]["placeholder"],
-                        multi=True,
-                        clearable=True,
-                        value=[],
-                        style=DROPDOWN_STYLE,
-                        persistence=True,
-                        persistence_type="local",
-                    ), width=2),
-
-                    dbc.Col(dcc.Input(
-                        id="app-id-filter",
-                        type="text",
-                        placeholder="Enter App ID or Repo Slug",
-                        debounce=True,
-                        value="",
-                        className="form-control",
-                        style={"fontSize": "14px", "height": "38px"},
-                        persistence=True,
-                        persistence_type="local",
-                    ), width=2),
-                ],
-                align="center",
-                className="g-3")
+        html.Div([
+            dmc.MultiSelect(
+                id="host-name-filter",
+                data=[{"value": opt, "label": opt} for opt in yaml_data.get("host-name-filter", [])],
+                placeholder="Select Host Name(s)",
+                searchable=True,
+                maxDropdownHeight=100,
+                style={"width": "100%"},
+                persistence=True,
+                clearable=True,
             ),
-            className="bg-light mb-4",
-        ),
-        html.Div(id="filter-debug", style={"border": "1px solid gray", "padding": "10px"})
-    ])
+        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
 
-@callback(
-    Output("filter-debug", "children"),
-    Input("host-name-filter", "value"),
-    Input("activity-status-filter", "value"),
-    Input("tc-filter", "value"),
-    Input("language-filter", "value"),
-    Input("classification-filter", "value"),
-    Input("app-id-filter", "value"),
-)
-def debug_display(*values):
-    data = dict(zip(FILTER_IDS, values))
-    return html.Pre(json.dumps(data, indent=2))
+        html.Div([
+            dmc.MultiSelect(
+                id="activity-status-filter",
+                data=[{"value": opt, "label": opt} for opt in yaml_data.get("activity-status-filter", [])],
+                placeholder="Select Activity Status",
+                searchable=True,
+                maxDropdownHeight=100,
+                style={"width": "100%"},
+                persistence=True,
+                clearable=True,
+            ),
+        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+
+        html.Div([
+            dmc.MultiSelect(
+                id="tc-filter",
+                data=[{"value": opt, "label": opt} for opt in yaml_data.get("tc-filter", [])],
+                placeholder="Select TC(s)",
+                searchable=True,
+                maxDropdownHeight=100,
+                style={"width": "100%"},
+                persistence=True,
+                clearable=True,
+            ),
+        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+
+        html.Div([
+            dmc.MultiSelect(
+                id="language-filter",
+                data=[{"value": opt, "label": opt} for opt in yaml_data.get("language-filter", [])],
+                placeholder="Select Language(s)",
+                searchable=True,
+                maxDropdownHeight=100,
+                style={"width": "100%"},
+                persistence=True,
+                clearable=True,
+            ),
+        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+
+        html.Div([
+            dmc.MultiSelect(
+                id="classification-filter",
+                data=[{"value": opt, "label": opt} for opt in yaml_data.get("classification-filter", [])],
+                placeholder="Select Classification(s)",
+                searchable=True,
+                maxDropdownHeight=100,
+                style={"width": "100%"},
+                persistence=True,
+                clearable=True,
+            ),
+        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+
+        html.Div([
+            dmc.TextInput(
+                id="app-id-filter",
+                placeholder="Enter App ID or Repo Slug",
+                style={"width": "100%"},
+                persistence=True,
+            ),
+        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+    ])
