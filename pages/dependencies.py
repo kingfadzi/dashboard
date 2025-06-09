@@ -163,6 +163,16 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        dbc.Row(
+            [
+                dbc.Col(card("Repos by Resource Type & Severity", "trivy-resource-type-chart"), width=4),
+                dbc.Col(card("Top Vulnerable Packages", "trivy-packages-chart"), width=4),
+                dbc.Col(card("Fix Availability by Severity", "trivy-fix-status-chart"), width=4),
+            ],
+            className="mb-4",
+        ),
+
+
         # Row 9: IaC Category Summary + Adoption
         dbc.Row(
             [
