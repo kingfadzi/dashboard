@@ -3,61 +3,98 @@ import json
 from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
 
-# Load filter config from YAML
+# Load filter definitions from YAML
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
-# All component IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
 def filter_layout():
     return html.Div([
         dbc.Card(
             dbc.CardBody(
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            dcc.Dropdown(
-                                id=fid,
-                                options=conf.get("options", []),
-                                placeholder=conf.get("placeholder", ""),
-                                multi=True,
-                                clearable=True,
-                                value=[],  # <- Ensures options show
-                                style={
-                                    "fontSize": "14px",
-                                    "whiteSpace": "nowrap",
-                                    "overflow": "hidden",
-                                    "textOverflow": "ellipsis",
-                                },
-                            ),
-                            width=2
-                        )
-                        for fid, conf in FILTERS.items()
-                    ] + [
-                        dbc.Col(
-                            dcc.Input(
-                                id="app-id-filter",
-                                type="text",
-                                placeholder="Enter App ID or Repo Slug",
-                                debounce=True,
-                                className="form-control",
-                                style={"fontSize": "14px"},
-                                value=""  # <- Ensures it shows empty
-                            ),
-                            width=2
-                        )
-                    ],
-                    align="center",
-                    className="g-3",
-                )
+                dbc.Row([
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="host-name-filter",
+                            options=FILTERS["host-name-filter"]["options"],
+                            placeholder=FILTERS["host-name-filter"]["placeholder"],
+                            multi=True,
+                            clearable=True,
+                            value=[],
+                            style={"fontSize": "14px", "whiteSpace": "nowrap"},
+                        ),
+                        width=2
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="activity-status-filter",
+                            options=FILTERS["activity-status-filter"]["options"],
+                            placeholder=FILTERS["activity-status-filter"]["placeholder"],
+                            multi=True,
+                            clearable=True,
+                            value=[],
+                            style={"fontSize": "14px", "whiteSpace": "nowrap"},
+                        ),
+                        width=2
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="tc-filter",
+                            options=FILTERS["tc-filter"]["options"],
+                            placeholder=FILTERS["tc-filter"]["placeholder"],
+                            multi=True,
+                            clearable=True,
+                            value=[],
+                            style={"fontSize": "14px", "whiteSpace": "nowrap"},
+                        ),
+                        width=2
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="language-filter",
+                            options=FILTERS["language-filter"]["options"],
+                            placeholder=FILTERS["language-filter"]["placeholder"],
+                            multi=True,
+                            clearable=True,
+                            value=[],
+                            style={"fontSize": "14px", "whiteSpace": "nowrap"},
+                        ),
+                        width=2
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="classification-filter",
+                            options=FILTERS["classification-filter"]["options"],
+                            placeholder=FILTERS["classification-filter"]["placeholder"],
+                            multi=True,
+                            clearable=True,
+                            value=[],
+                            style={"fontSize": "14px", "whiteSpace": "nowrap"},
+                        ),
+                        width=2
+                    ),
+                    dbc.Col(
+                        dcc.Input(
+                            id="app-id-filter",
+                            type="text",
+                            placeholder="Enter App ID or Repo Slug",
+                            debounce=True,
+                            value="",
+                            className="form-control",
+                            style={"fontSize": "14px"},
+                        ),
+                        width=2
+                    ),
+                ],
+                align="center",
+                className="g-3")
             ),
-            className="bg-light mb-4",
+            className="bg-light mb-4"
         ),
-        html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})
+        html.Div(id="filter-debug", style={"border": "1px solid gray", "padding": "10px"})
     ])
 
-# Debug output
 @callback(
     Output("filter-debug", "children"),
     Input("default-filter-store", "data"),
