@@ -6,8 +6,6 @@ from data.dependencies_fetchers import (
     fetch_package_type_distribution,
     fetch_subcategory_distribution,
     fetch_dependency_volume_buckets,
-    fetch_xeol_top_products,
-    fetch_iac_category_summary,
     fetch_iac_adoption_by_framework_count, fetch_top_expired_xeol_products,
 )
 from data.fetch_spring_versions import fetch_spring_framework_versions
@@ -24,8 +22,6 @@ from viz.viz_dependencies import (
     render_subcategory_distribution_chart,
     render_dependency_volume_chart,
     render_xeol_top_products_chart,
-    render_iac_category_summary_chart,
-    render_iac_adoption_by_framework_count_chart, render_top_expired_xeol_products_chart,
 )
 from viz.viz_spring_versions import render_spring_version_chart
 from viz.viz_iac_server_orchestration import render_iac_server_orchestration_chart
@@ -63,21 +59,6 @@ def register_dependencies_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         return render_dependency_volume_chart(fetch_dependency_volume_buckets(filters))
 
-    @app.callback(Output("xeol-top-products-chart", "figure"), Input("default-filter-store", "data"))
-    def update_xeol_top_products_chart(store_data):
-        filters = extract_filter_dict_from_store(store_data)
-        return render_xeol_top_products_chart(fetch_xeol_top_products(filters))
-
-    @app.callback(Output("iac-category-summary-chart", "figure"), Input("default-filter-store", "data"))
-    def update_iac_category_summary(store_data):
-        filters = extract_filter_dict_from_store(store_data)
-        return render_iac_category_summary_chart(fetch_iac_category_summary(filters))
-
-    @app.callback(Output("iac-adoption-chart", "figure"), Input("default-filter-store", "data"))
-    def update_iac_adoption_chart(store_data):
-        filters = extract_filter_dict_from_store(store_data)
-        return render_iac_adoption_by_framework_count_chart(fetch_iac_adoption_by_framework_count(filters))
-
     @app.callback(
         Output("iac-server-orchestration-chart", "figure"),
         Input("default-filter-store", "data"),
@@ -85,12 +66,6 @@ def register_dependencies_callbacks(app):
     def update_iac_server_orchestration(store_data):
         filters = extract_filter_dict_from_store(store_data)
         return render_iac_server_orchestration_chart(fetch_iac_server_orchestration_usage(filters))
-
-    @app.callback(Output("top-expired-xeol-products-chart", "figure"), Input("default-filter-store", "data"))
-    def update_top_expired_xeol_products_chart(store_data):
-        filters = extract_filter_dict_from_store(store_data)
-        return render_top_expired_xeol_products_chart(fetch_top_expired_xeol_products(filters))
-
 
 
     @app.callback(

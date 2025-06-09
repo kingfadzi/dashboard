@@ -273,61 +273,6 @@ def fetch_dependency_volume_buckets(filters=None):
     return query_data(condition_string, param_dict)
 
 
-
-
-@cache.memoize()
-def fetch_xeol_top_products(filters=None):
-    def query_data(condition_string, param_dict):
-        sql = """
-            SELECT
-                CASE
-                    WHEN x.eol_date IS NULL THEN 'unknown'
-                    WHEN CAST(x.eol_date AS DATE) < CURRENT_DATE THEN 'past_eol'
-                    WHEN CAST(x.eol_date AS DATE) BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '180 days' THEN 'near_eol'
-                    ELSE 'future_eol'
-                END AS eol_state,
-                x.artifact_type,
-                COUNT(DISTINCT x.repo_id) AS repo_count
-            FROM xeol_results x
-            JOIN harvested_repositories hr ON x.repo_id = hr.repo_id
-            WHERE x.product_name IS NOT NULL
-            {extra_where}
-            GROUP BY eol_state, x.artifact_type
-            ORDER BY eol_state, artifact_type
-            LIMIT 10;
-        """
-        extra_where = f"AND {condition_string}" if condition_string else ""
-        stmt = text(sql.format(extra_where=extra_where))
-        return pd.read_sql(stmt, engine, params=param_dict)
-
-    condition_string, param_dict = build_repo_filter_conditions(filters)
-    return query_data(condition_string, param_dict)
-
-
-@cache.memoize()
-def fetch_iac_category_summary(filters=None):
-    def query_data(condition_string, param_dict):
-        sql = """
-            SELECT
-                ic.category,
-                COUNT(DISTINCT ic.framework) AS framework_count,
-                COUNT(DISTINCT ic.repo_id) AS repo_count
-            FROM iac_components ic
-            JOIN harvested_repositories hr ON ic.repo_id = hr.repo_id
-            {where_clause}
-            GROUP BY ic.category
-            ORDER BY repo_count DESC
-        """
-        where_clause = f"WHERE {condition_string}" if condition_string else ""
-        stmt = text(sql.format(where_clause=where_clause))
-        return pd.read_sql(stmt, engine, params=param_dict)
-
-    condition_string, param_dict = build_repo_filter_conditions(filters)
-    df = query_data(condition_string, param_dict)
-    return df if not df.empty else pd.DataFrame(columns=["category", "framework_count", "repo_count"])
-
-
-
 @cache.memoize()
 def fetch_iac_adoption_by_framework_count(filters=None):
     def query_data(condition_string, param_dict):
