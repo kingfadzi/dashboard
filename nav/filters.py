@@ -5,11 +5,9 @@ from pathlib import Path
 
 FILTER_YAML_PATH = Path("filters.yaml")
 
-# Load from YAML
 with open(FILTER_YAML_PATH) as f:
     yaml_data = yaml.safe_load(f)
 
-# Define IDs
 FILTER_IDS = [
     "host-name-filter",
     "activity-status-filter",
@@ -19,80 +17,47 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
-# Create component map
+# Shared style for scrollable MultiSelect fields
+SELECT_STYLE = {
+    "width": "100%",
+    "maxHeight": "72px",      # limit vertical growth
+    "overflowY": "auto",      # enable scroll
+    "flexWrap": "wrap",
+    "display": "flex"
+}
+
 def filter_layout():
+    def make_multiselect(id_, placeholder):
+        return dmc.MultiSelect(
+            id=id_,
+            data=[{"value": v, "label": v} for v in yaml_data.get(id_, [])],
+            placeholder=placeholder,
+            searchable=True,
+            clearable=True,
+            maxDropdownHeight=150,
+            style=SELECT_STYLE,
+            persistence=True,
+        )
+
+    def make_textinput(id_, placeholder):
+        return dmc.TextInput(
+            id=id_,
+            placeholder=placeholder,
+            style={"width": "100%"},
+            persistence=True,
+        )
+
     return html.Div([
-        html.Div([
-            dmc.MultiSelect(
-                id="host-name-filter",
-                data=[{"value": opt, "label": opt} for opt in yaml_data.get("host-name-filter", [])],
-                placeholder="Select Host Name(s)",
-                searchable=True,
-                maxDropdownHeight=100,
-                style={"width": "100%"},
-                persistence=True,
-                clearable=True,
-            ),
-        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-
-        html.Div([
-            dmc.MultiSelect(
-                id="activity-status-filter",
-                data=[{"value": opt, "label": opt} for opt in yaml_data.get("activity-status-filter", [])],
-                placeholder="Select Activity Status",
-                searchable=True,
-                maxDropdownHeight=100,
-                style={"width": "100%"},
-                persistence=True,
-                clearable=True,
-            ),
-        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-
-        html.Div([
-            dmc.MultiSelect(
-                id="tc-filter",
-                data=[{"value": opt, "label": opt} for opt in yaml_data.get("tc-filter", [])],
-                placeholder="Select TC(s)",
-                searchable=True,
-                maxDropdownHeight=100,
-                style={"width": "100%"},
-                persistence=True,
-                clearable=True,
-            ),
-        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-
-        html.Div([
-            dmc.MultiSelect(
-                id="language-filter",
-                data=[{"value": opt, "label": opt} for opt in yaml_data.get("language-filter", [])],
-                placeholder="Select Language(s)",
-                searchable=True,
-                maxDropdownHeight=100,
-                style={"width": "100%"},
-                persistence=True,
-                clearable=True,
-            ),
-        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-
-        html.Div([
-            dmc.MultiSelect(
-                id="classification-filter",
-                data=[{"value": opt, "label": opt} for opt in yaml_data.get("classification-filter", [])],
-                placeholder="Select Classification(s)",
-                searchable=True,
-                maxDropdownHeight=100,
-                style={"width": "100%"},
-                persistence=True,
-                clearable=True,
-            ),
-        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
-
-        html.Div([
-            dmc.TextInput(
-                id="app-id-filter",
-                placeholder="Enter App ID or Repo Slug",
-                style={"width": "100%"},
-                persistence=True,
-            ),
-        ], style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("host-name-filter", "Select Host Name(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("activity-status-filter", "Select Activity Status"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("tc-filter", "Select TC(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("language-filter", "Select Language(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("classification-filter", "Select Classification(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_textinput("app-id-filter", "Enter App ID or Repo Slug"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
     ])
