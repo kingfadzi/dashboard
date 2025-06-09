@@ -10,14 +10,16 @@ from data.dependency_insights import (
 
 
 from data.fetch_trivy_vulnerabilities import fetch_repo_count_by_trivy_severity, \
-    fetch_repo_count_by_trivy_resource_type_and_severity, fetch_repo_count_by_fix_status_and_severity
+    fetch_repo_count_by_trivy_resource_type_and_severity, fetch_repo_count_by_fix_status_and_severity, \
+    fetch_top_expired_trivy_products
 from utils.filter_utils import extract_filter_dict_from_store
 from viz.viz_dependencies import render_middleware_subcategory_chart
 from viz.viz_dependency_insights import render_no_deps_heatmap, render_with_deps_by_variant, \
     render_avg_deps_per_package_type_chart, render_no_dependency_repo_scatter, \
     render_no_dependency_buildtool_summary_chart, render_ee_usage_chart
 from viz.viz_trivy_vulnerabilities import render_repo_count_by_trivy_severity_chart, \
-    render_repo_count_by_trivy_resource_type_chart, render_repo_count_by_fix_status_chart
+    render_repo_count_by_trivy_resource_type_chart, render_repo_count_by_fix_status_chart, \
+    render_top_expired_trivy_products_chart
 
 
 def register_dependency_insights_callbacks(app):
@@ -121,6 +123,14 @@ def register_dependency_insights_callbacks(app):
         fig = render_repo_count_by_fix_status_chart(df)
         return fig
 
-
+    @app.callback(
+        Output("top-expired-trivy-products-chart", "figure"),
+        Input("default-filter-store", "data")
+    )
+    def update_top_expired_trivy_products_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        df = fetch_top_expired_trivy_products(filters)
+        fig = render_top_expired_trivy_products_chart(df)
+        return fig
 
 
