@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
+# All filter input IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
 def filter_layout():
@@ -22,7 +23,8 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            style={"fontSize": "14px", "height": "40px", "minWidth": "180px"},
+                            className="fixed-multiselect",
+                            style={"minWidth": "180px"},
                         ), width=2
                     ),
                     dbc.Col(
@@ -33,7 +35,8 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            style={"fontSize": "14px", "height": "40px", "minWidth": "180px"},
+                            className="fixed-multiselect",
+                            style={"minWidth": "180px"},
                         ), width=2
                     ),
                     dbc.Col(
@@ -44,7 +47,8 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            style={"fontSize": "14px", "height": "40px", "minWidth": "180px"},
+                            className="fixed-multiselect",
+                            style={"minWidth": "180px"},
                         ), width=2
                     ),
                     dbc.Col(
@@ -55,7 +59,8 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            style={"fontSize": "14px", "height": "40px", "minWidth": "180px"},
+                            className="fixed-multiselect",
+                            style={"minWidth": "180px"},
                         ), width=2
                     ),
                     dbc.Col(
@@ -66,7 +71,8 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            style={"fontSize": "14px", "height": "40px", "minWidth": "180px"},
+                            className="fixed-multiselect",
+                            style={"minWidth": "180px"},
                         ), width=2
                     ),
                     dbc.Col(
