@@ -46,7 +46,7 @@ def render_xeol_detection_chart(df):
         y="repo_count",
         color="size",
         labels={
-            "language_group": "Language",
+            "language_group": "",
             "size": "Repo Size",
             "repo_count": "Repository Count"
         },
@@ -127,7 +127,7 @@ def render_xeol_top_products_chart(df):
         y="repo_count",
         color="artifact_type",
         labels={
-            "eol_state": "EOL Status",
+            "eol_state": "",
             "repo_count": "Repository Count",
             "artifact_type": "Artifact Type"
         },
@@ -268,7 +268,7 @@ def render_top_expired_xeol_products_chart(df):
         y="repo_count",
         color="artifact_type",
         labels={
-            "artifact_label": "Dependency",
+            "artifact_label": "",
             "repo_count": "Repository Count",
             "artifact_type": "Artifact Type"
         },

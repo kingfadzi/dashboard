@@ -294,6 +294,7 @@ def fetch_xeol_top_products(filters=None):
             {extra_where}
             GROUP BY eol_state, x.artifact_type
             ORDER BY eol_state, artifact_type
+            LIMIT 10;
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))
