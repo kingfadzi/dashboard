@@ -156,9 +156,9 @@ layout = dbc.Container(
         # Row 8: All EOL Charts
         dbc.Row(
             [
+                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
                 dbc.Col(card("EOL Top Dependencies", "xeol-top-products-chart"), width=4),
                 dbc.Col(card("Top Expired Dependencies", "top-expired-xeol-products-chart"), width=4),
-                dbc.Col(card("EOL Detection Coverage", "xeol-detection-chart"), width=4),
             ],
             className="mb-4",
         ),
