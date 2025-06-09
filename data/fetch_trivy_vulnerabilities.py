@@ -100,30 +100,36 @@ def fetch_repo_count_by_fix_status_and_severity(filters=None):
     return query_data(condition_string, param_dict)
 
 @cache.memoize()
-def fetch_top_expired_trivy_products(filters=None):
+def fetch_top_trivy_products_by_repo_impact(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
+            WITH normalized AS (
+                SELECT
+                    repo_id,
+                    severity,
+                    CASE WHEN tv.resource_type = 'pom' 
+                         THEN SPLIT_PART(tv.pkg_name, ':', 1)
+                         ELSE tv.pkg_name
+                    END AS product
+                FROM trivy_vulnerability tv
+                JOIN harvested_repositories hr USING (repo_id)
+                WHERE tv.pkg_name IS NOT NULL
+                {extra_where}
+            ),
+            product_totals AS (
+                SELECT product, COUNT(DISTINCT repo_id) AS total_repos
+                FROM normalized
+                GROUP BY product
+                ORDER BY total_repos DESC
+                LIMIT 10
+            )
             SELECT
-                CASE
-                    WHEN tv.resource_type = 'pom' THEN SPLIT_PART(tv.pkg_name, ':', 1)
-                    ELSE tv.pkg_name
-                END AS product_name,
-                tv.resource_type,
-                tv.severity,
-                COUNT(DISTINCT tv.repo_id) AS repo_count
-            FROM trivy_vulnerability tv
-            JOIN harvested_repositories hr USING (repo_id)
-            WHERE tv.pkg_name IS NOT NULL
-              {extra_where}
-            GROUP BY
-                CASE
-                    WHEN tv.resource_type = 'pom' THEN SPLIT_PART(tv.pkg_name, ':', 1)
-                    ELSE tv.pkg_name
-                END,
-                tv.resource_type,
-                tv.severity
-            ORDER BY repo_count DESC
-            LIMIT 10
+                n.product,
+                n.severity,
+                COUNT(DISTINCT n.repo_id) AS repo_count
+            FROM normalized n
+            JOIN product_totals pt ON pt.product = n.product
+            GROUP BY n.product, n.severity
         """
         extra_where = f"AND {condition_string}" if condition_string else ""
         stmt = text(sql.format(extra_where=extra_where))

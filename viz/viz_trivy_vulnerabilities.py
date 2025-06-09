@@ -88,22 +88,23 @@ def render_repo_count_by_fix_status_chart(df):
     fig.update_layout(xaxis=dict(type="category", tickangle=45))
     return fig, df
 
-@stacked_bar_chart_style(x_col="product_name", y_col="repo_count")
-def render_top_expired_trivy_products_chart(df):
+@stacked_bar_chart_style(x_col="product", y_col="repo_count")
+def render_top_trivy_repo_impact_chart(df):
     df = df.copy()
-    df["product_name"] = df["product_name"].fillna("Unknown").str.slice(0, 40)
+    df["product"] = df["product"].fillna("Unknown").str.slice(0, 40)
     df["severity"] = df["severity"].fillna("Unknown")
-    df = df.sort_values("repo_count", ascending=False)
+
+    df = df.sort_values(["repo_count", "product"], ascending=[False, True])
 
     fig = px.bar(
         df,
-        x="product_name",
+        x="product",
         y="repo_count",
         color="severity",
         labels={
-            "product_name": "Product",
+            "product": "Product",
             "severity": "Severity",
-            "repo_count": "Repository Count"
+            "repo_count": "Affected Repositories"
         },
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         barmode="stack"
@@ -114,3 +115,4 @@ def render_top_expired_trivy_products_chart(df):
     )
 
     return fig, df
+
