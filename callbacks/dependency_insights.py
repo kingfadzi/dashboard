@@ -7,15 +7,17 @@ from data.dependency_insights import (
     fetch_avg_deps_per_package_type, fetch_no_dependency_repo_scatter, fetch_no_dependency_buildtool_summary,
     fetch_ee_usage_by_repo,
 )
-from data.fetch_trivy import fetch_trivy_repo_severity_by_resource_type, fetch_top_trivy_packages_by_severity, \
-    fetch_trivy_fix_status_by_severity
+
+
+from data.fetch_trivy_vulnerabilities import fetch_repo_count_by_trivy_severity, \
+    fetch_repo_count_by_trivy_resource_type_and_severity, fetch_repo_count_by_fix_status_and_severity
 from utils.filter_utils import extract_filter_dict_from_store
 from viz.viz_dependencies import render_middleware_subcategory_chart
 from viz.viz_dependency_insights import render_no_deps_heatmap, render_with_deps_by_variant, \
     render_avg_deps_per_package_type_chart, render_no_dependency_repo_scatter, \
     render_no_dependency_buildtool_summary_chart, render_ee_usage_chart
-from viz.viz_trivy_vulnerabilities import render_trivy_repos_by_resource_type_chart, \
-    render_top_trivy_packages_by_severity_chart, render_trivy_fix_status_by_severity_chart
+from viz.viz_trivy_vulnerabilities import render_repo_count_by_trivy_severity_chart, \
+    render_repo_count_by_trivy_resource_type_chart, render_repo_count_by_fix_status_chart
 
 
 def register_dependency_insights_callbacks(app):
@@ -90,33 +92,35 @@ def register_dependency_insights_callbacks(app):
         return render_ee_usage_chart(df)
 
     @app.callback(
-        Output("trivy-resource-type-chart", "figure"),
+        Output("trivy-severity-repo-count-chart", "figure"),
         Input("default-filter-store", "data")
     )
-    def update_trivy_repo_resource_type_chart(store_data):
+    def update_repo_count_by_trivy_severity_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        df = fetch_trivy_repo_severity_by_resource_type(filters)
-        fig = render_trivy_repos_by_resource_type_chart(df)
+        df = fetch_repo_count_by_trivy_severity(filters)
+        fig = render_repo_count_by_trivy_severity_chart(df)
         return fig
-
 
     @app.callback(
-        Output("trivy-packages-chart", "figure"),
+        Output("trivy-resource-type-repo-count-chart", "figure"),
         Input("default-filter-store", "data")
     )
-    def update_top_trivy_packages_chart(store_data):
+    def update_repo_count_by_trivy_resource_type_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        df = fetch_top_trivy_packages_by_severity(filters)
-        fig = render_top_trivy_packages_by_severity_chart(df)
+        df = fetch_repo_count_by_trivy_resource_type_and_severity(filters)
+        fig = render_repo_count_by_trivy_resource_type_chart(df)
         return fig
-
 
     @app.callback(
-        Output("trivy-fix-status-chart", "figure"),
+        Output("trivy-fix-status-repo-count-chart", "figure"),
         Input("default-filter-store", "data")
     )
-    def update_trivy_fix_status_chart(store_data):
+    def update_repo_count_by_fix_status_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        df = fetch_trivy_fix_status_by_severity(filters)
-        fig = render_trivy_fix_status_by_severity_chart(df)
+        df = fetch_repo_count_by_fix_status_and_severity(filters)
+        fig = render_repo_count_by_fix_status_chart(df)
         return fig
+
+
+
+

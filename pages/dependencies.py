@@ -165,9 +165,9 @@ layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(card("Repos by Resource Type & Severity", "trivy-resource-type-chart"), width=4),
-                dbc.Col(card("Top Vulnerable Packages", "trivy-packages-chart"), width=4),
-                dbc.Col(card("Fix Availability by Severity", "trivy-fix-status-chart"), width=4),
+                dbc.Col(card("Vulnerabilties by Severity", "trivy-severity-repo-count-chart"), width=4),
+                dbc.Col(card("Vulnerabilties by Resource Type", "trivy-resource-type-repo-count-chart"), width=4),
+                dbc.Col(card("Vulnerabilties by Fix Availability", "trivy-fix-status-repo-count-chart"), width=4),
             ],
             className="mb-4",
         ),
