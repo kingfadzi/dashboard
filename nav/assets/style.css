@@ -1,12 +1,20 @@
-/* Force value container inside dropdown to show max 2 rows, then scroll */
+/* Enable scrolling in multi-select dropdown */
 .Select--multi .Select-value-container {
-  max-height: 72px !important;  /* ~2 rows */
+  max-height: 72px !important; /* ~2 rows */
   overflow-y: auto !important;
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start; /* Keep input field aligned */
+  padding-bottom: 2px !important; /* Reduce bottom padding */
 }
 
-/* Optional: tighten up spacing */
+/* Tighten spacing around values */
 .Select-value {
-  margin: 2px 4px;
+  margin: 2px 4px !important;
+}
+
+/* Fix input field height/spacing */
+.Select--multi .Select-input {
+  height: 29px !important;
+  margin: 2px 4px !important;
 }
