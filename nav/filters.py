@@ -3,20 +3,15 @@ import json
 from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
 
+# Load options from YAML
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
-# Fixed style for dropdowns
 DROPDOWN_STYLE = {
     "fontSize": "14px",
-    "height": "38px",
-    "lineHeight": "38px",
-    "overflowY": "auto",
-    "textOverflow": "ellipsis",
-    "whiteSpace": "nowrap",
-    "minWidth": "180px"
+    "minWidth": "100%",
 }
 
 def filter_layout():

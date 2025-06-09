@@ -1,27 +1,10 @@
-/* Fixed multiselect styling for all dropdowns */
-.fixed-multiselect .Select__control {
-  height: 38px;
-  min-height: 38px;
-  overflow: hidden;
+/* Prevent value container from growing vertically */
+.Select-control {
+  max-height: 70px !important; /* roughly 2 lines worth */
+  overflow-y: auto !important;
 }
 
-/* Keep selected values on one row with horizontal scroll */
-.fixed-multiselect .Select__value-container {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.fixed-multiselect .Select__value-container::-webkit-scrollbar {
-  display: none;
-}
-
-/* Individual chips */
-.fixed-multiselect .Select__multi-value {
-  margin: 2px 4px 2px 0;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Prevent dropdowns from overlapping each other */
+.dash-bootstrap .col {
+  min-width: 180px;
 }
