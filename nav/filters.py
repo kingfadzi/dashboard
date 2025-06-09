@@ -7,17 +7,15 @@ import dash_bootstrap_components as dbc
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
+# List of input field IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
-# Shared style for dropdowns
+# Safe dropdown styling: fixed width/height, no wrapping
 DROPDOWN_STYLE = {
     "fontSize": "14px",
-    "height": "38px",
-    "lineHeight": "38px",
-    "overflow": "hidden",
-    "textOverflow": "ellipsis",
+    "minWidth": "180px",
+    "maxHeight": "38px",
     "whiteSpace": "nowrap",
-    "minWidth": "180px"
 }
 
 def filter_layout():
@@ -34,6 +32,8 @@ def filter_layout():
                             clearable=True,
                             value=[],
                             style=DROPDOWN_STYLE,
+                            persistence=True,
+                            persistence_type="local",
                         ), width=2
                     ),
                     dbc.Col(
@@ -45,6 +45,8 @@ def filter_layout():
                             clearable=True,
                             value=[],
                             style=DROPDOWN_STYLE,
+                            persistence=True,
+                            persistence_type="local",
                         ), width=2
                     ),
                     dbc.Col(
@@ -56,6 +58,8 @@ def filter_layout():
                             clearable=True,
                             value=[],
                             style=DROPDOWN_STYLE,
+                            persistence=True,
+                            persistence_type="local",
                         ), width=2
                     ),
                     dbc.Col(
@@ -67,6 +71,8 @@ def filter_layout():
                             clearable=True,
                             value=[],
                             style=DROPDOWN_STYLE,
+                            persistence=True,
+                            persistence_type="local",
                         ), width=2
                     ),
                     dbc.Col(
@@ -78,6 +84,8 @@ def filter_layout():
                             clearable=True,
                             value=[],
                             style=DROPDOWN_STYLE,
+                            persistence=True,
+                            persistence_type="local",
                         ), width=2
                     ),
                     dbc.Col(
@@ -89,6 +97,8 @@ def filter_layout():
                             value="",
                             className="form-control",
                             style={"fontSize": "14px", "height": "38px"},
+                            persistence=True,
+                            persistence_type="local",
                         ), width=2
                     ),
                 ],
