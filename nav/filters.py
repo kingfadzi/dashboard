@@ -1,19 +1,14 @@
 import yaml
+import json
 from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
-import json
 
-# Load from YAML
+# Load YAML filters
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
-# All filter input IDs
+# List of input IDs for use in callbacks
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
-
-print("🔍 FILTERS LOADED FROM YAML:")
-for fid, conf in FILTERS.items():
-    print(f" - {fid}: {len(conf.get('options', []))} options")
-
 
 def filter_layout():
     return html.Div([
@@ -28,6 +23,7 @@ def filter_layout():
                                 placeholder=conf.get("placeholder", ""),
                                 multi=True,
                                 clearable=True,
+                                value=[],  # ensure options render
                                 style={
                                     "fontSize": "14px",
                                     "whiteSpace": "nowrap",
@@ -36,7 +32,8 @@ def filter_layout():
                                 },
                                 persistence=True,
                                 persistence_type="local",
-                            ), width=2
+                            ),
+                            width=2
                         )
                         for fid, conf in FILTERS.items()
                     ] + [
@@ -50,7 +47,8 @@ def filter_layout():
                                 style={"fontSize": "14px"},
                                 persistence=True,
                                 persistence_type="local",
-                            ), width=2
+                            ),
+                            width=2
                         )
                     ],
                     align="center",
@@ -62,6 +60,7 @@ def filter_layout():
         html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})
     ])
 
+# Optional: Debug callback (if store is global)
 @callback(
     Output("filter-debug", "children"),
     Input("default-filter-store", "data"),
