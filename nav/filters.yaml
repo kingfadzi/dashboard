@@ -18,7 +18,32 @@ language-filter:
   - Java
   - JavaScript
   - Go
-
+  - Ruby
+  - Rust
+  - Swift
+  - Kotlin
+  - TypeScript
+  - PHP
+  - Perl
+  - C
+  - C++
+  - C#
+  - Dart
+  - Scala
+  - R
+  - Objective-C
+  - Haskell
+  - Lua
+  - Elixir
+  - F#
+  - Erlang
+  - Julia
+  - Groovy
+  - Bash
+  - PowerShell
+  - Assembly
+  - COBOL
+  - Fortran
 classification-filter:
   - Business App
   - Internal Tool
