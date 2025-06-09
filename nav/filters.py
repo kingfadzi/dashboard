@@ -1,12 +1,13 @@
 import yaml
-from dash import dcc, html
+from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
+import json
 
-# Load YAML once
+# Load from YAML
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
-# List of all filter input IDs (including the app ID input)
+# All filter input IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
 def filter_layout():
@@ -55,3 +56,10 @@ def filter_layout():
         ),
         html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})
     ])
+
+@callback(
+    Output("filter-debug", "children"),
+    Input("default-filter-store", "data"),
+)
+def debug_filter_store(data):
+    return html.Pre(json.dumps(data, indent=2))

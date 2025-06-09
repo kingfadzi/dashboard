@@ -29,12 +29,5 @@ app.layout = dbc.Container(
 def persist_filter_values(*values):
     return dict(zip(FILTER_IDS, values))
 
-@app.callback(
-    Output("filter-debug", "children"),
-    Input("default-filter-store", "data"),
-)
-def debug(data):
-    return html.Pre(str(data))
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8050, debug=True)
