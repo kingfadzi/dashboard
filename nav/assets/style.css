@@ -1,20 +1,8 @@
-/* Enable scrolling in multi-select dropdown */
 .Select--multi .Select-value-container {
-  max-height: 72px !important; /* ~2 rows */
+  max-height: 72px !important;
   overflow-y: auto !important;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start; /* Keep input field aligned */
-  padding-bottom: 2px !important; /* Reduce bottom padding */
-}
-
-/* Tighten spacing around values */
-.Select-value {
-  margin: 2px 4px !important;
-}
-
-/* Fix input field height/spacing */
-.Select--multi .Select-input {
-  height: 29px !important;
-  margin: 2px 4px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  padding-right: 5px;
 }
