@@ -1,7 +1,7 @@
-from dash import Dash, dcc, html, Output, Input, page_container
+from dash import Dash, dcc, html, page_container
 import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
-from filters import filter_layout, FILTER_IDS, register_callbacks
+from filters import filter_layout, register_callbacks
 
 app = Dash(
     __name__,
@@ -12,18 +12,9 @@ app = Dash(
 
 app.layout = dmc.MantineProvider([
     dcc.Location(id="url", refresh=False),
-    dcc.Store(id="default-filter-store", storage_type="local"),
     filter_layout(),
     page_container,
 ])
-
-@app.callback(
-    Output("default-filter-store", "data"),
-    [Input(fid, "value") for fid in FILTER_IDS],
-    prevent_initial_call=True,
-)
-def persist_filter_values(*values):
-    return dict(zip(FILTER_IDS, values))
 
 register_callbacks(app)
 
