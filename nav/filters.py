@@ -1,4 +1,5 @@
 import yaml
+import dash  # Required for dash.exceptions.PreventUpdate
 from pathlib import Path
 import dash_mantine_components as dmc
 from dash import html, Output, Input, State, callback_context, ALL
@@ -28,6 +29,7 @@ def make_multiselect(id_, placeholder):
         classNames={"values": "scrollable-tags"},
         style={"width": "100%"},
         persistence=True,
+        hidePickedOptions=True,
     )
 
 def make_textinput(id_, placeholder):
@@ -62,30 +64,25 @@ def render_tags(data):
         values = data.get(fid)
         if not values:
             continue
-        # Accept both string (for text field) and list (for dropdowns)
         if isinstance(values, str):
             if values.strip():
                 tags.append(
                     dmc.Badge(
                         values,
                         rightSection=dmc.ActionIcon(
-                            "x", 
-                            size="xs",
-                            id={"type": "remove-tag", "filter": fid, "value": values}
+                            "x", size="xs", id={"type": "remove-tag", "filter": fid, "value": values}
                         ),
                         variant="light",
                         className="me-1 mb-1"
                     )
                 )
-        else:
+        elif isinstance(values, list):
             for v in values:
                 tags.append(
                     dmc.Badge(
                         v,
                         rightSection=dmc.ActionIcon(
-                            "x",
-                            size="xs",
-                            id={"type": "remove-tag", "filter": fid, "value": v}
+                            "x", size="xs", id={"type": "remove-tag", "filter": fid, "value": v}
                         ),
                         variant="light",
                         className="me-1 mb-1"
