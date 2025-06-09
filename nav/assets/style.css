@@ -1,10 +1,20 @@
-/* Prevent value container from growing vertically */
+/* Limit the height of the multi-select value container */
+.Select--multi .Select-value {
+  white-space: nowrap;
+}
+
+.Select--multi .Select-value-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .Select-control {
-  max-height: 70px !important; /* roughly 2 lines worth */
+  max-height: 72px !important; /* ~2 rows */
   overflow-y: auto !important;
 }
 
-/* Prevent dropdowns from overlapping each other */
-.dash-bootstrap .col {
-  min-width: 180px;
+/* Remove scrollbar from outer wrapper */
+.Select-control::-webkit-scrollbar {
+  display: none;
 }
