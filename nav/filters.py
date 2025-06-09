@@ -1,116 +1,118 @@
 import yaml
 import json
-import dash
-from dash import dcc, html, callback, Input, Output, State
+from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
 
-# Load filters.yaml
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
-def chip_field(filter_id):
-    return html.Div([
-        dcc.Store(id=f"{filter_id}-store", storage_type="local"),
-        html.Div(id=f"{filter_id}-chips", n_clicks=0, style={"cursor": "pointer", "overflowX": "auto", "whiteSpace": "nowrap"}),
-        dcc.Dropdown(
-            id=filter_id,
-            options=FILTERS[filter_id]["options"],
-            placeholder=FILTERS[filter_id]["placeholder"],
-            multi=True,
-            clearable=True,
-            value=[],
-            style={"display": "none"},
-        )
-    ])
+# Fixed style for dropdowns
+DROPDOWN_STYLE = {
+    "fontSize": "14px",
+    "height": "38px",
+    "lineHeight": "38px",
+    "overflowY": "auto",
+    "textOverflow": "ellipsis",
+    "whiteSpace": "nowrap",
+    "minWidth": "180px"
+}
 
 def filter_layout():
     return html.Div([
         dbc.Card(
             dbc.CardBody(
                 dbc.Row([
-                    dbc.Col(chip_field("host-name-filter"), width=2),
-                    dbc.Col(chip_field("activity-status-filter"), width=2),
-                    dbc.Col(chip_field("tc-filter"), width=2),
-                    dbc.Col(chip_field("language-filter"), width=2),
-                    dbc.Col(chip_field("classification-filter"), width=2),
-                    dbc.Col(
-                        dcc.Input(
-                            id="app-id-filter",
-                            type="text",
-                            placeholder="Enter App ID or Repo Slug",
-                            debounce=True,
-                            value="",
-                            className="form-control",
-                            style={"fontSize": "14px", "height": "38px"},
-                        ), width=2
-                    ),
-                ], align="center", className="g-3")
+                    dbc.Col(dcc.Dropdown(
+                        id="host-name-filter",
+                        options=FILTERS["host-name-filter"]["options"],
+                        placeholder=FILTERS["host-name-filter"]["placeholder"],
+                        multi=True,
+                        clearable=True,
+                        value=[],
+                        style=DROPDOWN_STYLE,
+                        persistence=True,
+                        persistence_type="local",
+                    ), width=2),
+
+                    dbc.Col(dcc.Dropdown(
+                        id="activity-status-filter",
+                        options=FILTERS["activity-status-filter"]["options"],
+                        placeholder=FILTERS["activity-status-filter"]["placeholder"],
+                        multi=True,
+                        clearable=True,
+                        value=[],
+                        style=DROPDOWN_STYLE,
+                        persistence=True,
+                        persistence_type="local",
+                    ), width=2),
+
+                    dbc.Col(dcc.Dropdown(
+                        id="tc-filter",
+                        options=FILTERS["tc-filter"]["options"],
+                        placeholder=FILTERS["tc-filter"]["placeholder"],
+                        multi=True,
+                        clearable=True,
+                        value=[],
+                        style=DROPDOWN_STYLE,
+                        persistence=True,
+                        persistence_type="local",
+                    ), width=2),
+
+                    dbc.Col(dcc.Dropdown(
+                        id="language-filter",
+                        options=FILTERS["language-filter"]["options"],
+                        placeholder=FILTERS["language-filter"]["placeholder"],
+                        multi=True,
+                        clearable=True,
+                        value=[],
+                        style=DROPDOWN_STYLE,
+                        persistence=True,
+                        persistence_type="local",
+                    ), width=2),
+
+                    dbc.Col(dcc.Dropdown(
+                        id="classification-filter",
+                        options=FILTERS["classification-filter"]["options"],
+                        placeholder=FILTERS["classification-filter"]["placeholder"],
+                        multi=True,
+                        clearable=True,
+                        value=[],
+                        style=DROPDOWN_STYLE,
+                        persistence=True,
+                        persistence_type="local",
+                    ), width=2),
+
+                    dbc.Col(dcc.Input(
+                        id="app-id-filter",
+                        type="text",
+                        placeholder="Enter App ID or Repo Slug",
+                        debounce=True,
+                        value="",
+                        className="form-control",
+                        style={"fontSize": "14px", "height": "38px"},
+                        persistence=True,
+                        persistence_type="local",
+                    ), width=2),
+                ],
+                align="center",
+                className="g-3")
             ),
             className="bg-light mb-4",
         ),
         html.Div(id="filter-debug", style={"border": "1px solid gray", "padding": "10px"})
     ])
 
-def render_chip_callback(filter_id):
-    @callback(
-        Output(f"{filter_id}-chips", "children"),
-        Input(f"{filter_id}-store", "data"),
-        State(f"{filter_id}", "options"),
-    )
-    def update_chips(selected, options):
-        if not selected:
-            return html.Div(FILTERS[filter_id]["placeholder"], style={"color": "#999"})
-
-        chips = [
-            dbc.Badge(
-                next((o["label"] for o in options if o["value"] == v), v),
-                color="primary",
-                pill=True,
-                className="me-1"
-            ) for v in selected
-        ]
-
-        return html.Div(chips, style={
-            "whiteSpace": "nowrap",
-            "overflowX": "auto",
-            "display": "flex",
-            "gap": "0.25rem",
-        })
-
-def toggle_dropdown_callback(filter_id):
-    @callback(
-        Output(filter_id, "style"),
-        Output(f"{filter_id}-chips", "style"),
-        Input(f"{filter_id}-chips", "n_clicks"),
-        Input(filter_id, "value"),
-        prevent_initial_call=True
-    )
-    def toggle_dropdown(chip_clicks, value):
-        trigger = dash.callback_context.triggered_id
-        if trigger == f"{filter_id}-chips":
-            return {"display": "block"}, {"display": "none"}
-        else:
-            return {"display": "none"}, {"display": "block"}
-
-def sync_selection_store_callback(filter_id):
-    @callback(
-        Output(f"{filter_id}-store", "data"),
-        Input(filter_id, "value"),
-    )
-    def sync_to_store(value):
-        return value
-
-for fid in FILTERS:
-    render_chip_callback(fid)
-    toggle_dropdown_callback(fid)
-    sync_selection_store_callback(fid)
-
 @callback(
     Output("filter-debug", "children"),
-    [Input(f"{fid}-store", "data") for fid in FILTERS] + [Input("app-id-filter", "value")],
+    Input("host-name-filter", "value"),
+    Input("activity-status-filter", "value"),
+    Input("tc-filter", "value"),
+    Input("language-filter", "value"),
+    Input("classification-filter", "value"),
+    Input("app-id-filter", "value"),
 )
 def debug_display(*values):
     data = dict(zip(FILTER_IDS, values))
-    return html.Pre(json.dumps(data or {}, indent=2))
+    return html.Pre(json.dumps(data, indent=2))
