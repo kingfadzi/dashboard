@@ -3,11 +3,11 @@ import json
 from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
 
-# Load YAML filters
+# Load filter config from YAML
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
-# List of input IDs for use in callbacks
+# All component IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
 def filter_layout():
@@ -23,15 +23,13 @@ def filter_layout():
                                 placeholder=conf.get("placeholder", ""),
                                 multi=True,
                                 clearable=True,
-                                value=[],  # ensure options render
+                                value=[],  # <- Ensures options show
                                 style={
                                     "fontSize": "14px",
                                     "whiteSpace": "nowrap",
                                     "overflow": "hidden",
                                     "textOverflow": "ellipsis",
                                 },
-                                persistence=True,
-                                persistence_type="local",
                             ),
                             width=2
                         )
@@ -45,8 +43,7 @@ def filter_layout():
                                 debounce=True,
                                 className="form-control",
                                 style={"fontSize": "14px"},
-                                persistence=True,
-                                persistence_type="local",
+                                value=""  # <- Ensures it shows empty
                             ),
                             width=2
                         )
@@ -60,10 +57,10 @@ def filter_layout():
         html.Div(id="filter-debug", style={'border': '1px solid gray', 'padding': '10px'})
     ])
 
-# Optional: Debug callback (if store is global)
+# Debug output
 @callback(
     Output("filter-debug", "children"),
     Input("default-filter-store", "data"),
 )
 def debug_filter_store(data):
-    return html.Pre(json.dumps(data, indent=2))
+    return html.Pre(json.dumps(data or {}, indent=2))
