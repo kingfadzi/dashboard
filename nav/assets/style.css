@@ -1,6 +1,6 @@
-.scrollable-tags {
-  max-height: 64px;
-  overflow-y: auto;
+.div.scrollable-tags {
+  max-height: 64px !important;
+  overflow-y: auto !important;
   display: flex;
   flex-wrap: wrap;
 }
