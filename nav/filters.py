@@ -1,8 +1,8 @@
 import yaml
-import dash  # Required for dash.exceptions.PreventUpdate
+import dash
 from pathlib import Path
 import dash_mantine_components as dmc
-from dash import html, Output, Input, State, callback_context, ALL
+from dash import html, Output, Input, State, callback_context, ALL, no_update
 import dash_bootstrap_components as dbc
 
 FILTER_IDS = [
@@ -14,7 +14,9 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
+MULTISELECT_IDS = FILTER_IDS[:-1]  # All filters except app-id-filter
 FILTER_YAML_PATH = Path("filters.yaml")
+
 with open(FILTER_YAML_PATH) as f:
     yaml_data = yaml.safe_load(f)
 
@@ -29,7 +31,9 @@ def make_multiselect(id_, placeholder):
         classNames={"values": "scrollable-tags"},
         style={"width": "100%"},
         persistence=True,
+        persistence_type="session",
         hidePickedOptions=True,
+        nothingFoundMessage="No options available",
     )
 
 def make_textinput(id_, placeholder):
@@ -112,7 +116,7 @@ def register_callbacks(app):
         triggered = ctx.triggered_id
         outputs = []
         for fid, state in zip(FILTER_IDS, states):
-            if triggered and fid == triggered["filter"]:
+            if fid == triggered["filter"]:
                 if isinstance(state, list):
                     outputs.append([v for v in state if v != triggered["value"]])
                 elif isinstance(state, str) and state == triggered["value"]:
@@ -122,3 +126,17 @@ def register_callbacks(app):
             else:
                 outputs.append(state)
         return outputs
+
+    @app.callback(
+        [Output(fid, "data") for fid in MULTISELECT_IDS],
+        [Input(fid, "value") for fid in MULTISELECT_IDS],
+        prevent_initial_call=True
+    )
+    def update_dropdown_options(*selected_values):
+        updated_data = []
+        for fid, selected in zip(MULTISELECT_IDS, selected_values):
+            original_options = yaml_data.get(fid, [])
+            current_selection = selected if selected else []
+            available_options = [opt for opt in original_options if opt not in current_selection]
+            updated_data.append([{"value": v, "label": v} for v in available_options])
+        return updated_data
