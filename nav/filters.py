@@ -1,8 +1,8 @@
 import yaml
+import dash
 import dash_mantine_components as dmc
-from dash import html, Output, Input, State, MATCH, ctx
+from dash import html, Input, Output, State, ctx, dcc
 import dash_bootstrap_components as dbc
-from dash_iconify import DashIconify
 from pathlib import Path
 
 FILTER_YAML_PATH = Path("filters.yaml")
@@ -19,80 +19,109 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
+
+# Each filter's MultiSelect
+filter_components = {
+    fid: dmc.MultiSelect(
+        id=fid,
+        data=[{"value": v, "label": v} for v in yaml_data.get(fid, [])],
+        placeholder=fid.replace("-", " ").title(),
+        searchable=True,
+        clearable=True,
+        maxDropdownHeight=150,
+        classNames={"values": "scrollable-tags"},
+        style={"width": "100%"},
+        persistence=True,
+        value=[],
+    )
+    for fid in FILTER_IDS if fid != "app-id-filter"
+}
+
+filter_components["app-id-filter"] = dmc.TextInput(
+    id="app-id-filter",
+    placeholder="Enter App ID or Repo Slug",
+    style={"width": "100%"},
+    persistence=True,
+    value="",
+)
+
+
 def filter_layout():
-    def make_multiselect(id_, placeholder):
-        return dmc.MultiSelect(
-            id=id_,
-            data=[{"value": v, "label": v} for v in yaml_data.get(id_, [])],
-            placeholder=placeholder,
-            searchable=True,
-            clearable=True,
-            maxDropdownHeight=150,
-            style={"width": "100%"},
-            persistence=True,
-        )
-
-    def make_textinput(id_, placeholder):
-        return dmc.TextInput(
-            id=id_,
-            placeholder=placeholder,
-            style={"width": "100%"},
-            persistence=True,
-        )
-
     return dbc.Card(
-        dbc.CardBody([
-            dbc.Row([
-                dbc.Col(make_multiselect("host-name-filter", "Select Host Name(s)"), width=2),
-                dbc.Col(make_multiselect("activity-status-filter", "Select Activity Status"), width=2),
-                dbc.Col(make_multiselect("tc-filter", "Select TC(s)"), width=2),
-                dbc.Col(make_multiselect("language-filter", "Select Language(s)"), width=2),
-                dbc.Col(make_multiselect("classification-filter", "Select Classification(s)"), width=2),
-                dbc.Col(make_textinput("app-id-filter", "Enter App ID or Repo Slug"), width=2),
-            ], className="g-3", align="center"),
-            html.Div(id="filter-tags", className="mt-3"),
-        ]),
+        dbc.CardBody(
+            dbc.Row(
+                [
+                    dbc.Col(filter_components[fid], width=2) for fid in FILTER_IDS
+                ],
+                className="g-3",
+                align="center",
+            )
+        ),
         className="bg-light mb-4",
     )
 
+
+def tag_layout():
+    return html.Div(id="filter-tags-container", className="mb-3")
+
+
 def register_callbacks(app):
     @app.callback(
-        Output("filter-tags", "children"),
+        Output("filter-tags-container", "children"),
         [Input(fid, "value") for fid in FILTER_IDS],
-        prevent_initial_call=False,
+        prevent_initial_call=False
     )
     def update_tags(*values):
-        data = dict(zip(FILTER_IDS, values))
-        tags = [
-            dmc.Badge(
-                label,
-                variant="light",
-                size="md",
-                radius="sm",
-                rightSection=dmc.ActionIcon(
-                    DashIconify(icon="mdi:close", width=12),
-                    size="xs",
-                    variant="subtle",
-                    color="red",
-                    n_clicks=0,
-                    id={"type": "remove-tag", "filter_id": fid, "value": label},
-                ),
-                className="me-2 mb-2",
-            )
-            for fid, vals in data.items() if isinstance(vals, list)
-            for label in vals
-        ]
-        return dmc.Group(tags, spacing="xs", position="left")
+        tags = []
+        for fid, val in zip(FILTER_IDS, values):
+            if isinstance(val, list):
+                for v in val:
+                    tags.append(
+                        dmc.Badge(
+                            f"{v}",
+                            rightSection=dmc.ActionIcon(
+                                dmc.IconX(size=10),
+                                size="xs",
+                                variant="transparent",
+                                id={"type": "remove-tag", "filter_id": fid, "value": v},
+                            ),
+                            variant="light",
+                            className="me-1 mb-1"
+                        )
+                    )
+            elif isinstance(val, str) and val:
+                tags.append(
+                    dmc.Badge(
+                        f"{val}",
+                        rightSection=dmc.ActionIcon(
+                            dmc.IconX(size=10),
+                            size="xs",
+                            variant="transparent",
+                            id={"type": "remove-tag", "filter_id": fid, "value": val},
+                        ),
+                        variant="light",
+                        className="me-1 mb-1"
+                    )
+                )
+        return tags
 
-    @app.callback(
-        Output(MATCH, "value"),
-        Input({"type": "remove-tag", "filter_id": MATCH, "value": MATCH}, "n_clicks"),
-        State(MATCH, "value"),
-        prevent_initial_call=True,
-    )
-    def remove_tag(n, current_vals):
-        triggered = ctx.triggered_id
-        if not triggered:
-            return current_vals
-        to_remove = triggered["value"]
-        return [v for v in current_vals if v != to_remove]
+    # Dynamically clear value when X is clicked
+    for fid in FILTER_IDS:
+        @app.callback(
+            Output(fid, "value"),
+            Input({"type": "remove-tag", "filter_id": fid, "value": dash.dependencies.ALL}, "n_clicks"),
+            State(fid, "value"),
+            prevent_initial_call=True,
+        )
+        def clear_value(n_clicks_list, current_values):
+            if not ctx.triggered_id or not isinstance(current_values, (list, str)):
+                raise dash.exceptions.PreventUpdate
+
+            triggered = ctx.triggered_id
+            to_remove = triggered["value"]
+
+            if isinstance(current_values, list):
+                return [v for v in current_values if v != to_remove]
+            elif isinstance(current_values, str) and current_values == to_remove:
+                return ""
+            raise dash.exceptions.PreventUpdate
