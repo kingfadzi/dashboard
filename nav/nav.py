@@ -1,5 +1,6 @@
 from dash import Dash, dcc, html, Input, Output, page_container
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 from filters import filter_layout, FILTER_IDS, register_callbacks
 
 app = Dash(
@@ -9,19 +10,20 @@ app = Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 
-app.layout = dbc.Container(
-    [
-        dcc.Location(id="url", refresh=False),
-        dcc.Location(id="repo-modal-location", refresh=False),
-        html.Div(id="repo-modal-container"),
-        dcc.Store(id="default-filter-store", storage_type="local"),
-        dbc.Collapse(filter_layout(), id="filter-collapse", is_open=True),
-        page_container,
-    ],
-    fluid=True,
+app.layout = dmc.MantineProvider(
+    children=dbc.Container(
+        [
+            dcc.Location(id="url", refresh=False),
+            dcc.Location(id="repo-modal-location", refresh=False),
+            html.Div(id="repo-modal-container"),
+            dcc.Store(id="default-filter-store", storage_type="local"),
+            dbc.Collapse(filter_layout(), id="filter-collapse", is_open=True),
+            page_container,
+        ],
+        fluid=True,
+    )
 )
 
-# Store filter values
 @app.callback(
     Output("default-filter-store", "data"),
     [Input(fid, "value") for fid in FILTER_IDS],
@@ -30,7 +32,6 @@ app.layout = dbc.Container(
 def persist_filter_values(*values):
     return dict(zip(FILTER_IDS, values))
 
-# Register tag callbacks
 register_callbacks(app)
 
 if __name__ == "__main__":
