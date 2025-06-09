@@ -1,14 +1,9 @@
 import yaml
-import dash
-import dash_mantine_components as dmc
-from dash import html, Input, Output, State, ctx, dcc
-import dash_bootstrap_components as dbc
 from pathlib import Path
-
-FILTER_YAML_PATH = Path("filters.yaml")
-
-with open(FILTER_YAML_PATH) as f:
-    yaml_data = yaml.safe_load(f)
+from dash import html, Output, Input, State, callback_context
+import dash_mantine_components as dmc
+import dash
+import dash_bootstrap_components as dbc
 
 FILTER_IDS = [
     "host-name-filter",
@@ -19,109 +14,110 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
+FILTER_YAML_PATH = Path("filters.yaml")
+with open(FILTER_YAML_PATH) as f:
+    yaml_data = yaml.safe_load(f)
 
-# Each filter's MultiSelect
-filter_components = {
-    fid: dmc.MultiSelect(
-        id=fid,
-        data=[{"value": v, "label": v} for v in yaml_data.get(fid, [])],
-        placeholder=fid.replace("-", " ").title(),
+def make_multiselect(id_, placeholder):
+    return dmc.MultiSelect(
+        id=id_,
+        data=[{"value": v, "label": v} for v in yaml_data.get(id_, [])],
+        placeholder=placeholder,
         searchable=True,
         clearable=True,
         maxDropdownHeight=150,
-        classNames={"values": "scrollable-tags"},
+        value=[],  # Start empty; selections tracked separately
         style={"width": "100%"},
         persistence=True,
-        value=[],
     )
-    for fid in FILTER_IDS if fid != "app-id-filter"
-}
 
-filter_components["app-id-filter"] = dmc.TextInput(
-    id="app-id-filter",
-    placeholder="Enter App ID or Repo Slug",
-    style={"width": "100%"},
-    persistence=True,
-    value="",
-)
-
+def make_textinput(id_, placeholder):
+    return dmc.TextInput(
+        id=id_,
+        placeholder=placeholder,
+        style={"width": "100%"},
+        persistence=True,
+    )
 
 def filter_layout():
-    return dbc.Card(
-        dbc.CardBody(
-            dbc.Row(
-                [
-                    dbc.Col(filter_components[fid], width=2) for fid in FILTER_IDS
-                ],
-                className="g-3",
-                align="center",
-            )
+    return html.Div([
+        dbc.Card(
+            dbc.CardBody(
+                dbc.Row([
+                    dbc.Col(make_multiselect("host-name-filter", "Select Host Name(s)"), width=2),
+                    dbc.Col(make_multiselect("activity-status-filter", "Select Activity Status"), width=2),
+                    dbc.Col(make_multiselect("tc-filter", "Select TC(s)"), width=2),
+                    dbc.Col(make_multiselect("language-filter", "Select Language(s)"), width=2),
+                    dbc.Col(make_multiselect("classification-filter", "Select Classification(s)"), width=2),
+                    dbc.Col(make_textinput("app-id-filter", "Enter App ID or Repo Slug"), width=2),
+                ], className="g-3", align="center")
+            ),
+            className="bg-light mb-3"
         ),
-        className="bg-light mb-4",
-    )
+        html.Div(id="filter-tags", className="mb-4"),
+        dmc.LoadingOverlay(
+            html.Div(id="dummy-output"),
+            overlayOpacity=0,
+            visible=False
+        )
+    ])
 
-
-def tag_layout():
-    return html.Div(id="filter-tags-container", className="mb-3")
-
+def render_tags(data):
+    tags = []
+    for fid in FILTER_IDS:
+        values = data.get(fid)
+        if not values:
+            continue
+        if not isinstance(values, list):
+            values = [values]
+        for v in values:
+            tags.append(
+                dmc.Badge(
+                    v,
+                    rightSection=dmc.CloseButton(size="xs", id={"type": "remove-tag", "filter": fid, "value": v}),
+                    variant="light",
+                    className="me-1 mb-1"
+                )
+            )
+    return tags
 
 def register_callbacks(app):
     @app.callback(
-        Output("filter-tags-container", "children"),
+        Output("default-filter-store", "data", allow_duplicate=True),
         [Input(fid, "value") for fid in FILTER_IDS],
-        prevent_initial_call=False
+        prevent_initial_call=True
     )
-    def update_tags(*values):
-        tags = []
-        for fid, val in zip(FILTER_IDS, values):
-            if isinstance(val, list):
-                for v in val:
-                    tags.append(
-                        dmc.Badge(
-                            f"{v}",
-                            rightSection=dmc.ActionIcon(
-                                dmc.IconX(size=10),
-                                size="xs",
-                                variant="transparent",
-                                id={"type": "remove-tag", "filter_id": fid, "value": v},
-                            ),
-                            variant="light",
-                            className="me-1 mb-1"
-                        )
-                    )
-            elif isinstance(val, str) and val:
-                tags.append(
-                    dmc.Badge(
-                        f"{val}",
-                        rightSection=dmc.ActionIcon(
-                            dmc.IconX(size=10),
-                            size="xs",
-                            variant="transparent",
-                            id={"type": "remove-tag", "filter_id": fid, "value": val},
-                        ),
-                        variant="light",
-                        className="me-1 mb-1"
-                    )
-                )
-        return tags
+    def persist_filters(*values):
+        return dict(zip(FILTER_IDS, values))
 
-    # Dynamically clear value when X is clicked
-    for fid in FILTER_IDS:
-        @app.callback(
-            Output(fid, "value"),
-            Input({"type": "remove-tag", "filter_id": fid, "value": dash.dependencies.ALL}, "n_clicks"),
-            State(fid, "value"),
-            prevent_initial_call=True,
-        )
-        def clear_value(n_clicks_list, current_values):
-            if not ctx.triggered_id or not isinstance(current_values, (list, str)):
-                raise dash.exceptions.PreventUpdate
+    @app.callback(
+        Output("filter-tags", "children"),
+        Input("default-filter-store", "data")
+    )
+    def update_tags(data):
+        if not data:
+            return []
+        return render_tags(data)
 
-            triggered = ctx.triggered_id
-            to_remove = triggered["value"]
-
-            if isinstance(current_values, list):
-                return [v for v in current_values if v != to_remove]
-            elif isinstance(current_values, str) and current_values == to_remove:
-                return ""
-            raise dash.exceptions.PreventUpdate
+    @app.callback(
+        Output("default-filter-store", "data", allow_duplicate=True),
+        Input({"type": "remove-tag", "filter": dash.ALL, "value": dash.ALL}, "n_clicks"),
+        State("default-filter-store", "data"),
+        prevent_initial_call=True
+    )
+    def remove_tag(n_clicks_list, data):
+        ctx = callback_context
+        if not ctx.triggered or not data:
+            return data
+        triggered = ctx.triggered_id
+        if not triggered:
+            return data
+        fid = triggered["filter"]
+        val = triggered["value"]
+        updated = data.copy()
+        current_values = updated.get(fid, [])
+        if isinstance(current_values, list):
+            updated[fid] = [v for v in current_values if v != val]
+        elif current_values == val:
+            updated[fid] = []
+        return updated
