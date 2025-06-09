@@ -1,35 +1,63 @@
-from dash import Dash, dcc, html, Input, Output, page_container
-import dash_bootstrap_components as dbc
+import yaml
 import dash_mantine_components as dmc
-from filters import filter_layout, FILTER_IDS
+from dash import html
+from pathlib import Path
 
-app = Dash(
-    __name__,
-    use_pages=True,
-    suppress_callback_exceptions=True,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-)
+FILTER_YAML_PATH = Path("filters.yaml")
 
-app.layout = dmc.MantineProvider(  # ← Wrap here
-    html.Div(
-        [
-            dcc.Location(id="url", refresh=False),
-            dcc.Location(id="repo-modal-location", refresh=False),
-            html.Div(id="repo-modal-container"),
-            dcc.Store(id="default-filter-store", storage_type="local"),
-            filter_layout(),
-            page_container,
-        ]
-    )
-)
+with open(FILTER_YAML_PATH) as f:
+    yaml_data = yaml.safe_load(f)
 
-@app.callback(
-    Output("default-filter-store", "data"),
-    [Input(fid, "value") for fid in FILTER_IDS],
-    prevent_initial_call=True,
-)
-def persist_filter_values(*values):
-    return dict(zip(FILTER_IDS, values))
+FILTER_IDS = [
+    "host-name-filter",
+    "activity-status-filter",
+    "tc-filter",
+    "language-filter",
+    "classification-filter",
+    "app-id-filter",
+]
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8050, debug=True)
+# Shared style for scrollable MultiSelect fields
+SELECT_STYLE = {
+    "width": "100%",
+    "maxHeight": "72px",      # limit vertical growth
+    "overflowY": "auto",      # enable scroll
+    "flexWrap": "wrap",
+    "display": "flex"
+}
+
+def filter_layout():
+    def make_multiselect(id_, placeholder):
+        return dmc.MultiSelect(
+            id=id_,
+            data=[{"value": v, "label": v} for v in yaml_data.get(id_, [])],
+            placeholder=placeholder,
+            searchable=True,
+            clearable=True,
+            maxDropdownHeight=150,
+            style=SELECT_STYLE,
+            persistence=True,
+        )
+
+    def make_textinput(id_, placeholder):
+        return dmc.TextInput(
+            id=id_,
+            placeholder=placeholder,
+            style={"width": "100%"},
+            persistence=True,
+        )
+
+    return html.Div([
+        html.Div(make_multiselect("host-name-filter", "Select Host Name(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("activity-status-filter", "Select Activity Status"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("tc-filter", "Select TC(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("language-filter", "Select Language(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_multiselect("classification-filter", "Select Classification(s)"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+        html.Div(make_textinput("app-id-filter", "Enter App ID or Repo Slug"),
+                 style={"width": "16.66%", "display": "inline-block", "padding": "4px"}),
+    ])
