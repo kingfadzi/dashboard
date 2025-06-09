@@ -10,6 +10,11 @@ with open("filters.yaml") as f:
 # All filter input IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 
+print("🔍 FILTERS LOADED FROM YAML:")
+for fid, conf in FILTERS.items():
+    print(f" - {fid}: {len(conf.get('options', []))} options")
+
+
 def filter_layout():
     return html.Div([
         dbc.Card(
