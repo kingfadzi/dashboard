@@ -1,5 +1,6 @@
 from dash import Dash, dcc, html, Input, Output, page_container
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 from filters import filter_layout, FILTER_IDS
 
 app = Dash(
@@ -9,16 +10,17 @@ app = Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP],
 )
 
-app.layout = dbc.Container(
-    [
-        dcc.Location(id="url", refresh=False),
-        dcc.Location(id="repo-modal-location", refresh=False),
-        html.Div(id="repo-modal-container"),
-        dcc.Store(id="default-filter-store", storage_type="local"),
-        filter_layout(),
-        page_container,
-    ],
-    fluid=True,
+app.layout = dmc.MantineProvider(  # ← Wrap here
+    html.Div(
+        [
+            dcc.Location(id="url", refresh=False),
+            dcc.Location(id="repo-modal-location", refresh=False),
+            html.Div(id="repo-modal-container"),
+            dcc.Store(id="default-filter-store", storage_type="local"),
+            filter_layout(),
+            page_container,
+        ]
+    )
 )
 
 @app.callback(
