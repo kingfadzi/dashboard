@@ -1,0 +1,40 @@
+filters:
+  host-name-filter:
+    placeholder: "Select Host Name(s)"
+    options:
+      - label: Host A
+        value: host_a
+      - label: Host B
+        value: host_b
+
+  activity-status-filter:
+    placeholder: "Select Activity Status"
+    options:
+      - label: Active
+        value: active
+      - label: Inactive
+        value: inactive
+
+  tc-filter:
+    placeholder: "Select TC(s)"
+    options:
+      - label: TC1
+        value: tc1
+      - label: TC2
+        value: tc2
+
+  language-filter:
+    placeholder: "Select Language(s)"
+    options:
+      - label: Python
+        value: python
+      - label: Java
+        value: java
+
+  classification-filter:
+    placeholder: "Select Classification(s)"
+    options:
+      - label: Core
+        value: core
+      - label: Support
+        value: support
