@@ -378,16 +378,24 @@ def fetch_top_expired_xeol_products(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
             SELECT
-                x.artifact_name,
+                CASE
+                    WHEN x.artifact_type = 'java-archive' THEN SPLIT_PART(x.product_name, ':', 1)
+                    ELSE x.product_name
+                END AS artifact_name,
                 x.artifact_type,
                 COUNT(DISTINCT x.repo_id) AS repo_count
             FROM xeol_results x
             JOIN harvested_repositories hr ON x.repo_id = hr.repo_id
-            WHERE x.artifact_name IS NOT NULL
+            WHERE x.product_name IS NOT NULL
               AND x.eol_date IS NOT NULL
               AND CAST(x.eol_date AS DATE) < CURRENT_DATE
               {extra_where}
-            GROUP BY x.artifact_name, x.artifact_type
+            GROUP BY
+                CASE
+                    WHEN x.artifact_type = 'java-archive' THEN SPLIT_PART(x.product_name, ':', 1)
+                    ELSE x.product_name
+                END,
+                x.artifact_type
             ORDER BY repo_count DESC
             LIMIT 10
         """
@@ -397,6 +405,8 @@ def fetch_top_expired_xeol_products(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+
 
 
 @cache.memoize()

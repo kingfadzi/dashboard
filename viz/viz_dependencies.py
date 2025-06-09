@@ -254,36 +254,32 @@ from components.chart_style import standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 import plotly.express as px
 
-@stacked_bar_chart_style(x_col="artifact_label", y_col="repo_count")
+@stacked_bar_chart_style(x_col="artifact_name", y_col="repo_count")
 def render_top_expired_xeol_products_chart(df):
     df = df.copy()
-
-    df["artifact_label"] = df["artifact_name"].apply(
-        lambda name: name if len(name) <= 40 else name[:37] + "..."
-    )
+    df["artifact_type"] = df["artifact_type"].fillna("Unknown")
+    df["artifact_name"] = df["artifact_name"].fillna("Unknown").str.slice(0, 40)
+    df = df.sort_values("repo_count", ascending=False)
 
     fig = px.bar(
         df,
-        x="artifact_label",
+        x="artifact_name",
         y="repo_count",
         color="artifact_type",
         labels={
-            "artifact_label": "",
-            "repo_count": "Repository Count",
-            "artifact_type": "Artifact Type"
+            "artifact_name": "Artifact / Product",
+            "artifact_type": "Artifact Type",
+            "repo_count": "Repository Count"
         },
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
-        barmode="stack",
-        custom_data=["artifact_name"]  # optional: keep full name for hover
+        barmode="stack"
     )
 
-    fig.update_traces(
-        hovertemplate="<b>%{customdata[0]}</b><br>Repositories: %{y}<br><extra></extra>"
+    fig.update_layout(
+        xaxis=dict(type="category", tickangle=45)
     )
 
     return fig, df
-
-
 
 
 
