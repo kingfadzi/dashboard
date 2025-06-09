@@ -1,20 +1,12 @@
-/* Limit the height of the multi-select value container */
-.Select--multi .Select-value {
-  white-space: nowrap;
-}
-
-.Select--multi .Select-value-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.Select-control {
-  max-height: 72px !important; /* ~2 rows */
+/* Force value container inside dropdown to show max 2 rows, then scroll */
+.Select--multi .Select-value-container {
+  max-height: 72px !important;  /* ~2 rows */
   overflow-y: auto !important;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-/* Remove scrollbar from outer wrapper */
-.Select-control::-webkit-scrollbar {
-  display: none;
+/* Optional: tighten up spacing */
+.Select-value {
+  margin: 2px 4px;
 }
