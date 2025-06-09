@@ -13,7 +13,7 @@ FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
 def chip_field(filter_id):
     return html.Div([
         dcc.Store(id=f"{filter_id}-store", storage_type="local"),
-        html.Div(id=f"{filter_id}-chips", n_clicks=0, style={"cursor": "pointer"}),
+        html.Div(id=f"{filter_id}-chips", n_clicks=0, style={"cursor": "pointer", "overflowX": "auto", "whiteSpace": "nowrap"}),
         dcc.Dropdown(
             id=filter_id,
             options=FILTERS[filter_id]["options"],
@@ -44,8 +44,7 @@ def filter_layout():
                             value="",
                             className="form-control",
                             style={"fontSize": "14px", "height": "38px"},
-                        ),
-                        width=2
+                        ), width=2
                     ),
                 ], align="center", className="g-3")
             ),
@@ -54,7 +53,6 @@ def filter_layout():
         html.Div(id="filter-debug", style={"border": "1px solid gray", "padding": "10px"})
     ])
 
-# Show chips with "+N more" summary
 def render_chip_callback(filter_id):
     @callback(
         Output(f"{filter_id}-chips", "children"),
@@ -65,24 +63,22 @@ def render_chip_callback(filter_id):
         if not selected:
             return html.Div(FILTERS[filter_id]["placeholder"], style={"color": "#999"})
 
-        limit = 2
-        visible = selected[:limit]
-        hidden = len(selected) - limit
-
         chips = [
             dbc.Badge(
                 next((o["label"] for o in options if o["value"] == v), v),
                 color="primary",
                 pill=True,
                 className="me-1"
-            ) for v in visible
+            ) for v in selected
         ]
-        if hidden > 0:
-            chips.append(html.Span(f"+{hidden} more", style={"color": "#555", "fontSize": "12px"}))
 
-        return html.Div(chips, style={"whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"})
+        return html.Div(chips, style={
+            "whiteSpace": "nowrap",
+            "overflowX": "auto",
+            "display": "flex",
+            "gap": "0.25rem",
+        })
 
-# Toggle dropdown open/close
 def toggle_dropdown_callback(filter_id):
     @callback(
         Output(filter_id, "style"),
@@ -98,7 +94,6 @@ def toggle_dropdown_callback(filter_id):
         else:
             return {"display": "none"}, {"display": "block"}
 
-# Sync dropdown values into store
 def sync_selection_store_callback(filter_id):
     @callback(
         Output(f"{filter_id}-store", "data"),
@@ -107,13 +102,11 @@ def sync_selection_store_callback(filter_id):
     def sync_to_store(value):
         return value
 
-# Register all callbacks for each field
 for fid in FILTERS:
     render_chip_callback(fid)
     toggle_dropdown_callback(fid)
     sync_selection_store_callback(fid)
 
-# Show all filter values for debug
 @callback(
     Output("filter-debug", "children"),
     [Input(f"{fid}-store", "data") for fid in FILTERS] + [Input("app-id-filter", "value")],
