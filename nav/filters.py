@@ -18,12 +18,6 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
-# Used to limit selected tag display height (vertical scroll only)
-TAG_STYLE = {
-    "maxHeight": 60,
-    "overflowY": "auto"
-}
-
 def filter_layout():
     def make_multiselect(id_, placeholder):
         return dmc.MultiSelect(
@@ -33,9 +27,8 @@ def filter_layout():
             searchable=True,
             clearable=True,
             maxDropdownHeight=150,
-            value=[],
+            classNames={"values": "scrollable-tags"},
             style={"width": "100%"},
-            classNames={"values": TAG_STYLE},
             persistence=True,
         )
 
@@ -56,9 +49,7 @@ def filter_layout():
                 dbc.Col(make_multiselect("language-filter", "Select Language(s)"), width=2),
                 dbc.Col(make_multiselect("classification-filter", "Select Classification(s)"), width=2),
                 dbc.Col(make_textinput("app-id-filter", "Enter App ID or Repo Slug"), width=2),
-            ],
-            className="g-3",
-            align="center")
+            ], className="g-3", align="center")
         ),
         className="bg-light mb-4",
     )
