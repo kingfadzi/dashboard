@@ -49,20 +49,33 @@ def fetch_repo_count_by_trivy_severity(filters=None):
 def fetch_repo_count_by_trivy_resource_type_and_severity(filters=None):
     def query_data(condition_string, param_dict):
         sql = """
+            WITH resource_totals AS (
+                SELECT 
+                    resource_type,
+                    COUNT(DISTINCT repo_id) AS total_repo_count
+                FROM trivy_vulnerability tv
+                JOIN harvested_repositories hr USING (repo_id)
+                WHERE resource_type IS NOT NULL AND {condition_string}
+                GROUP BY resource_type
+                ORDER BY total_repo_count DESC
+                LIMIT 10
+            )
             SELECT 
-                resource_type,
-                severity,
-                COUNT(DISTINCT repo_id) AS repo_count
+                tv.resource_type,
+                tv.severity,
+                COUNT(DISTINCT tv.repo_id) AS repo_count
             FROM trivy_vulnerability tv
             JOIN harvested_repositories hr USING (repo_id)
-            WHERE resource_type IS NOT NULL AND {condition_string}
-            GROUP BY resource_type, severity
+            JOIN resource_totals rt ON tv.resource_type = rt.resource_type
+            WHERE {condition_string}
+            GROUP BY tv.resource_type, tv.severity
         """
         stmt = text(sql.format(condition_string=condition_string or "TRUE"))
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 @cache.memoize()
 def fetch_repo_count_by_fix_status_and_severity(filters=None):
