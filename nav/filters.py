@@ -3,12 +3,22 @@ import json
 from dash import dcc, html, callback, Input, Output
 import dash_bootstrap_components as dbc
 
-# Load filters.yaml
+# Load from filters.yaml
 with open("filters.yaml") as f:
     FILTERS = yaml.safe_load(f)["filters"]
 
-# All filter input IDs
 FILTER_IDS = list(FILTERS.keys()) + ["app-id-filter"]
+
+# Shared style for dropdowns
+DROPDOWN_STYLE = {
+    "fontSize": "14px",
+    "height": "38px",
+    "lineHeight": "38px",
+    "overflow": "hidden",
+    "textOverflow": "ellipsis",
+    "whiteSpace": "nowrap",
+    "minWidth": "180px"
+}
 
 def filter_layout():
     return html.Div([
@@ -23,8 +33,7 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            className="fixed-multiselect",
-                            style={"minWidth": "180px"},
+                            style=DROPDOWN_STYLE,
                         ), width=2
                     ),
                     dbc.Col(
@@ -35,8 +44,7 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            className="fixed-multiselect",
-                            style={"minWidth": "180px"},
+                            style=DROPDOWN_STYLE,
                         ), width=2
                     ),
                     dbc.Col(
@@ -47,8 +55,7 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            className="fixed-multiselect",
-                            style={"minWidth": "180px"},
+                            style=DROPDOWN_STYLE,
                         ), width=2
                     ),
                     dbc.Col(
@@ -59,8 +66,7 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            className="fixed-multiselect",
-                            style={"minWidth": "180px"},
+                            style=DROPDOWN_STYLE,
                         ), width=2
                     ),
                     dbc.Col(
@@ -71,8 +77,7 @@ def filter_layout():
                             multi=True,
                             clearable=True,
                             value=[],
-                            className="fixed-multiselect",
-                            style={"minWidth": "180px"},
+                            style=DROPDOWN_STYLE,
                         ), width=2
                     ),
                     dbc.Col(
@@ -83,10 +88,12 @@ def filter_layout():
                             debounce=True,
                             value="",
                             className="form-control",
-                            style={"fontSize": "14px"},
+                            style={"fontSize": "14px", "height": "38px"},
                         ), width=2
                     ),
-                ], align="center", className="g-3")
+                ],
+                align="center",
+                className="g-3")
             ),
             className="bg-light mb-4",
         ),
