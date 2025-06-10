@@ -31,55 +31,50 @@ def render_role_distribution_chart(df: pd.DataFrame):
 
 
 
-import plotly.graph_objects as go
-import numpy as np
+import pandas as pd
+import plotly.express as px
+from dash import dcc
 
-def render_language_mixed_chart(df):
-    # Sort for consistent layout
+def render_language_metrics_heatmap(df):
+    # Sort by dominance
     df = df.sort_values("avg_percent_usage", ascending=False)
 
-    # Log-scale repo count for line
-    df["log_repo_count"] = df["repo_count"].apply(lambda x: round(np.log10(x + 1), 2))
+    # Select and round key metrics
+    metric_cols = [
+        "avg_percent_usage",
+        "repo_count",
+        "primary_language_count",
+        "avg_code_per_file"
+    ]
+    df_melted = df[["language"] + metric_cols].melt(
+        id_vars="language",
+        var_name="Metric",
+        value_name="Value"
+    )
 
-    fig = go.Figure()
+    # Round values for display
+    df_melted["Value"] = df_melted["Value"].round(2)
 
-    # Bar chart: avg percent usage
-    fig.add_trace(go.Bar(
-        x=df["language"],
-        y=df["avg_percent_usage"],
-        name="Avg % Usage",
-        yaxis="y1",
-        marker_color="#636EFA"
-    ))
+    # Pivot to wide format for imshow
+    pivoted = df_melted.pivot(index="Metric", columns="language", values="Value")
 
-    # Line chart: log repo count
-    fig.add_trace(go.Scatter(
-        x=df["language"],
-        y=df["log_repo_count"],
-        name="Log(Repo Count)",
-        yaxis="y2",
-        mode="lines+markers",
-        line=dict(color="#EF553B", width=3),
-        marker=dict(size=6)
-    ))
+    # Plot heatmap with real values
+    fig = px.imshow(
+        pivoted,
+        text_auto=True,
+        color_continuous_scale="Viridis",
+        aspect="auto"
+    )
 
-    # Layout with dual axes
     fig.update_layout(
-        title=None,
-        xaxis=dict(title="Language"),
-        yaxis=dict(title="Avg % Usage", side="left", range=[0, 100]),
-        yaxis2=dict(
-            title="Log10(Repo Count)",
-            overlaying="y",
-            side="right",
-            showgrid=False,
-            #range=[0, 5]
-        ),
-        legend=dict(x=0.5, y=1.15, xanchor="center", orientation="h"),
-        margin=dict(t=40, b=20, l=40, r=40),
+        title="Language Metrics Heatmap",
+        xaxis_title="Language",
+        yaxis_title=None,
+        margin=dict(t=40, b=20, l=20, r=20),
         dragmode=False
     )
 
-    return dcc.Graph(id="language-mixed-chart", figure=fig)
+    return dcc.Graph(id="language-metrics-heatmap", figure=fig)
+
 
 
