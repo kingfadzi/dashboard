@@ -2,20 +2,32 @@ import plotly.express as px
 import pandas as pd
 from dash import dcc
 
+from components.chart_style import stacked_bar_chart_style
+from components.colors import NEUTRAL_COLOR_SEQUENCE
 
+
+@stacked_bar_chart_style(x_col="size_bucket", y_col="repo_count")
 def render_avg_file_size_chart(df: pd.DataFrame):
+
+    size_order = ["< 500B", "500B - 1KB", "1KB - 5KB", "5KB - 20KB", "20KB+"]
+    df["size_bucket"] = pd.Categorical(df["size_bucket"], categories=size_order, ordered=True)
+    df = df.sort_values("size_bucket")
+
     fig = px.bar(
         df,
         x="size_bucket",
         y="repo_count",
-        #title="Average File Size (code_size / file_count)",
-        labels={"size_bucket": "Avg File Size", "repo_count": "Repo Count"},
+        color="language_group",
+        labels={
+            "size_bucket": "Avg File Size",
+            "language_group": "Language Group",
+            "repo_count": "Repository Count"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
-    fig.update_layout(
-        dragmode=False
-        
-    )
-    return dcc.Graph(id="avg-file-size-chart", figure=fig)
+
+    return fig, df
 
 
 def render_contributor_dominance_chart(df: pd.DataFrame):

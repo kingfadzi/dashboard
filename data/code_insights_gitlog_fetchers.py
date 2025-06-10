@@ -17,18 +17,34 @@ def fetch_avg_file_size_buckets(filters=None):
                     WHEN code_size_bytes / NULLIF(file_count, 0) < 20000 THEN '5KB - 20KB'
                     ELSE '20KB+' 
                 END AS size_bucket,
+
+                CASE
+                    WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+                    WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+                    WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
+                    WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
+                    WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+                    WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+                    WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
+                    WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
+                    ELSE 'unknown'
+                END AS language_group,
+
                 COUNT(*) AS repo_count
+
             FROM repo_metrics
             JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
             {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY size_bucket
-            ORDER BY repo_count DESC
+            GROUP BY size_bucket, language_group
+            ORDER BY size_bucket, repo_count DESC
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 # 2. Contributor Dominance (top contributor commits / total)
 def fetch_contributor_dominance(filters=None):

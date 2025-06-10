@@ -19,7 +19,8 @@ def register_code_insights_gitlog_callbacks(app):
     def update_avg_file_size_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_avg_file_size_buckets(filters)
-        return render_avg_file_size_chart(df).figure
+        fig = render_avg_file_size_chart(df)
+        return fig
 
     @app.callback(Output("contributor-dominance-chart", "figure"), Input("default-filter-store", "data"))
     def update_contributor_dominance_chart(store_data):
