@@ -35,46 +35,49 @@ import pandas as pd
 import plotly.express as px
 from dash import dcc
 
-def render_language_metrics_heatmap(df):
-    # Sort by dominance
-    df = df.sort_values("avg_percent_usage", ascending=False)
+from dash import dcc
+import plotly.graph_objects as go
 
-    # Select and round key metrics
+
+from dash import dcc
+import plotly.graph_objects as go
+
+
+def render_language_metrics_heatmap(df):
     metric_cols = [
         "avg_percent_usage",
         "repo_count",
         "primary_language_count",
         "avg_code_per_file"
     ]
-    df_melted = df[["language"] + metric_cols].melt(
-        id_vars="language",
-        var_name="Metric",
-        value_name="Value"
-    )
 
-    # Round values for display
-    df_melted["Value"] = df_melted["Value"].round(2)
+    df = df[["language"] + metric_cols]
 
-    # Pivot to wide format for imshow
-    pivoted = df_melted.pivot(index="Metric", columns="language", values="Value")
+    z_data = df[metric_cols].values
+    text_data = [[f"{val:.2f}" for val in row] for row in z_data.T]
 
-    # Plot heatmap with real values
-    fig = px.imshow(
-        pivoted,
-        text_auto=True,
-        color_continuous_scale="Viridis",
-        aspect="auto"
-    )
+    fig = go.Figure(data=go.Heatmap(
+        z=z_data.T,
+        x=df["language"],
+        y=metric_cols,
+        text=text_data,
+        texttemplate="%{text}",
+        colorscale=NEUTRAL_COLOR_SEQUENCE,
+        showscale=False  # 🔥 remove legend/colorbar
+    ))
 
     fig.update_layout(
-        title="Language Metrics Heatmap",
-        xaxis_title="Language",
+        title=None,
+        xaxis_title=None,
         yaxis_title=None,
-        margin=dict(t=40, b=20, l=20, r=20),
+        margin=dict(t=20, b=20, l=20, r=20),
         dragmode=False
     )
 
     return dcc.Graph(id="language-metrics-heatmap", figure=fig)
+
+    return dcc.Graph(id="language-metrics-heatmap", figure=fig)
+
 
 
 
