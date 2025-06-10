@@ -2,7 +2,7 @@ import yaml
 import dash
 from pathlib import Path
 import dash_mantine_components as dmc
-from dash import html, Output, Input, State, callback_context, ALL, no_update
+from dash import html, Output, Input, State, callback_context, ALL, dcc
 import dash_bootstrap_components as dbc
 
 FILTER_IDS = [
@@ -14,7 +14,7 @@ FILTER_IDS = [
     "app-id-filter",
 ]
 
-MULTISELECT_IDS = FILTER_IDS[:-1]  # All filters except app-id-filter
+MULTISELECT_IDS = FILTER_IDS[:-1]
 FILTER_YAML_PATH = Path("filters.yaml")
 
 with open(FILTER_YAML_PATH) as f:
@@ -31,9 +31,7 @@ def make_multiselect(id_, placeholder):
         classNames={"values": "scrollable-tags"},
         style={"width": "100%"},
         persistence=True,
-        persistence_type="session",
         hidePickedOptions=True,
-        nothingFoundMessage="No options available",
     )
 
 def make_textinput(id_, placeholder):
@@ -46,6 +44,7 @@ def make_textinput(id_, placeholder):
 
 def filter_layout():
     return html.Div([
+        dcc.Store(id="selected-tags", data={fid: [] for fid in MULTISELECT_IDS}),
         dbc.Card(
             dbc.CardBody(
                 dbc.Row([
@@ -64,79 +63,77 @@ def filter_layout():
 
 def render_tags(data):
     tags = []
-    for fid in FILTER_IDS:
-        values = data.get(fid)
+    for fid, values in data.items():
         if not values:
             continue
-        if isinstance(values, str):
-            if values.strip():
-                tags.append(
-                    dmc.Badge(
-                        values,
-                        rightSection=dmc.ActionIcon(
-                            "x", size="xs", id={"type": "remove-tag", "filter": fid, "value": values}
-                        ),
-                        variant="light",
-                        className="me-1 mb-1"
-                    )
+        for val in values:
+            tags.append(
+                dmc.Badge(
+                    val,
+                    rightSection=dmc.ActionIcon(
+                        "x",
+                        size="xs",
+                        id={"type": "remove-tag", "filter": fid, "value": val}
+                    ),
+                    variant="light",
+                    className="me-1 mb-1"
                 )
-        elif isinstance(values, list):
-            for v in values:
-                tags.append(
-                    dmc.Badge(
-                        v,
-                        rightSection=dmc.ActionIcon(
-                            "x", size="xs", id={"type": "remove-tag", "filter": fid, "value": v}
-                        ),
-                        variant="light",
-                        className="me-1 mb-1"
-                    )
-                )
+            )
     return tags
 
 def register_callbacks(app):
+    # Show selected values as tags
     @app.callback(
         Output("filter-tags", "children"),
-        [Input(fid, "value") for fid in FILTER_IDS]
+        Input("selected-tags", "data"),
     )
-    def update_tags(*values):
-        data = dict(zip(FILTER_IDS, values))
+    def display_tags(data):
         return render_tags(data)
 
-    @app.callback(
-        [Output(fid, "value") for fid in FILTER_IDS],
-        Input({"type": "remove-tag", "filter": ALL, "value": ALL}, "n_clicks"),
-        [State(fid, "value") for fid in FILTER_IDS],
-        prevent_initial_call=True
-    )
-    def clear_tag(n_clicks, *states):
-        ctx = callback_context
-        if not ctx.triggered or not any(n_clicks):
-            raise dash.exceptions.PreventUpdate
-        triggered = ctx.triggered_id
-        outputs = []
-        for fid, state in zip(FILTER_IDS, states):
-            if fid == triggered["filter"]:
-                if isinstance(state, list):
-                    outputs.append([v for v in state if v != triggered["value"]])
-                elif isinstance(state, str) and state == triggered["value"]:
-                    outputs.append("")
-                else:
-                    outputs.append(state)
-            else:
-                outputs.append(state)
-        return outputs
+    # Update selected-tags store and clear dropdown value
+    for fid in MULTISELECT_IDS:
+        @app.callback(
+            Output("selected-tags", "data", allow_duplicate=True),
+            Output(fid, "value"),
+            Input(fid, "value"),
+            State("selected-tags", "data"),
+            prevent_initial_call=True,
+        )
+        def add_tag(value, data, fid=fid):
+            if not value:
+                raise dash.exceptions.PreventUpdate
+            updated = data.copy()
+            updated[fid] = list(set(updated.get(fid, []) + value))
+            return updated, []
 
+    # Remove tag and put it back into dropdown
     @app.callback(
-        [Output(fid, "data") for fid in MULTISELECT_IDS],
-        [Input(fid, "value") for fid in MULTISELECT_IDS],
-        prevent_initial_call=True
+        Output("selected-tags", "data"),
+        Input({"type": "remove-tag", "filter": ALL, "value": ALL}, "n_clicks"),
+        State("selected-tags", "data"),
+        prevent_initial_call=True,
     )
-    def update_dropdown_options(*selected_values):
-        updated_data = []
-        for fid, selected in zip(MULTISELECT_IDS, selected_values):
-            original_options = yaml_data.get(fid, [])
-            current_selection = selected if selected else []
-            available_options = [opt for opt in original_options if opt not in current_selection]
-            updated_data.append([{"value": v, "label": v} for v in available_options])
-        return updated_data
+    def remove_tag(n_clicks, data):
+        ctx = callback_context
+        if not ctx.triggered_id or not any(n_clicks):
+            raise dash.exceptions.PreventUpdate
+        fid = ctx.triggered_id["filter"]
+        val = ctx.triggered_id["value"]
+        if fid in data:
+            data[fid] = [v for v in data[fid] if v != val]
+        return data
+
+    # Refresh options for each dropdown based on selected-tags
+    def make_refresh_callback(fid):
+        @app.callback(
+            Output(fid, "data"),
+            Input("selected-tags", "data"),
+            prevent_initial_call=True,
+        )
+        def refresh_options(data):
+            selected = data.get(fid, [])
+            original = yaml_data.get(fid, [])
+            return [{"value": v, "label": v} for v in original if v not in selected]
+
+    for fid in MULTISELECT_IDS:
+        make_refresh_callback(fid)
