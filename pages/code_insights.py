@@ -49,7 +49,7 @@ layout = dbc.Container(
         # Gitlog charts
         dbc.Row([
             dbc.Col(card("Average File Size (code_size / file_count)", "avg-file-size-chart"), width=6),
-            dbc.Col(card("Contributor Dominance", "contributor-dominance-chart"), width=6),
+            dbc.Col(card("Top Contributor Dominance", "contributor-dominance-chart"), width=6),
         ]),
         dbc.Row([
             dbc.Col(card("Branch Sprawl", "branch-sprawl-chart"), width=6),

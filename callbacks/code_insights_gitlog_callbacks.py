@@ -26,7 +26,9 @@ def register_code_insights_gitlog_callbacks(app):
     def update_contributor_dominance_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_contributor_dominance(filters)
-        return render_contributor_dominance_chart(df).figure
+        fig = render_contributor_dominance_chart(df)
+        return fig
+
 
     @app.callback(Output("branch-sprawl-chart", "figure"), Input("default-filter-store", "data"))
     def update_branch_sprawl_chart(store_data):

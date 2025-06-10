@@ -37,3 +37,18 @@ def normalize_version_sql(column_expr: str) -> str:
     END
     """
 
+LANGUAGE_GROUP_CASE_SQL = """
+    CASE
+        WHEN LOWER(hr.main_language) = 'java' THEN 'java'
+        WHEN LOWER(hr.main_language) = 'python' THEN 'python'
+        WHEN LOWER(hr.main_language) IN ('javascript', 'typescript', 'tsx') THEN 'javascript'
+        WHEN LOWER(hr.main_language) IN ('asp.net', 'c#', 'f#', 'visual basic.net', 'visual basic', 'visual basic 6.0') THEN 'dotnet'
+        WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
+        WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
+        WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
+        WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
+        ELSE 'unknown'
+    END
+"""
+
+

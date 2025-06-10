@@ -30,19 +30,24 @@ def render_avg_file_size_chart(df: pd.DataFrame):
     return fig, df
 
 
+@stacked_bar_chart_style(x_col="dominance_bucket", y_col="repo_count")
 def render_contributor_dominance_chart(df: pd.DataFrame):
     fig = px.bar(
         df,
         x="dominance_bucket",
         y="repo_count",
-        #title="Contributor Dominance (Top Contributor % of Commits)",
-        labels={"dominance_bucket": "Ownership Bucket", "repo_count": "Repo Count"},
+        color="language_group",
+        labels={
+            "dominance_bucket": "Top Contributor Share",
+            "repo_count": "Repository Count",
+            "language_group": "Language Group"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
-    fig.update_layout(
-        dragmode=False
-        
-    )
-    return dcc.Graph(id="contributor-dominance-chart", figure=fig)
+
+    return fig, df
+
 
 
 def render_branch_sprawl_chart(df: pd.DataFrame):

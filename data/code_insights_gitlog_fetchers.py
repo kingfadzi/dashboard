@@ -3,6 +3,8 @@ from sqlalchemy import text
 from data.db_connection import engine
 from data.cache_instance import cache
 from data.build_filter_conditions import build_filter_conditions
+from utils.sql_filter_utils import LANGUAGE_GROUP_CASE_SQL
+
 
 # 1. Average File Size (code size / file count)
 def fetch_avg_file_size_buckets(filters=None):
@@ -18,17 +20,7 @@ def fetch_avg_file_size_buckets(filters=None):
                     ELSE '20KB+' 
                 END AS size_bucket,
 
-                CASE
-                    WHEN LOWER(hr.main_language) = 'java' THEN 'java'
-                    WHEN LOWER(hr.main_language) = 'python' THEN 'python'
-                    WHEN LOWER(hr.main_language) IN ('javascript', 'typescript') THEN 'javascript'
-                    WHEN LOWER(hr.main_language) IN ('c#', 'f#', 'vb.net', 'visual basic') THEN 'dotnet'
-                    WHEN LOWER(hr.main_language) IN ('go', 'golang') THEN 'go'
-                    WHEN LOWER(hr.main_language) = 'no language' OR hr.main_language IS NULL THEN 'no_language'
-                    WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
-                    WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
-                    ELSE 'unknown'
-                END AS language_group,
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
 
                 COUNT(*) AS repo_count
 
@@ -59,18 +51,23 @@ def fetch_contributor_dominance(filters=None):
                     WHEN top_contributor_commits::float / total_commits >= 0.5 THEN '50%-74%'
                     ELSE '< 50%'
                 END AS dominance_bucket,
+
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
+
                 COUNT(*) AS repo_count
             FROM repo_metrics
             JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
             {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY dominance_bucket
-            ORDER BY repo_count DESC
+            GROUP BY dominance_bucket, language_group
+            ORDER BY dominance_bucket, repo_count DESC
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 # 3. Branch Sprawl (active branch count)
 def fetch_branch_sprawl(filters=None):
