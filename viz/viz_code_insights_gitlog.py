@@ -32,6 +32,10 @@ def render_avg_file_size_chart(df: pd.DataFrame):
 
 @stacked_bar_chart_style(x_col="dominance_bucket", y_col="repo_count")
 def render_contributor_dominance_chart(df: pd.DataFrame):
+    dominance_order = ["No Commits", "90%+", "75%-89%", "50%-74%", "< 50%"]
+    df["dominance_bucket"] = pd.Categorical(df["dominance_bucket"], categories=dominance_order, ordered=True)
+    df = df.sort_values("dominance_bucket")
+
     fig = px.bar(
         df,
         x="dominance_bucket",
@@ -50,31 +54,48 @@ def render_contributor_dominance_chart(df: pd.DataFrame):
 
 
 
+@stacked_bar_chart_style(x_col="branch_bucket", y_col="repo_count")
 def render_branch_sprawl_chart(df: pd.DataFrame):
+    branch_order = ["0", "1-5", "6-15", "16-30", "30+"]
+    df["branch_bucket"] = pd.Categorical(df["branch_bucket"], categories=branch_order, ordered=True)
+    df = df.sort_values("branch_bucket")
+
     fig = px.bar(
         df,
         x="branch_bucket",
         y="repo_count",
-        #title="Branch Sprawl (Active Branch Count)",
-        labels={"branch_bucket": "Branch Count Bucket", "repo_count": "Repo Count"},
+        color="language_group",
+        labels={
+            "branch_bucket": "Active Branch Count",
+            "repo_count": "Repository Count",
+            "language_group": "Language Group"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
-    fig.update_layout(
-        dragmode=False
-        
-    )
-    return dcc.Graph(id="branch-sprawl-chart", figure=fig)
+
+    return fig, df
 
 
+
+@stacked_bar_chart_style(x_col="age_bucket", y_col="repo_count")
 def render_repo_age_chart(df: pd.DataFrame):
+    age_order = ["< 1 year", "1 - 3 years", "3 - 5 years", "5+ years"]
+    df["age_bucket"] = pd.Categorical(df["age_bucket"], categories=age_order, ordered=True)
+    df = df.sort_values("age_bucket")
+
     fig = px.bar(
         df,
         x="age_bucket",
         y="repo_count",
-        #title="Repository Age Buckets",
-        labels={"age_bucket": "Repo Age", "repo_count": "Repo Count"},
+        color="classification_label",
+        labels={
+            "age_bucket": "Repository Age",
+            "classification_label": "Size",
+            "repo_count": "Repository Count"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
-    fig.update_layout(
-        dragmode=False
-        
-    )
-    return dcc.Graph(id="repo-age-chart", figure=fig)
+
+    return fig, df

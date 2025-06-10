@@ -82,18 +82,24 @@ def fetch_branch_sprawl(filters=None):
                     WHEN active_branch_count <= 30 THEN '16-30'
                     ELSE '30+'
                 END AS branch_bucket,
+
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
+
                 COUNT(*) AS repo_count
+
             FROM repo_metrics
             JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
             {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY branch_bucket
-            ORDER BY repo_count DESC
+            GROUP BY branch_bucket, language_group
+            ORDER BY branch_bucket, repo_count DESC
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 # 4. Repo Age Buckets (in days)
 def fetch_repo_age_buckets(filters=None):
@@ -107,15 +113,17 @@ def fetch_repo_age_buckets(filters=None):
                     WHEN repo_age_days < 1825 THEN '3 - 5 years'
                     ELSE '5+ years'
                 END AS age_bucket,
+                hr.classification_label,
                 COUNT(*) AS repo_count
             FROM repo_metrics
             JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
             {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY age_bucket
-            ORDER BY repo_count DESC
+            GROUP BY age_bucket, hr.classification_label
+            ORDER BY age_bucket, repo_count DESC
         """
         sql = text(base_query)
         return pd.read_sql(sql, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
