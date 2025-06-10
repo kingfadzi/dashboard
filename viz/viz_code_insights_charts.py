@@ -35,21 +35,30 @@ from dash import dcc
 import plotly.graph_objects as go
 
 def render_language_metrics_heatmap(df):
-    metric_cols = [
+    metric_rows = [
         "avg_percent_usage",
         "repo_count",
         "primary_language_count",
         "avg_code_per_file"
     ]
 
-    df = df[["language"] + metric_cols]
-    z_data = df[metric_cols].values
-    text_data = [[f"{int(round(val))}" for val in row] for row in z_data.T]
+    df = df[["language"] + metric_rows]
+    z_data = df[metric_rows].values.T
+
+    text_data = []
+    for i, metric in enumerate(metric_rows):
+        row = []
+        for val in z_data[i]:
+            if metric == "avg_percent_usage":
+                row.append(f"{int(round(val))}%")
+            else:
+                row.append(f"{int(round(val)):,}")
+        text_data.append(row)
 
     fig = go.Figure(data=go.Heatmap(
-        z=z_data.T,
+        z=z_data,
         x=df["language"],
-        y=metric_cols,
+        y=metric_rows,
         text=text_data,
         texttemplate="%{text}",
         colorscale=NEUTRAL_COLOR_SEQUENCE,
