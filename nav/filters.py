@@ -44,7 +44,11 @@ def make_textinput(id_, placeholder):
 
 def filter_layout():
     return html.Div([
-        dcc.Store(id="selected-tags", data={fid: [] for fid in MULTISELECT_IDS}),
+        dcc.Store(
+            id="selected-tags",
+            data={fid: [] for fid in MULTISELECT_IDS},
+            storage_type="local"
+        ),
         dbc.Card(
             dbc.CardBody(
                 dbc.Row([
