@@ -31,31 +31,55 @@ def render_role_distribution_chart(df: pd.DataFrame):
 
 
 
-def render_language_bubble_chart(df):
-    fig = px.scatter(
-        df,
-        x="avg_percent_usage",
-        y="avg_code_per_file",
-        size="log_repo_count",
-        color="language",
-        hover_name="language",
-        size_max=60,
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
-        labels={
-            "avg_percent_usage": "Avg % Usage",
-            "avg_code_per_file": "Avg Code per File",
-            "primary_language_count": "Primary Language Count",
-            "log_repo_count": "Repo Count (log10)"
-        }
-    )
+import plotly.graph_objects as go
+import numpy as np
 
+def render_language_mixed_chart(df):
+    # Sort for consistent layout
+    df = df.sort_values("avg_percent_usage", ascending=False)
+
+    # Log-scale repo count for line
+    df["log_repo_count"] = df["repo_count"].apply(lambda x: round(np.log10(x + 1), 2))
+
+    fig = go.Figure()
+
+    # Bar chart: avg percent usage
+    fig.add_trace(go.Bar(
+        x=df["language"],
+        y=df["avg_percent_usage"],
+        name="Avg % Usage",
+        yaxis="y1",
+        marker_color="#636EFA"
+    ))
+
+    # Line chart: log repo count
+    fig.add_trace(go.Scatter(
+        x=df["language"],
+        y=df["log_repo_count"],
+        name="Log(Repo Count)",
+        yaxis="y2",
+        mode="lines+markers",
+        line=dict(color="#EF553B", width=3),
+        marker=dict(size=6)
+    ))
+
+    # Layout with dual axes
     fig.update_layout(
         title=None,
-        xaxis_title="Avg % Usage (per repo)",
-        yaxis_title="Avg Code per File",
-        margin=dict(t=40, b=20, l=20, r=20),
+        xaxis=dict(title="Language"),
+        yaxis=dict(title="Avg % Usage", side="left", range=[0, 100]),
+        yaxis2=dict(
+            title="Log10(Repo Count)",
+            overlaying="y",
+            side="right",
+            showgrid=False,
+            #range=[0, 5]
+        ),
+        legend=dict(x=0.5, y=1.15, xanchor="center", orientation="h"),
+        margin=dict(t=40, b=20, l=40, r=40),
         dragmode=False
     )
 
-    return dcc.Graph(id="language-bubble-chart", figure=fig)
+    return dcc.Graph(id="language-mixed-chart", figure=fig)
+
 
