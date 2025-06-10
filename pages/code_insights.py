@@ -2,7 +2,6 @@ import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from components.modal_table import modal_table
-from layouts.layout_filters import filter_layout
 
 dash.register_page(__name__, path="/code-insights", name="Code Insights")
 

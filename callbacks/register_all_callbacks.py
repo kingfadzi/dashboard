@@ -1,3 +1,4 @@
+from filters.layout_filters import register_filter_tags_callbacks
 from .build_info_callbacks import register_build_info_callbacks
 from .code_insights_callbacks import register_code_insights_callbacks
 from .code_insights_cloc import register_code_insights_cloc_callbacks
@@ -14,7 +15,7 @@ from .dependency_insights import register_dependency_insights_callbacks
 
 
 def register_all_callbacks(app):
-    register_filter_callbacks(app)
+    #register_filter_callbacks(app)
     register_code_insights_callbacks(app)
     register_code_insights_gitlog_callbacks(app)
     register_code_insights_cloc_callbacks(app)
@@ -27,4 +28,7 @@ def register_all_callbacks(app):
     register_overview_callbacks(app)
     register_repo_profile_callbacks(app)
     register_dependency_insights_callbacks(app)
-    register_dropdown_callbacks(app)
+    #register_dropdown_callbacks(app)
+
+    register_filter_tags_callbacks(app)
+

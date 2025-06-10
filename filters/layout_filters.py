@@ -1,3 +1,5 @@
+import os
+
 import yaml
 import dash
 from pathlib import Path
@@ -6,16 +8,17 @@ from dash import html, Output, Input, State, callback_context, ALL, dcc
 import dash_bootstrap_components as dbc
 
 FILTER_IDS = [
-    "host-name-filter",
-    "activity-status-filter",
-    "tc-filter",
-    "language-filter",
-    "classification-filter",
-    "app-id-filter",
+    "host_name",
+    "activity_status",
+    "transaction_cycle",
+    "main_language",
+    "classification_label",
+    "app_id",
 ]
 
 MULTISELECT_IDS = FILTER_IDS[:-1]
-FILTER_YAML_PATH = Path("filters.yaml")
+#FILTER_YAML_PATH = Path("filters/.layout_filters.yaml")
+FILTER_YAML_PATH = Path(os.environ["FILTER_YAML_PATH"])
 
 with open(FILTER_YAML_PATH) as f:
     yaml_data = yaml.safe_load(f)
@@ -45,19 +48,19 @@ def make_textinput(id_, placeholder):
 def filter_layout():
     return html.Div([
         dcc.Store(
-            id="selected-tags",
+            id="default-filter-store",
             data={fid: [] for fid in MULTISELECT_IDS},
             storage_type="local"
         ),
         dbc.Card(
             dbc.CardBody(
                 dbc.Row([
-                    dbc.Col(make_multiselect("host-name-filter", "Select Host Name(s)"), width=2),
-                    dbc.Col(make_multiselect("activity-status-filter", "Select Activity Status"), width=2),
-                    dbc.Col(make_multiselect("tc-filter", "Select TC(s)"), width=2),
-                    dbc.Col(make_multiselect("language-filter", "Select Language(s)"), width=2),
-                    dbc.Col(make_multiselect("classification-filter", "Select Classification(s)"), width=2),
-                    dbc.Col(make_textinput("app-id-filter", "Enter App ID or Repo Slug"), width=2),
+                    dbc.Col(make_multiselect("host_name", "Select Host Name(s)"), width=2),
+                    dbc.Col(make_multiselect("activity_status", "Select Activity Status"), width=2),
+                    dbc.Col(make_multiselect("transaction_cycle", "Select TC(s)"), width=2),
+                    dbc.Col(make_multiselect("main_language", "Select Language(s)"), width=2),
+                    dbc.Col(make_multiselect("classification_label", "Select Classification(s)"), width=2),
+                    dbc.Col(make_textinput("app_id", "Enter App ID or Repo Slug"), width=2),
                 ], className="g-3", align="center")
             ),
             className="bg-light mb-3"
@@ -85,22 +88,22 @@ def render_tags(data):
             )
     return tags
 
-def register_callbacks(app):
+def register_filter_tags_callbacks(app):
     # Show selected values as tags
     @app.callback(
         Output("filter-tags", "children"),
-        Input("selected-tags", "data"),
+        Input("default-filter-store", "data"),
     )
     def display_tags(data):
         return render_tags(data)
 
-    # Update selected-tags store and clear dropdown value
+    # Update default-filter-store store and clear dropdown value
     for fid in MULTISELECT_IDS:
         @app.callback(
-            Output("selected-tags", "data", allow_duplicate=True),
+            Output("default-filter-store", "data", allow_duplicate=True),
             Output(fid, "value"),
             Input(fid, "value"),
-            State("selected-tags", "data"),
+            State("default-filter-store", "data"),
             prevent_initial_call=True,
         )
         def add_tag(value, data, fid=fid):
@@ -112,9 +115,9 @@ def register_callbacks(app):
 
     # Remove tag and put it back into dropdown
     @app.callback(
-        Output("selected-tags", "data"),
+        Output("default-filter-store", "data"),
         Input({"type": "remove-tag", "filter": ALL, "value": ALL}, "n_clicks"),
-        State("selected-tags", "data"),
+        State("default-filter-store", "data"),
         prevent_initial_call=True,
     )
     def remove_tag(n_clicks, data):
@@ -127,11 +130,11 @@ def register_callbacks(app):
             data[fid] = [v for v in data[fid] if v != val]
         return data
 
-    # Refresh options for each dropdown based on selected-tags
+    # Refresh options for each dropdown based on default-filter-store
     def make_refresh_callback(fid):
         @app.callback(
             Output(fid, "data"),
-            Input("selected-tags", "data"),
+            Input("default-filter-store", "data"),
             prevent_initial_call=True,
         )
         def refresh_options(data):

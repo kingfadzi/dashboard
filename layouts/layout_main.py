@@ -1,6 +1,5 @@
 from dash import html
 import dash_bootstrap_components as dbc
-from layouts.layout_filters import filter_layout
 from layouts.layout_charts import chart_layout
 from layouts.layout_kpi import kpi_layout
 
@@ -22,7 +21,7 @@ def main_layout():
             # Row containing the filters on the left and the charts on the right.
             dbc.Row(
                 [
-                    dbc.Col(filter_layout(), md=3),
+
                     dbc.Col(chart_layout(), md=9),
                 ]
             ),

@@ -2,7 +2,7 @@ def build_filter_conditions(filters, alias=None, field_alias_map=None):
     if not filters:
         return None, {}
 
-    text_search_fields = {"app_id", "all_languages", "name"}
+    text_search_fields = {"app_id", "all_languages", "name", "transaction_cycle"}
     conditions = []
     param_dict = {}
     placeholder_counter = 1

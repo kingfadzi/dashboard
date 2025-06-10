@@ -228,7 +228,6 @@ def render_dependency_detection_heatmap(df):
     return fig
 
 
-
 from plotly import express as px
 from components.chart_style import standard_chart_style
 
