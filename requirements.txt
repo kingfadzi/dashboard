@@ -11,3 +11,4 @@ dash_ag_grid
 univers
 scikit-learn
 dash-mantine-components
+pyaml
