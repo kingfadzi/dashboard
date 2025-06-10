@@ -42,7 +42,7 @@ layout = dbc.Container(
 
         # Normalized + Markup side by side (50:50)
         dbc.Row([
-            dbc.Col(card("Normalized Language Weight (Top 10)", "normalized-weight-chart"), width=6),
+            dbc.Col(card("Language Usage vs. Code Density", "language-bubble-chart"), width=6),
             dbc.Col(card("Markup/Data Language Usage", "markup-language-usage-chart"), width=6),
         ], className="mb-4"),
 

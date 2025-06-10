@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
@@ -35,27 +36,45 @@ def fetch_role_distribution(filters=None):
     )
     return query_data(condition_string, param_dict)
 
-def fetch_normalized_weight(filters=None):
+def fetch_language_bubble_chart_data(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT ga.language, ROUND(AVG(ga.percent_usage)::numeric, 2) AS avg_percent_usage
+            SELECT
+                ga.language,
+                ROUND(AVG(ga.percent_usage)::numeric, 2) AS avg_percent_usage,
+                COUNT(DISTINCT ga.repo_id) AS repo_count,
+                SUM(CASE WHEN ga.percent_usage = primary_langs.max_usage THEN 1 ELSE 0 END) AS primary_language_count,
+                ROUND(AVG(c.code / NULLIF(c.files, 0))::numeric, 1) AS avg_code_per_file
             FROM go_enry_analysis ga
             JOIN harvested_repositories hr ON ga.repo_id = hr.repo_id
             JOIN languages l ON ga.language = l.name
+            JOIN cloc_metrics c ON ga.repo_id = c.repo_id AND ga.language = c.language
+            JOIN (
+                SELECT repo_id, MAX(percent_usage) AS max_usage
+                FROM go_enry_analysis
+                GROUP BY repo_id
+            ) primary_langs ON ga.repo_id = primary_langs.repo_id
             WHERE l.type = 'programming'
-              AND ga.percent_usage <> 'NaN'
               AND ga.percent_usage > 0
+              AND ga.percent_usage <> 'NaN'
               {f'AND {condition_string}' if condition_string else ''}
             GROUP BY ga.language
-            ORDER BY avg_percent_usage DESC
-            LIMIT 10
+            HAVING COUNT(DISTINCT ga.repo_id) > 5
+            ORDER BY (COUNT(DISTINCT ga.repo_id) * AVG(ga.percent_usage)) DESC,
+                     avg_code_per_file DESC
         """
         sql = text(base_query)
-        return pd.read_sql(sql, engine, params=param_dict)
+        df = pd.read_sql(sql, engine, params=param_dict)
+
+        # Log-scale repo count for bubble size
+        df['log_repo_count'] = df['repo_count'].apply(lambda x: round(np.log10(x + 1), 2))
+
+        return df
 
     condition_string, param_dict = build_filter_conditions(
         filters, alias="hr", field_alias_map={"repo_slug": "hr"}
     )
     return query_data(condition_string, param_dict)
+
 
