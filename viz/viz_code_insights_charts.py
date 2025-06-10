@@ -31,17 +31,8 @@ def render_role_distribution_chart(df: pd.DataFrame):
 
 
 
-import pandas as pd
-import plotly.express as px
-from dash import dcc
-
 from dash import dcc
 import plotly.graph_objects as go
-
-
-from dash import dcc
-import plotly.graph_objects as go
-
 
 def render_language_metrics_heatmap(df):
     metric_cols = [
@@ -52,9 +43,8 @@ def render_language_metrics_heatmap(df):
     ]
 
     df = df[["language"] + metric_cols]
-
     z_data = df[metric_cols].values
-    text_data = [[f"{val:.2f}" for val in row] for row in z_data.T]
+    text_data = [[f"{int(round(val))}" for val in row] for row in z_data.T]
 
     fig = go.Figure(data=go.Heatmap(
         z=z_data.T,
@@ -63,7 +53,7 @@ def render_language_metrics_heatmap(df):
         text=text_data,
         texttemplate="%{text}",
         colorscale=NEUTRAL_COLOR_SEQUENCE,
-        showscale=False  # 🔥 remove legend/colorbar
+        showscale=False
     ))
 
     fig.update_layout(
@@ -73,8 +63,6 @@ def render_language_metrics_heatmap(df):
         margin=dict(t=20, b=20, l=20, r=20),
         dragmode=False
     )
-
-    return dcc.Graph(id="language-metrics-heatmap", figure=fig)
 
     return dcc.Graph(id="language-metrics-heatmap", figure=fig)
 
