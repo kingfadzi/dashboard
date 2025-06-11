@@ -125,7 +125,7 @@ def chart_layout():
             dbc.Card(
                 [
                     dbc.CardHeader(html.B("Code Contribution by Language", className="text-center"), className="bg-light"),
-                    dcc.Graph(id="language-contributors-heatmap", config={"displayModeBar": False}, style={"height": 600}),
+                    dcc.Graph(id="language-contributors-heatmap", config={"displayModeBar": False}, style={"height": 400}),
                 ],
                 className="mb-4",
             ),

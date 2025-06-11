@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from components.chart_style import stacked_bar_chart_style
+from components.chart_style import stacked_bar_chart_style, standard_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 from utils.formattting import human_readable_size
 
@@ -115,32 +115,40 @@ def render_appserver_chart(filtered_df):
         showlegend=False
     )
 
-def render_package_type_chart(df):
+@standard_chart_style
+def render_package_type_chart(df: pd.DataFrame):
     if df.empty:
         return px.bar(title=None)
 
     df["package_type"] = df["package_type"].fillna("Unknown").replace("", "Unknown")
 
-    return px.bar(
+    fig = px.bar(
         df,
         x="package_type",
         y="repo_count",
+        text="repo_count",
         color="package_type",
         labels={
             "package_type": "Package Type",
             "repo_count": "Repository Count"
         },
-    ).update_layout(
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+    )
+
+    fig.update_layout(
         xaxis=dict(categoryorder="total descending"),
-        template="plotly_white",
         title=None,
         xaxis_title=None,
         dragmode=False,
+        template="plotly_white",
         showlegend=False
     )
+    fig.update_xaxes(showticklabels=True)
+    return fig
+
 
 def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
-    # Define SQL-style bucket order
+    # Define the correct contributor bucket order
     bucket_order = [
         "0-1",
         "2-5",
@@ -151,24 +159,28 @@ def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
         "101-500"
     ]
 
-    # Apply categorical sort
+    # Apply categorical ordering and sort
     filtered_df["contributor_bucket"] = pd.Categorical(
-        filtered_df["contributor_bucket"], categories=bucket_order, ordered=True
+        filtered_df["contributor_bucket"],
+        categories=bucket_order,
+        ordered=True
     )
     filtered_df = filtered_df.sort_values("contributor_bucket")
 
-    # Pivot to form heatmap
-    heatmap_data = filtered_df.pivot(
-        index="contributor_bucket",
-        columns="language",
-        values="repo_count"
-    ).fillna(0)
+    # Pivot and reindex to ensure all expected rows are present
+    heatmap_data = (
+        filtered_df.pivot(index="contributor_bucket", columns="language", values="repo_count")
+        .fillna(0)
+        .reindex(bucket_order, fill_value=0)
+    )
 
+    # Prepare heatmap values
     z_data = heatmap_data.values
     x_labels = heatmap_data.columns.tolist()
     y_labels = heatmap_data.index.tolist()
     text_data = [[f"{int(val)}" for val in row] for row in z_data]
 
+    # Build figure
     fig = go.Figure(data=go.Heatmap(
         z=z_data,
         x=x_labels,
@@ -184,43 +196,44 @@ def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
         template="plotly_white",
         dragmode=False,
         xaxis_title="Language",
-        yaxis_title="Number of Contributors"
+        yaxis=dict(
+            title="Number of Contributors",
+            categoryorder="array",
+            categoryarray=bucket_order
+        )
     )
 
     return fig
 
 
 
-
-def render_iac_chart(filtered_df):
+@stacked_bar_chart_style(x_col="iac_type", y_col="repo_count")
+def render_iac_chart(filtered_df: pd.DataFrame):
     if filtered_df.empty:
-        return {"data": []}
+        return px.bar(title=None), filtered_df
 
     fig = px.bar(
         filtered_df,
         x="iac_type",
         y="repo_count",
-        labels={"iac_type": "IaC Framework", "repo_count": "Repositories"},
-        color="iac_type"
+        color="language_group",
+        text="repo_count",
+        labels={
+            "iac_type": "",
+            "repo_count": "Repository Count",
+            "language_group": "Language Group"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
 
     fig.update_layout(
         xaxis=dict(categoryorder="total descending"),
-        template="plotly_white",
-        title_text="Top 20 IaC Frameworks",
-        title_x=0.5,
-        xaxis_title=None,
-        yaxis_title="Repositories",
-        dragmode=False,
-        showlegend=False,
-        height=450,
-        margin=dict(t=60, b=100)
+        #margin=dict(t=60, b=100)
     )
-    fig.update_layout(
-        xaxis_title=None,
-        title=None
-    )
-    return fig
+
+    return fig, filtered_df
+
 
 def render_dev_frameworks_chart(df):
     if df.empty:
@@ -244,27 +257,31 @@ def render_dev_frameworks_chart(df):
         showlegend=False
     )
 
-def render_multilang_chart(df):
+@stacked_bar_chart_style(x_col="language_bucket", y_col="repo_count")
+def render_multilang_chart(filtered_df: pd.DataFrame):
+    filtered_df["language_bucket"] = pd.Categorical(
+        filtered_df["language_bucket"],
+        categories=["Single Language", "2-5", "6-10", "10+"],
+        ordered=True
+    )
 
     fig = px.bar(
-        df,
+        filtered_df,
         x="language_bucket",
         y="repo_count",
-        color="language_bucket",
+        color="classification_label",
+        text="repo_count",
         labels={
             "language_bucket": "Number of Languages per Repo",
-            "repo_count": "Repository Count"
+            "repo_count": "Repository Count",
+            "classification_label": "Repo Size"
         },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
+    )
+    return fig, filtered_df
 
-    )
-    fig.update_layout(
-        showlegend=False,
-        template="plotly_white",
-        xaxis=dict(categoryorder="total descending"),
-        title_x=0.5,
-        dragmode=False
-    )
-    return fig
+
 
 
 @stacked_bar_chart_style(x_col="main_language", y_col="count")
@@ -383,48 +400,48 @@ def render_contribution_scatter(filtered_df: pd.DataFrame):
 
     return fig
 
-def render_primary_language_chart(filtered_df):
-
-    return px.bar(
+@stacked_bar_chart_style(x_col="main_language", y_col="repo_count")
+def render_primary_language_chart(filtered_df: pd.DataFrame):
+    fig = px.bar(
         filtered_df,
         x="main_language",
         y="repo_count",
+        color="classification_label",
+        text="repo_count",
         labels={
             "main_language": "Language",
-            "repo_count": "Repository Count"
+            "repo_count": "Repository Count",
+            "classification_label": "Repo Size"
         },
-    ).update_layout(
-        dragmode=False,
-        xaxis_title="",
-        yaxis_title="Repository Count",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
+    return fig, filtered_df
 
-def render_commit_buckets_chart(df):
-    if "commit_bucket" not in df.columns or "repo_count" not in df.columns:
-        raise KeyError("Required columns 'commit_bucket' and 'repo_count' are missing in the DataFrame.")
+
+@stacked_bar_chart_style(x_col="commit_bucket", y_col="repo_count")
+def render_commit_buckets_chart(df: pd.DataFrame):
+    # Define the desired order
+    ordered_buckets = [
+        "< 1 month", "1-3 months", "3-6 months", "6-9 months",
+        "9-12 months", "12-18 months", "18-24 months", "24+ months"
+    ]
+
+    # Apply categorical ordering
+    df["commit_bucket"] = pd.Categorical(df["commit_bucket"], categories=ordered_buckets, ordered=True)
 
     fig = px.bar(
         df,
         x="commit_bucket",
         y="repo_count",
-        color="commit_bucket",
+        color="language_group",
+        barmode="stack",
         labels={
             "commit_bucket": "Commit Recency",
             "repo_count": "Repository Count",
+            "language_group": "Language Group"
         },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
-    fig.update_layout(
-        showlegend=False,
-        template="plotly_white",
-        title_x=0.5,
-        xaxis=dict(
-            categoryorder="array",
-            categoryarray=[
-                "< 1 month", "1-3 months", "3-6 months", "6-9 months",
-                "9-12 months", "12-18 months", "18-24 months", "24+ months"
-            ],
-        ),
-        yaxis=dict(title="Repository Count"),
-        dragmode=False,
-    )
-    return fig
+    return fig, df
+

@@ -69,7 +69,10 @@ def register_overview_callbacks(app):
     @app.callback(Output("repos-by-language-bar", "figure"), Input("default-filter-store", "data"))
     def update_primary_language(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        return render_primary_language_chart(fetch_language_distribution(filters))
+        df = fetch_language_distribution(filters)
+        fig = render_primary_language_chart(df)
+        return fig
+
 
     @app.callback(Output("package-type-bar-chart", "figure"), Input("default-filter-store", "data"))
     def update_package_type(store_data):
@@ -89,7 +92,9 @@ def register_overview_callbacks(app):
     @app.callback(Output("iac-bar-chart", "figure"), Input("default-filter-store", "data"))
     def update_iac_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        return render_iac_chart(fetch_iac_usage(filters))
+        df = fetch_iac_usage(filters)
+        fig = render_iac_chart(df)
+        return fig
 
     @app.callback(Output("language-contributors-heatmap", "figure"), Input("default-filter-store", "data"))
     def update_contributors_chart(store_data):

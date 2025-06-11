@@ -183,21 +183,34 @@ def fetch_vulnerabilities(filters=None):
 def fetch_iac_usage(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
+        # CTE to find top 10 IaC frameworks
+        base_query = f"""
+            WITH top_frameworks AS (
+                SELECT 
+                    ic.framework AS iac_type
+                FROM iac_components ic
+                JOIN harvested_repositories hr ON hr.repo_id = ic.repo_id
+                JOIN repo_metrics rm ON rm.repo_id = ic.repo_id
+                LEFT JOIN languages l ON hr.main_language = l.name
+                {f"WHERE {condition_string}" if condition_string else ""}
+                GROUP BY ic.framework
+                ORDER BY COUNT(DISTINCT ic.repo_id) DESC
+                LIMIT 10
+            )
             SELECT 
                 ic.framework AS iac_type,
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
                 COUNT(DISTINCT ic.repo_id) AS repo_count
             FROM iac_components ic
             JOIN harvested_repositories hr ON hr.repo_id = ic.repo_id
             JOIN repo_metrics rm ON rm.repo_id = ic.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
+            JOIN top_frameworks tf ON tf.iac_type = ic.framework
+            {f"WHERE {condition_string}" if condition_string else ""}
+            GROUP BY ic.framework, language_group
         """
 
-        if condition_string:
-            base_query += f" WHERE {condition_string}"
-
-        base_query += " GROUP BY ic.framework ORDER BY repo_count DESC LIMIT 20"
-
-        logger.debug("Executing IaC framework usage query:")
+        logger.debug("Executing IaC framework usage query (top 10):")
         logger.debug(base_query)
         logger.debug("With parameters:")
         logger.debug(param_dict)
@@ -208,10 +221,11 @@ def fetch_iac_usage(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
+
 def fetch_commit_buckets(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        sql = """
+        sql = f"""
         SELECT * FROM (
             SELECT
                 CASE
@@ -224,15 +238,18 @@ def fetch_commit_buckets(filters=None):
                     WHEN rm.last_commit_date >= NOW() - INTERVAL '24 months' THEN '18-24 months'
                     ELSE '24+ months'
                 END AS commit_bucket,
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
                 COUNT(DISTINCT rm.repo_id) AS repo_count
             FROM repo_metrics rm
             INNER JOIN harvested_repositories hr ON rm.repo_id = hr.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
             WHERE 1=1
         """
         if condition_string:
             sql += f" AND {condition_string}"
+
         sql += """
-            GROUP BY 1
+            GROUP BY 1, 2
         ) subquery
         ORDER BY 
             CASE
@@ -252,10 +269,12 @@ def fetch_commit_buckets(filters=None):
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
 
+
+
 def fetch_multilang_usage(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        sql = """
+        sql = f"""
         WITH language_counts AS (
             SELECT
                 gea.repo_id,
@@ -266,29 +285,27 @@ def fetch_multilang_usage(filters=None):
             GROUP BY gea.repo_id
         )
         SELECT
+            hr.classification_label,
             CASE
-                WHEN language_count = 1 THEN '1'
-                WHEN language_count BETWEEN 2 AND 5 THEN '2-5'
-                WHEN language_count BETWEEN 6 AND 10 THEN '6-10'
+                WHEN lc.language_count = 1 THEN 'Single Language'
+                WHEN lc.language_count BETWEEN 2 AND 5 THEN '2-5'
+                WHEN lc.language_count BETWEEN 6 AND 10 THEN '6-10'
                 ELSE '10+'
             END AS language_bucket,
             COUNT(*) AS repo_count
-        FROM language_counts
-        """
-
-        if condition_string:
-            sql += f" WHERE repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
-
-        sql += """
-        GROUP BY language_bucket
-        ORDER BY repo_count DESC
+        FROM language_counts lc
+        JOIN harvested_repositories hr ON lc.repo_id = hr.repo_id
+        {f"WHERE {condition_string}" if condition_string else ""}
+        GROUP BY hr.classification_label, language_bucket
+        ORDER BY language_bucket
         """
 
         stmt = text(sql)
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters)
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 def fetch_cloc(filters=None):
     @cache.memoize()
@@ -388,6 +405,7 @@ def fetch_language_distribution(filters=None):
         base_query = """
             SELECT 
                 hr.main_language, 
+                hr.classification_label,
                 COUNT(*) AS repo_count
             FROM harvested_repositories hr
             JOIN languages l ON hr.main_language = l.name
@@ -397,12 +415,12 @@ def fetch_language_distribution(filters=None):
             base_query += f" AND {condition_string}"
 
         base_query += """
-            GROUP BY hr.main_language
-            ORDER BY repo_count DESC
-            LIMIT 10
+            GROUP BY hr.main_language, hr.classification_label
+            ORDER BY COUNT(*) DESC
+            LIMIT 100
         """
 
-        logger.debug("Executing language data query:")
+        logger.debug("Executing language distribution query:")
         logger.debug(base_query)
         logger.debug("With parameters:")
         logger.debug(param_dict)
@@ -412,6 +430,7 @@ def fetch_language_distribution(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 @cache.memoize()
