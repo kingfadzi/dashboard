@@ -49,11 +49,6 @@ def register_dependencies_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         return render_package_type_distribution_chart(fetch_package_type_distribution(filters))
 
-    @app.callback(Output("framework-distribution-chart", "figure"), Input("default-filter-store", "data"))
-    def update_framework_chart(store_data):
-        filters = extract_filter_dict_from_store(store_data)
-        return render_subcategory_distribution_chart(fetch_subcategory_distribution(filters))
-
     @app.callback(Output("dependency-volume-chart", "figure"), Input("default-filter-store", "data"))
     def update_dependency_volume_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)

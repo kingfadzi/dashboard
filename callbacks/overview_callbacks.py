@@ -129,17 +129,6 @@ def register_overview_callbacks(app):
         return [{"label": lang, "value": lang} for lang in languages]
 
 
-    @app.callback(
-        Output("dev-frameworks-bar-chart", "figure"),
-        Input("default-filter-store", "data"),
-        Input("framework-language-dropdown", "value")
-    )
-    def update_dev_frameworks_chart(store_data, selected_language):
-        filters = extract_filter_dict_from_store(store_data)
-        df = fetch_dev_frameworks(filters, selected_language)
-        return render_dev_frameworks_chart(df)
-
-
     generate_redirect_callbacks(
         app,
         target_href="/table-overview",

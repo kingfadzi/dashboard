@@ -96,8 +96,49 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 5
-        dbc.Row([dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=12)], className="mb-4"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                dbc.Row(
+                                    [
+                                        dbc.Col(html.B("Top Developer Frameworks"), className="text-start"),
+                                        dbc.Col(
+                                            dcc.Dropdown(
+                                                id="framework-language-dropdown",
+                                                placeholder="Select Ecosystem/Language",
+                                                options=[],  # populated dynamically
+                                                clearable=True,
+                                                style={"width": "250px", "fontSize": "14px"},
+                                            ),
+                                            width="auto",
+                                        ),
+                                    ],
+                                    className="align-items-center justify-content-between",
+                                ),
+                                className="bg-light",
+                            ),
+                            dbc.CardBody(
+                                dcc.Loading(
+                                    dcc.Graph(
+                                        id="dev-frameworks-bar-chart",
+                                        config={"staticPlot": True},
+                                        style={"height": "400px"},
+                                    )
+                                ),
+                                className="p-0",
+                            ),
+                        ],
+                        className="mb-4",
+                    )
+                )
+            ],
+            className="mb-4",
+        ),
+
+
 
         # Row 6: Middleware + App Servers
         dbc.Row(

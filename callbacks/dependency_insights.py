@@ -1,22 +1,23 @@
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from data.dependencies_fetchers import fetch_no_deps_heatmap_data
+from data.dependencies_fetchers import fetch_no_deps_heatmap_data, fetch_subcategory_distribution
 from data.dependency_insights import (
     fetch_middleware_usage_detailed, fetch_middleware_usage_by_sub_category, fetch_with_deps_by_variant,
     fetch_avg_deps_per_package_type, fetch_no_dependency_repo_scatter, fetch_no_dependency_buildtool_summary,
     fetch_ee_usage_by_repo,
 )
-
+from data.fetch_overview_metrics import fetch_dev_frameworks
 
 from data.fetch_trivy_vulnerabilities import fetch_repo_count_by_trivy_severity, \
     fetch_repo_count_by_trivy_resource_type_and_severity, fetch_repo_count_by_fix_status_and_severity, \
     fetch_top_trivy_products_by_repo_impact
 from utils.filter_utils import extract_filter_dict_from_store
-from viz.viz_dependencies import render_middleware_subcategory_chart
+from viz.viz_dependencies import render_middleware_subcategory_chart, render_subcategory_distribution_chart
 from viz.viz_dependency_insights import render_no_deps_heatmap, render_with_deps_by_variant, \
     render_avg_deps_per_package_type_chart, render_no_dependency_repo_scatter, \
     render_no_dependency_buildtool_summary_chart, render_ee_usage_chart
+from viz.viz_overview_charts import render_dev_frameworks_chart
 from viz.viz_trivy_vulnerabilities import render_repo_count_by_trivy_severity_chart, \
     render_repo_count_by_trivy_resource_type_chart, render_repo_count_by_fix_status_chart, \
     render_top_trivy_repo_impact_chart
@@ -133,4 +134,17 @@ def register_dependency_insights_callbacks(app):
         fig = render_top_trivy_repo_impact_chart(df)
         return fig
 
+    @app.callback(Output("framework-distribution-chart", "figure"), Input("default-filter-store", "data"))
+    def update_framework_chart(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        return render_subcategory_distribution_chart(fetch_subcategory_distribution(filters))
 
+    @app.callback(
+        Output("dev-frameworks-bar-chart", "figure"),
+        Input("default-filter-store", "data"),
+        Input("framework-language-dropdown", "value")
+    )
+    def update_dev_frameworks_chart(store_data, selected_language):
+        filters = extract_filter_dict_from_store(store_data)
+        df = fetch_dev_frameworks(filters, selected_language)
+        return render_dev_frameworks_chart(df)

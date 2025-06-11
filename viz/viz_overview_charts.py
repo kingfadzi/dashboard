@@ -272,7 +272,7 @@ def render_dev_frameworks_chart(df: pd.DataFrame):
             ticklabeloverflow="hide past domain"
         ),
         margin=dict(b=120),
-        height=500,
+
         dragmode=False,
         showlegend=False,
         xaxis_title=None,

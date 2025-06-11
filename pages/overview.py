@@ -80,6 +80,8 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        dbc.Row([dbc.Col(card("Framework Distribution", "framework-distribution-chart"), width=12)], className="mb-4"),
+
         # IAC + App Servers side by side
         dbc.Row(
             [
@@ -93,21 +95,6 @@ layout = dbc.Container(
             [
                 dbc.Col(card("Vulnerabilities by Severity (Shallow scan)", "trivy-vulnerabilities-bar-chart"), width=6),
                 dbc.Col(card("Standards Issues", "semgrep-findings-bar-chart"), width=6),
-            ],
-            className="mb-4",
-        ),
-
-        dcc.Dropdown(
-            id="framework-language-dropdown",
-            placeholder="Select Ecosystem/Language",
-            options=[],  # will populate dynamically
-            clearable=True,
-            style={"margin-bottom": "1rem"}
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(card("Top Developer Frameworks", "dev-frameworks-bar-chart")),
             ],
             className="mb-4",
         ),
