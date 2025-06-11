@@ -1,31 +1,33 @@
 #!/bin/bash
 
-# Check if a command argument is provided
-if [ -z "$1" ]; then
+set -e
+
+COMMAND=$1
+
+if [ -z "$COMMAND" ]; then
   echo "Usage: $0 {start|stop|restart}"
   exit 1
 fi
 
-COMMAND=$1
-
 case "$COMMAND" in
   start)
-    echo "Building the image and starting the container..."
-    docker-compose build || { echo "Build failed"; exit 1; }
-    docker-compose up -d || { echo "Failed to start container"; exit 1; }
+    echo "Building and starting the container..."
+    docker compose build
+    docker compose up -d
     ;;
   stop)
     echo "Stopping and removing the container..."
-    docker-compose down || { echo "Failed to stop container"; exit 1; }
+    docker compose down
     ;;
   restart)
     echo "Restarting the container..."
-    docker-compose down || { echo "Failed to stop container"; exit 1; }
-    docker-compose build || { echo "Build failed"; exit 1; }
-    docker-compose up -d || { echo "Failed to start container"; exit 1; }
+    docker compose down
+    docker compose build
+    docker compose up -d
     ;;
   *)
-    echo "Invalid command. Use start, stop, or restart."
+    echo "Invalid command: $COMMAND"
+    echo "Usage: $0 {start|stop|restart}"
     exit 1
     ;;
 esac
