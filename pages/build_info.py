@@ -12,7 +12,7 @@ def card(title, graph_id, height=400):
             dcc.Loading(
                 dcc.Graph(
                     id=graph_id,
-                    config={"staticPlot": True},  # fully static (no hover)
+                    config={"staticPlot": True},
                     style={"height": f"{height}px"},
                 )
             ),
@@ -28,9 +28,9 @@ def interactive_card(title, graph_id, height=400):
                 dcc.Graph(
                     id=graph_id,
                     config={
-                        "staticPlot": False,       # enable hover
-                        "displayModeBar": False,   # hide toolbar
-                        "scrollZoom": False        # disable scroll-zoom
+                        "staticPlot": False,
+                        "displayModeBar": False,
+                        "scrollZoom": False
                     },
                     style={"height": f"{height}px"},
                 )
@@ -60,13 +60,12 @@ header_with_button = dbc.Row(
     className="mb-2 align-items-center",
 )
 
-
 layout = dbc.Container(
     [
         dcc.Location(id="url", refresh=False),
         header_with_button,
 
-        # First row: Detection Status & Runtime Fragmentation
+        # First row
         dbc.Row(
             [
                 dbc.Col(card("Build Tool/Runtime Detection Coverage", "build-runtime-coverage-chart"), width=4),
@@ -76,7 +75,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Second row: No Build Tool scatter & language distribution
+        # Second row
         dbc.Row(
             [
                 dbc.Col(
@@ -104,9 +103,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-
-
-        # Combined row: Build Tools + Module Count
+        # Third row
         dbc.Row(
             [
                 dbc.Col(card("Build Tools", "build-tool-variant-chart"), width=8),
@@ -115,38 +112,52 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Third row: Tool selector
+        # Fourth row: Dropdown inside the card
         dbc.Row(
             [
                 dbc.Col(
-                    [
-                        html.Label("Select Language Tool", className="fw-bold"),
-                        dcc.Dropdown(
-                            id="tool-selector",
-                            options=[],
-                            placeholder="Select a tool",
-                            clearable=True,
-                        ),
-                    ],
-                    width=3,
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(
+                                dbc.Row(
+                                    [
+                                        dbc.Col(html.B("Runtime Versions"), className="text-start"),
+                                        dbc.Col(
+                                            dcc.Dropdown(
+                                                id="tool-selector",
+                                                placeholder="Select Language Tool",
+                                                options=[],
+                                                clearable=True,
+                                                value=None,
+                                                style={"width": "250px", "fontSize": "14px"},
+                                            ),
+                                            width="auto",
+                                        ),
+                                    ],
+                                    className="align-items-center justify-content-between",
+                                ),
+                                className="bg-light",
+                            ),
+                            dbc.CardBody(
+                                dcc.Loading(
+                                    dcc.Graph(
+                                        id="runtime-versions-chart",
+                                        config={"staticPlot": True},
+                                        style={"height": "400px"},
+                                    )
+                                ),
+                                className="p-0",
+                            ),
+                        ],
+                        className="mb-4",
+                    ),
+                    width=12,
                 ),
-                dbc.Col([], width=9),
             ],
             className="mb-4",
         ),
 
-
-        # Fourth row: Runtime Versions
-        dbc.Row(
-            [
-                dbc.Col(card("Runtime Versions", "runtime-versions-chart"), width=12),
-            ],
-            className="mb-4",
-        ),
-
-
-
-        # Fifth row: Support Status (.NET + Java)
+        # Fifth row
         dbc.Row(
             [
                 dbc.Col(interactive_card("Support Status (.NET)", "dotnet-support-status-chart"), width=6),
@@ -155,7 +166,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Sixth row: Support Status (Python + JavaScript + Go)
+        # Sixth row
         dbc.Row(
             [
                 dbc.Col(interactive_card("Support Status (Python)", "python-support-status-chart"), width=4),
@@ -165,9 +176,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-
-
-        # Detection Coverage as standalone
         dbc.Row(
             [
                 dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),
@@ -175,11 +183,9 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Confidence Distribution & Detection Status by Tool
         dbc.Row(
             [
                 dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
-
             ],
             className="mb-4",
         ),
