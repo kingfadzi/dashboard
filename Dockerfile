@@ -22,24 +22,14 @@ RUN alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
     python3 -m ensurepip && \
     python3 -m pip install --no-cache-dir --upgrade pip
 
-RUN python3 -m pip install --no-cache-dir \
-    psycopg2-binary \
-    requests \
-    pandas \
-    numpy \
-    python-dotenv \
-    sqlalchemy \
-    dash \
-    plotly \
-    dash-bootstrap-components==1.6.0 \
-    python-dotenv \
-    redis \
-    flask_caching
-
 RUN useradd -m dashuser
 USER dashuser
 
 WORKDIR /app
+
+COPY --chown=dashuser:dashuser requirements.txt /app/
+
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=dashuser:dashuser . /app/
 
