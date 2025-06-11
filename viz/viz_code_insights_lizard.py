@@ -77,6 +77,10 @@ def render_total_nloc_chart(df: pd.DataFrame):
 
 # 4. Scatter: Function Count vs Total Complexity
 def render_ccn_vs_function_count_chart(df: pd.DataFrame):
+
+    df["code_size_bytes"] = pd.to_numeric(df["code_size_bytes"], errors="coerce").fillna(0)
+
+
     fig = px.scatter(
         df,
         x="function_count",

@@ -1,11 +1,16 @@
+import pandas as pd
 import plotly.express as px
-
+import plotly.graph_objects as go
+from components.chart_style import stacked_bar_chart_style
+from components.colors import NEUTRAL_COLOR_SEQUENCE
 from utils.formattting import human_readable_size
 
-def render_repo_status_chart(filtered_df):
+@stacked_bar_chart_style(x_col="activity_status", y_col="repo_count")
+def render_repo_status_chart(filtered_df: pd.DataFrame):
     aggregated_df = filtered_df.groupby(
         ["activity_status", "host_name"], as_index=False
     )["repo_count"].sum()
+
     aggregated_df["activity_status"] = aggregated_df["activity_status"].str.capitalize()
 
     fig = px.bar(
@@ -14,41 +19,44 @@ def render_repo_status_chart(filtered_df):
         y="repo_count",
         color="host_name",
         barmode="stack",
-        color_discrete_sequence=px.colors.qualitative.Plotly,  # or Safe
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        labels={
+            "activity_status": "Activity Status",
+            "repo_count": "Repository Count",
+            "host_name": "Host"
+        }
     )
 
-    fig.update_layout(
-        dragmode=False,
-        xaxis_title="",
-        yaxis_title="Repository Count",
-        legend_title="Host Name",
-    )
+    return fig, aggregated_df
 
-    return fig
-    
-def render_repo_size_chart(filtered_df):
+
+@stacked_bar_chart_style(x_col="classification_label", y_col="repo_count")
+def render_repo_size_chart(filtered_df: pd.DataFrame):
+    # Set fixed size ordering
+    filtered_df["classification_label"] = pd.Categorical(
+        filtered_df["classification_label"],
+        categories=["Tiny", "Small", "Medium", "Large", "Massive"],
+        ordered=True
+    )
+    filtered_df = filtered_df.sort_values("classification_label")
 
     fig = px.bar(
         filtered_df,
         x="classification_label",
         y="repo_count",
-        text="repo_count"
+        color="language_group",
+        text="repo_count",
+        labels={
+            "classification_label": "Repo Size",
+            "repo_count": "Repository Count",
+            "language_group": "Language Group"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
 
-    fig.update_traces(
-        textposition="outside",
-        textfont_size=10
-    )
+    return fig, filtered_df
 
-    fig.update_layout(
-        showlegend=False,
-        title={"x": 0.5},
-        xaxis_title="",
-        yaxis_title="Repository Count",
-        dragmode=False
-    )
-
-    return fig
 
 def render_vulnerabilities_chart(filtered_df):
 
@@ -131,28 +139,57 @@ def render_package_type_chart(df):
         showlegend=False
     )
 
-def render_language_contributors_heatmap(filtered_df):
+def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
+    # Define SQL-style bucket order
+    bucket_order = [
+        "0-1",
+        "2-5",
+        "6-10",
+        "11-20",
+        "21-50",
+        "51-100",
+        "101-500"
+    ]
+
+    # Apply categorical sort
+    filtered_df["contributor_bucket"] = pd.Categorical(
+        filtered_df["contributor_bucket"], categories=bucket_order, ordered=True
+    )
+    filtered_df = filtered_df.sort_values("contributor_bucket")
+
+    # Pivot to form heatmap
     heatmap_data = filtered_df.pivot(
         index="contributor_bucket",
         columns="language",
         values="repo_count"
     ).fillna(0)
 
-    return px.imshow(
-        heatmap_data,
-        text_auto=True,
-        labels={
-            "x": "Language",
-            "y": "Number of contributors",
-            "color": "Repository Count",
-        },
-        color_continuous_scale="Viridis",
-    ).update_layout(
+    z_data = heatmap_data.values
+    x_labels = heatmap_data.columns.tolist()
+    y_labels = heatmap_data.index.tolist()
+    text_data = [[f"{int(val)}" for val in row] for row in z_data]
+
+    fig = go.Figure(data=go.Heatmap(
+        z=z_data,
+        x=x_labels,
+        y=y_labels,
+        text=text_data,
+        texttemplate="%{text}",
+        colorscale=NEUTRAL_COLOR_SEQUENCE,
+        showscale=False
+    ))
+
+    fig.update_layout(
         title={"x": 0.5},
         template="plotly_white",
         dragmode=False,
-        xaxis_title=None,
+        xaxis_title="Language",
+        yaxis_title="Number of Contributors"
     )
+
+    return fig
+
+
 
 
 def render_iac_chart(filtered_df):
@@ -230,11 +267,16 @@ def render_multilang_chart(df):
     return fig
 
 
-def render_cloc_chart(filtered_df):
-
+@stacked_bar_chart_style(x_col="main_language", y_col="count")
+def render_cloc_chart(filtered_df: pd.DataFrame):
     melted_df = filtered_df.melt(
         id_vars="main_language",
-        value_vars=["blank_lines", "comment_lines", "total_lines_of_code", "source_code_file_count"],
+        value_vars=[
+            "blank_lines",
+            "comment_lines",
+            "total_lines_of_code",
+            "source_code_file_count"
+        ],
         var_name="metric",
         value_name="count"
     )
@@ -246,14 +288,17 @@ def render_cloc_chart(filtered_df):
         color="metric",
         labels={
             "main_language": "Language",
-            "count": "Lines of code",
-            "metric": "Metric Type",
+            "count": "Lines of Code",
+            "metric": "Metric Type"
         },
-        barmode="stack",
-    ).update_layout(
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
+    )
+
+    fig.update_layout(
         template="plotly_white",
         xaxis=dict(categoryorder="total descending", title=None),
-        legend_title=None,  # Remove the legend title
+        legend_title=None,
         dragmode=False,
         yaxis=dict(tickformat=",")
     )
@@ -262,15 +307,23 @@ def render_cloc_chart(filtered_df):
         hovertemplate="<b>%{x}</b><br>%{y:,} lines<extra></extra>"
     )
 
-    return fig
+    return fig, melted_df
 
-def render_contribution_scatter(filtered_df):
+
+def render_contribution_scatter(filtered_df: pd.DataFrame):
     filtered_df["repo_size"] = filtered_df["repo_size"].fillna(0)
     filtered_df["repo_size_human"] = filtered_df["repo_size"].apply(human_readable_size)
 
+    # Truncate long hover fields
+    def truncate(text, max_len=60):
+        return text if pd.isna(text) or len(str(text)) <= max_len else str(text)[:max_len] + "..."
+
+    filtered_df["web_url"] = filtered_df["web_url"].apply(lambda x: truncate(x, 60))
+    filtered_df["all_languages"] = filtered_df["all_languages"].apply(lambda x: truncate(x, 60))
+
+    # Setup size scale ticks
     min_size = filtered_df["repo_size"].min()
     max_size = filtered_df["repo_size"].max()
-
     tickvals = [min_size, max_size / 4, max_size / 2, 3 * max_size / 4, max_size]
     ticktext = [human_readable_size(val) for val in tickvals]
 
@@ -281,6 +334,7 @@ def render_contribution_scatter(filtered_df):
         size="repo_size",
         size_max=60,
         color="repo_size",
+        color_continuous_scale=NEUTRAL_COLOR_SEQUENCE,
         labels={
             "main_language": "Main Language",
             "repo_size_human": "Size",

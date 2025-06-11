@@ -52,7 +52,9 @@ def register_overview_callbacks(app):
     @app.callback(Output("classification-pie", "figure"), Input("default-filter-store", "data"))
     def update_repo_size(store_data):
         filters = extract_filter_dict_from_store(store_data)
-        return render_repo_size_chart(fetch_repo_sizes(filters))
+        df = fetch_repo_sizes(filters)
+        fig = render_repo_size_chart(df)
+        return fig
 
     @app.callback(Output("cloc-bar-chart", "figure"), Input("default-filter-store", "data"))
     def update_cloc_chart(store_data):

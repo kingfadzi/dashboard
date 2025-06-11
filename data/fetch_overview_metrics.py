@@ -3,7 +3,7 @@
 import logging
 
 from data.fetch_contributors_commits_size import human_readable_age
-from utils.sql_filter_utils import build_repo_filter_conditions
+from utils.sql_filter_utils import build_repo_filter_conditions, LANGUAGE_GROUP_CASE_SQL
 from utils.formattting import deduplicate_comma_separated_values
 
 logger = logging.getLogger(__name__)
@@ -39,25 +39,30 @@ def _clean_classification_label(label):
 def fetch_repo_sizes(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        sql = """
-        SELECT classification_label, COUNT(*) AS repo_count
-        FROM harvested_repositories
+        sql = f"""
+            SELECT
+                hr.classification_label,
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
+                COUNT(*) AS repo_count
+            FROM harvested_repositories hr
+            LEFT JOIN languages l ON hr.main_language = l.name
+            {"WHERE " + condition_string if condition_string else ""}
+            GROUP BY hr.classification_label, {LANGUAGE_GROUP_CASE_SQL}
+           
         """
-        if condition_string:
-            sql += f" WHERE {condition_string}"
-        sql += " GROUP BY classification_label"
 
         stmt = text(sql)
         df = pd.read_sql(stmt, engine, params=param_dict)
 
         df["classification_value"] = df["classification_label"].apply(_clean_classification_label)
-        df = df.groupby("classification_value", as_index=False)["repo_count"].sum()
+        df = df.groupby(["classification_value", "language_group"], as_index=False)["repo_count"].sum()
         df.rename(columns={"classification_value": "classification_label"}, inplace=True)
 
         return df
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 def fetch_dev_frameworks(filters=None):
     @cache.memoize()
