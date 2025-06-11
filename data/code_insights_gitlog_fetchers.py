@@ -60,6 +60,7 @@ def fetch_contributor_dominance(filters=None):
             LEFT JOIN languages l ON hr.main_language = l.name
             {f'WHERE {condition_string}' if condition_string else ''}
             GROUP BY dominance_bucket, language_group
+            HAVING {LANGUAGE_GROUP_CASE_SQL} NOT IN ('markup_or_data', 'no_language')
             ORDER BY dominance_bucket, repo_count DESC
         """
         sql = text(base_query)
@@ -92,6 +93,7 @@ def fetch_branch_sprawl(filters=None):
             LEFT JOIN languages l ON hr.main_language = l.name
             {f'WHERE {condition_string}' if condition_string else ''}
             GROUP BY branch_bucket, language_group
+            HAVING {LANGUAGE_GROUP_CASE_SQL} NOT IN ('markup_or_data', 'no_language')
             ORDER BY branch_bucket, repo_count DESC
         """
         sql = text(base_query)
