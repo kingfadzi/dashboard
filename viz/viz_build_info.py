@@ -95,7 +95,7 @@ def render_repos_per_tool_variant_chart(df):
 from components.colors import NEUTRAL_COLOR_SEQUENCE
 
 # 4. Status by Tool
-@standard_chart_style
+@stacked_bar_chart_style(x_col="tool", y_col="repo_count")
 def render_status_by_tool_chart(df):
     fig = px.bar(
         df,
@@ -113,7 +113,8 @@ def render_status_by_tool_chart(df):
     )
     fig.update_xaxes(showticklabels=True)
     fig.update_layout(title=None)
-    return fig
+    return fig, df
+
 
 
 @stacked_bar_chart_style(x_col="runtime_version", y_col="repo_count")
