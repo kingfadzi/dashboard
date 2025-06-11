@@ -19,22 +19,30 @@ def register_code_insights_lizard_callbacks(app):
     def update_total_ccn_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_total_ccn_buckets(filters)
-        return render_total_ccn_chart(df)
+        fig = render_total_ccn_chart(df)
+        return fig
+
 
     @app.callback(Output("function-count-chart", "figure"), Input("default-filter-store", "data"))
     def update_function_count_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_function_count_buckets(filters)
-        return render_function_count_chart(df)
+        fig = render_function_count_chart(df)
+        return fig
+
 
     @app.callback(Output("total-nloc-chart", "figure"), Input("default-filter-store", "data"))
     def update_total_nloc_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_total_nloc_buckets(filters)
-        return render_total_nloc_chart(df)
+        fig = render_total_nloc_chart(df)
+        return fig
+
 
     @app.callback(Output("ccn-vs-function-count-chart", "figure"), Input("default-filter-store", "data"))
     def update_ccn_vs_function_count_chart(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_ccn_vs_function_count(filters)
-        return render_ccn_vs_function_count_chart(df)
+        fig = render_ccn_vs_function_count_chart(df)
+        return fig
+

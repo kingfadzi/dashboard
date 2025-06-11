@@ -56,11 +56,6 @@ layout = dbc.Container(
             dbc.Col(card("Repository Age Buckets", "repo-age-chart"), width=6),
         ]),
 
-        # Cloc charts
-        dbc.Row([
-            dbc.Col(card("Code Volume", "code-volume-chart"), width=6),
-            dbc.Col(card("File Count", "file-count-chart"), width=6),
-        ]),
         dbc.Row([
             dbc.Col(card("Code Composition", "code-composition-chart"), width=6),
             dbc.Col(card("File Size Scatter", "code-file-scatter-chart"), width=6),

@@ -2,56 +2,35 @@ import plotly.express as px
 import pandas as pd
 from dash import dcc
 
-
-def render_code_volume_chart(df: pd.DataFrame):
-    fig = px.bar(
-        df,
-        x="language",
-        y="code_lines",
-        #title="Code Volume by Language",
-        labels={"language": "Language", "code_lines": "Lines of Code"}
-    )
-    fig.update_layout(
-        dragmode=False,  
-        xaxis_title=None,
-        title=None
-    )
-    return dcc.Graph(id="code-volume-chart", figure=fig)
+from components.chart_style import stacked_bar_chart_style
+from components.colors import NEUTRAL_COLOR_SEQUENCE
 
 
-def render_file_count_chart(df: pd.DataFrame):
-    fig = px.bar(
-        df,
-        x="language",
-        y="total_files",
-        #title="File Count by Language",
-        labels={"language": "Language", "total_files": "File Count"}
-    )
-    fig.update_layout(
-        dragmode=False,  
-        xaxis_title=None,
-        title=None
-    )
-    return dcc.Graph(id="file-count-chart", figure=fig)
-
-
+@stacked_bar_chart_style(x_col="language", y_col="lines")
 def render_code_composition_chart(df: pd.DataFrame):
-    df_melted = df.melt(id_vars="language", value_vars=["code", "comment", "blank"],
-                        var_name="type", value_name="lines")
+    df_melted = df.melt(
+        id_vars="language",
+        value_vars=["code", "comment", "blank"],
+        var_name="type",
+        value_name="lines"
+    )
+
     fig = px.bar(
         df_melted,
         x="language",
         y="lines",
         color="type",
-        #title="Code vs Comment Composition",
-        labels={"language": "Language", "lines": "Line Count", "type": "Segment"}
+        labels={
+            "language": "Language",
+            "lines": "Line Count",
+            "type": "Segment"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
-    fig.update_layout(
-        dragmode=False,  
-        xaxis_title=None,
-        title=None
-    )
-    return dcc.Graph(id="code-composition-chart", figure=fig)
+
+    return fig, df_melted
+
 
 
 def render_code_file_scatter_chart(df: pd.DataFrame):
@@ -59,12 +38,20 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
         df,
         x="files",
         y="code",
-        color="language",
-        #title="Code vs File Count (Unbalanced Usage)",
-        labels={"files": "File Count", "code": "Lines of Code", "language": "Language"}
+        size="code_size_bytes",
+        color="classification_label",
+        labels={
+            "files": "File Count",
+            "code": "Lines of Code",
+            "code_size_bytes": "Repo Size (Bytes)",
+            "classification_label": "Size"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        hover_name="repo_name"
     )
     fig.update_layout(
-        dragmode=False
-        
+        dragmode=False,
+        margin=dict(t=40, b=40, l=20, r=20)
     )
-    return dcc.Graph(id="code-file-scatter-chart", figure=fig)
+    return fig
+
