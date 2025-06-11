@@ -97,6 +97,14 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        dcc.Dropdown(
+            id="framework-language-dropdown",
+            placeholder="Select Ecosystem/Language",
+            options=[],  # will populate dynamically
+            clearable=True,
+            style={"margin-bottom": "1rem"}
+        ),
+
         dbc.Row(
             [
                 dbc.Col(card("Top Developer Frameworks", "dev-frameworks-bar-chart")),

@@ -64,12 +64,13 @@ def fetch_repo_sizes(filters=None):
     return query_data(condition_string, param_dict)
 
 
-def fetch_dev_frameworks(filters=None):
+def fetch_dev_frameworks(filters=None, selected_language=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
                 COALESCE(sd.framework, 'Unclassified') AS framework,
+                sd.language,
                 COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories crm ON crm.repo_id = sd.repo_id
@@ -93,14 +94,22 @@ def fetch_dev_frameworks(filters=None):
 
         if condition_string:
             base_query += f" AND {condition_string}"
+        if selected_language:
+            base_query += " AND sd.language = :selected_language"
+            param_dict["selected_language"] = selected_language
 
-        base_query += " GROUP BY framework ORDER BY repo_count DESC LIMIT 20"
+        base_query += """
+            GROUP BY sd.framework, sd.language
+            ORDER BY repo_count DESC
+            LIMIT 20
+        """
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 import pandas as pd
 from sqlalchemy import text
@@ -136,19 +145,22 @@ def fetch_appserver_usage(filters=None):
 def fetch_standards_issues(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
+        base_query = f"""
             SELECT 
                 COALESCE(s.category, 'Uncategorized') AS category,
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
                 COUNT(DISTINCT s.repo_id) AS repo_count
             FROM semgrep_results s
             JOIN harvested_repositories hr ON s.repo_id = hr.repo_id
-            WHERE s.category IS NOT NULL
+            JOIN repo_metrics rm ON s.repo_id = rm.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
+            WHERE s.category IS NOT NULL AND TRIM(s.category) <> ''
         """
 
         if condition_string:
             base_query += f" AND {condition_string}"
 
-        base_query += " GROUP BY s.category"
+        base_query += " GROUP BY category, language_group"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
@@ -157,28 +169,35 @@ def fetch_standards_issues(filters=None):
     return query_data(condition_string, param_dict)
 
 
+
 def fetch_vulnerabilities(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
+        base_query = f"""
             SELECT 
                 v.severity,
+                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
                 COUNT(DISTINCT v.repo_id) AS repo_count
             FROM trivy_vulnerability v
             JOIN harvested_repositories hr ON v.repo_id = hr.repo_id
+            JOIN repo_metrics rm ON rm.repo_id = hr.repo_id
+            LEFT JOIN languages l ON hr.main_language = l.name
             WHERE v.severity IS NOT NULL
         """
 
         if condition_string:
             base_query += f" AND {condition_string}"
 
-        base_query += " GROUP BY v.severity"
+        base_query += """
+            GROUP BY v.severity, language_group
+        """
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 def fetch_iac_usage(filters=None):
     @cache.memoize()

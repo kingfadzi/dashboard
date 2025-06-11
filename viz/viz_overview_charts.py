@@ -58,62 +58,65 @@ def render_repo_size_chart(filtered_df: pd.DataFrame):
     return fig, filtered_df
 
 
-def render_vulnerabilities_chart(filtered_df):
-
-    return px.bar(
+@stacked_bar_chart_style(x_col="severity", y_col="repo_count")
+def render_vulnerabilities_chart(filtered_df: pd.DataFrame):
+    fig = px.bar(
         filtered_df,
         x="severity",
         y="repo_count",
+        color="language_group",
+        text="repo_count",
         labels={
-            "severity": "Severity Level",
+            "severity": "",
             "repo_count": "Repository Count",
+            "language_group": "Language Group"
         },
-        color="severity",  # Color bars by severity
-    ).update_layout(
-        template="plotly_white",
-        title={"x": 0.5},  # Center the title
-        dragmode=False,
-        showlegend=False
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
+    return fig, filtered_df
 
+@stacked_bar_chart_style(x_col="category", y_col="repo_count")
 def render_standards_issues_chart(filtered_df):
-
-    return px.bar(
+    fig = px.bar(
         filtered_df,
         x="category",
         y="repo_count",
+        color="language_group",
         labels={
             "category": "Issue Category",
             "repo_count": "Repository Count",
+            "language_group": "Language Group"
         },
-        color="category",
-    ).update_layout(
-        template="plotly_white",
-        title={"x": 0.5},
-        dragmode=False,
-        showlegend=False
+        barmode="stack",
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
+    return fig, filtered_df
 
-def render_appserver_chart(filtered_df):
+@standard_chart_style
+def render_appserver_chart(filtered_df: pd.DataFrame):
     if filtered_df.empty:
-        return px.bar(
-            title="No App Server Data Found"
-        )
+        return px.bar(title="No App Server Data Found")
 
-    return px.bar(
+    fig = px.bar(
         filtered_df,
         x="iac_type",
         y="repo_count",
-        labels={"iac_type": "App Server", "repo_count": "Repository Count"},
-        color="iac_type"
-    ).update_layout(
-        xaxis=dict(categoryorder="total descending"),
-        template="plotly_white",
-        title={"text": "Top Application Servers", "x": 0.5},
-        xaxis_title=None,
-        dragmode=False,
-        showlegend=False
+        text="repo_count",
+        color="iac_type",
+        labels={
+            "iac_type": "",
+            "repo_count": "Repository Count"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
+    fig.update_layout(
+        xaxis=dict(categoryorder="total descending"),
+        title=None,
+        showlegend=False,
+    )
+    fig.update_xaxes(showticklabels=True)
+    return fig
 
 @standard_chart_style
 def render_package_type_chart(df: pd.DataFrame):
@@ -195,7 +198,7 @@ def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
         title={"x": 0.5},
         template="plotly_white",
         dragmode=False,
-        xaxis_title="Language",
+        xaxis_title="",
         yaxis=dict(
             title="Number of Contributors",
             categoryorder="array",
@@ -235,27 +238,49 @@ def render_iac_chart(filtered_df: pd.DataFrame):
     return fig, filtered_df
 
 
-def render_dev_frameworks_chart(df):
+@standard_chart_style
+def render_dev_frameworks_chart(df: pd.DataFrame):
     if df.empty:
         return px.bar(title="No Developer Framework Data Found")
 
-    # Normalize empty strings or None to "Unclassified"
     df["framework"] = df["framework"].fillna("Unclassified").replace("", "Unclassified")
 
-    return px.bar(
+    def truncate_middle(name, max_len=20):
+        return name if len(name) <= max_len else name[:10] + "…" + name[-9:]
+
+    df["short_framework"] = df["framework"].apply(truncate_middle)
+
+    fig = px.bar(
         df,
-        x="framework",
+        x="short_framework",
         y="repo_count",
-        labels={"framework": "Framework", "repo_count": "Repository Count"},
-        color="framework"
-    ).update_layout(
-        xaxis=dict(categoryorder="total descending"),
-        template="plotly_white",
-        title=None,
-        xaxis_title=None,
-        dragmode=False,
-        showlegend=False
+        text="repo_count",
+        hover_name="framework",
+        color="short_framework",
+        labels={
+            "short_framework": "Framework",
+            "repo_count": "Repository Count"
+        },
+        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
     )
+
+    fig.update_layout(
+        xaxis=dict(
+            categoryorder="total descending",
+            tickangle=45,
+            tickfont=dict(size=10),
+            ticklabeloverflow="hide past domain"
+        ),
+        margin=dict(b=120),
+        height=500,
+        dragmode=False,
+        showlegend=False,
+        xaxis_title=None,
+        title=None
+    )
+    fig.update_xaxes(showticklabels=True)
+    return fig
+
 
 @stacked_bar_chart_style(x_col="language_bucket", y_col="repo_count")
 def render_multilang_chart(filtered_df: pd.DataFrame):
@@ -409,7 +434,7 @@ def render_primary_language_chart(filtered_df: pd.DataFrame):
         color="classification_label",
         text="repo_count",
         labels={
-            "main_language": "Language",
+            "main_language": "",
             "repo_count": "Repository Count",
             "classification_label": "Repo Size"
         },
