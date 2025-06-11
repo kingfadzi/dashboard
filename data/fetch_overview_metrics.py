@@ -402,25 +402,30 @@ def fetch_contribution_activity(filters=None):
 def fetch_language_distribution(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
+        base_query = f"""
+            WITH top_languages AS (
+                SELECT hr.main_language
+                FROM harvested_repositories hr
+                JOIN languages l ON hr.main_language = l.name
+                WHERE l.type = 'programming'
+                {f"AND {condition_string}" if condition_string else ""}
+                GROUP BY hr.main_language
+                ORDER BY COUNT(*) DESC
+                LIMIT 10
+            )
             SELECT 
                 hr.main_language, 
                 hr.classification_label,
                 COUNT(*) AS repo_count
             FROM harvested_repositories hr
             JOIN languages l ON hr.main_language = l.name
+            JOIN top_languages tl ON hr.main_language = tl.main_language
             WHERE l.type = 'programming'
-        """
-        if condition_string:
-            base_query += f" AND {condition_string}"
-
-        base_query += """
+            {f"AND {condition_string}" if condition_string else ""}
             GROUP BY hr.main_language, hr.classification_label
-            ORDER BY COUNT(*) DESC
-            LIMIT 100
         """
 
-        logger.debug("Executing language distribution query:")
+        logger.debug("Executing top 10 language distribution query:")
         logger.debug(base_query)
         logger.debug("With parameters:")
         logger.debug(param_dict)
@@ -430,6 +435,7 @@ def fetch_language_distribution(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 
