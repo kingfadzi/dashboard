@@ -1,0 +1,16 @@
+services:
+  dashapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8050:8050"
+    env_file:
+      - .env
+    environment:
+      - PYTHONIOENCODING=utf-8
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+    volumes:
+      - .:/app
+    restart: unless-stopped
