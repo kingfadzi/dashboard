@@ -1,8 +1,8 @@
 from sqlalchemy import text
 import pandas as pd
-from db import engine
+from data.cache_instance import cache
+from data.db_connection import engine
 from shared.filter_builder import build_filter_conditions
-from shared.cache import cache  # adjust to your caching layer
 
 def fetch_overview_kpis(filters=None):
     @cache.memoize()
