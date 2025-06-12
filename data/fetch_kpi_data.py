@@ -1,121 +1,47 @@
-import pandas as pd
 from sqlalchemy import text
-from data.cache_instance import cache
-from data.db_connection import engine
-from utils.sql_filter_utils import build_repo_filter_conditions
+import pandas as pd
+from db import engine
+from shared.filter_builder import build_filter_conditions
+from shared.cache import cache  # adjust to your caching layer
 
+def fetch_overview_kpis(filters=None):
+    @cache.memoize()
+    def query_data(condition_string, param_dict):
+        query = f"""
+            WITH base AS (
+                SELECT hr.repo_id, hr.activity_status, hr.host_name,
+                       rm.last_commit_date, rm.repo_age_days
+                FROM harvested_repositories hr
+                JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
+                WHERE 1=1
+                {f'AND {condition_string}' if condition_string else ''}
+            )
+            SELECT
+                (SELECT COUNT(*) FROM base) AS total_repos,
+                (SELECT COUNT(*) FROM base WHERE activity_status = 'active') AS active,
+                (SELECT COUNT(*) FROM base WHERE activity_status = 'inactive') AS inactive,
+                (SELECT COUNT(*) FROM base WHERE last_commit_date >= NOW() - INTERVAL '30 days') AS recently_updated,
+                (SELECT COUNT(*) FROM base WHERE repo_age_days <= 30) AS new_repos,
+                (SELECT COUNT(DISTINCT bcc.repo_id) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE tool IS NOT NULL) AS build_tool_detected,
+                (SELECT COUNT(*) FROM build_config_cache bcc JOIN base USING (repo_id)) AS modules,
+                (SELECT COUNT(*) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE tool IS NULL) AS without_tool,
+                (SELECT COUNT(DISTINCT bcc.repo_id) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE runtime_version IS NOT NULL) AS runtime_detected,
+                (SELECT COUNT(DISTINCT ga.language) FROM go_enry_analysis ga JOIN base USING (repo_id)) AS languages,
+                (SELECT COUNT(DISTINCT iac.repo_id) FROM iac_components iac JOIN base USING (repo_id) WHERE framework IN ('gitlab', 'jenkins', 'github_actions', 'teamcity')) AS cicd_total,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'jenkins') AS jenkins,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'github_actions') AS gha,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'teamcity') AS teamcity,
+                (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,
+                (SELECT COUNT(*) FROM base WHERE host_name ILIKE '%github%') AS github,
+                (SELECT COUNT(*) FROM base WHERE host_name ILIKE '%gitlab%') AS gitlab,
+                (SELECT COUNT(*) FROM base WHERE host_name ILIKE '%bitbucket%') AS bitbucket,
+                (SELECT SUM(code) FROM cloc_metrics cm JOIN base USING (repo_id)) AS loc,
+                (SELECT SUM(files) FROM cloc_metrics cm JOIN base USING (repo_id)) AS source_files,
+                (SELECT COUNT(DISTINCT rm.repo_id) FROM repo_metrics rm JOIN base USING (repo_id) WHERE number_of_contributors = 1) AS solo_contributor,
+                (SELECT SUM(rm.number_of_contributors) FROM repo_metrics rm JOIN base USING (repo_id)) AS total_contributors,
+                (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl;
+        """
+        return pd.read_sql(text(query), engine, params=param_dict).iloc[0].to_dict()
 
-def short_format(num):
-    if not num:
-        return "0"
-    val = float(num)
-    if val >= 1_000_000_000:
-        return f"{val / 1_000_000_000:.1f}B"
-    elif val >= 1_000_000:
-        return f"{val / 1_000_000:.1f}M"
-    elif val >= 1_000:
-        return f"{val / 1_000:.1f}K"
-    else:
-        return f"{val:.0f}"
-
-
-def human_readable_size(size_in_bytes):
-    if size_in_bytes is None:
-        size_in_bytes = 0
-    if size_in_bytes < 1024:
-        return f"{size_in_bytes:.2f} B"
-    elif size_in_bytes < 1024**2:
-        return f"{(size_in_bytes / 1024):.2f} KB"
-    elif size_in_bytes < 1024**3:
-        return f"{(size_in_bytes / (1024**2)):.2f} MB"
-    else:
-        return f"{(size_in_bytes / (1024**3)):.2f} GB"
-
-
-@cache.memoize()
-def fetch_kpi_data(filters=None):
-    condition_string, param_dict = build_repo_filter_conditions(filters)
-
-    sql = """
-    SELECT
-        hr.repo_id,
-        hr.main_language,
-        rm.total_commits,
-        rm.number_of_contributors,
-        rm.active_branch_count,
-        rm.last_commit_date,
-        rm.repo_size_bytes,
-        ls.total_nloc,
-        ls.avg_ccn,
-        ls.function_count,
-        ls.total_ccn
-    FROM harvested_repositories hr
-    LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
-    LEFT JOIN lizard_summary ls ON hr.repo_id = ls.repo_id
-    JOIN languages l ON hr.main_language = l.name
-    WHERE l.type = 'programming'
-    """
-    if condition_string:
-        sql += f" AND {condition_string}"
-
-    df = pd.read_sql(text(sql), engine, params=param_dict)
-    if df.empty:
-        return {}
-
-    now = pd.Timestamp.now()
-    df["repo_age_days"] = (now - pd.to_datetime(df["last_commit_date"], errors="coerce")).dt.days
-    df["lines_per_function"] = df["total_nloc"] / df["function_count"]
-    df = df.replace([float("inf"), -float("inf")], pd.NA)
-
-    result = {}
-
-    def summarize_metric(df, column, formatter=short_format, size=False):
-        series = df[column].dropna()
-        if series.empty:
-            return {
-                "median": "0",
-                "iqr": "0",
-                "stddev": "0",
-                "outlier_count": 0
-            }
-
-        q1 = series.quantile(0.25)
-        q3 = series.quantile(0.75)
-        iqr = q3 - q1
-        lower = q1 - 1.5 * iqr
-        upper = q3 + 1.5 * iqr
-        filtered = series[(series >= lower) & (series <= upper)]
-        outlier_count = series.size - filtered.size
-
-        if filtered.empty:
-            filtered = series
-            outlier_count = 0
-
-        print(f"{column}: using {len(filtered)} of {len(series)} rows (excluded {outlier_count})")
-
-        median = filtered.median()
-        stddev = filtered.std()
-
-        return {
-            "median": human_readable_size(median) if size else formatter(median),
-            "iqr": human_readable_size(iqr) if size else formatter(iqr),
-            "stddev": human_readable_size(stddev) if size else formatter(stddev),
-            "outlier_count": int(outlier_count)
-        }
-
-    result["commits"] = summarize_metric(df, "total_commits")
-    result["contributors"] = summarize_metric(df, "number_of_contributors")
-    result["branches"] = summarize_metric(df, "active_branch_count")
-    result["repo_age_days"] = summarize_metric(df, "repo_age_days")
-    result["loc"] = summarize_metric(df, "total_nloc")
-    result["repo_size"] = summarize_metric(df, "repo_size_bytes", size=True)
-    result["lines_per_function"] = summarize_metric(df, "lines_per_function")
-
-    df_ccn = df[["avg_ccn", "function_count", "total_ccn"]].dropna()
-    result["avg_ccn"] = {
-        "median": f"{df_ccn['avg_ccn'].median():.1f}" if not df_ccn.empty else "0.0",
-        "function_count": short_format(df_ccn["function_count"].sum()),
-        "total_cyclomatic_complexity": short_format(df_ccn["total_ccn"].sum())
-    }
-    result["total_repos"] = f"{df['repo_id'].dropna().nunique():,}"
-    return result
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    return query_data(condition_string, param_dict)
