@@ -1,6 +1,6 @@
 from dash.dependencies import Input, Output
 from data.fetch_overview_kpis import fetch_overview_kpis  # updated fetcher
-from shared.utils import extract_filter_dict_from_inputs  # assumes similar to extract_filter_dict_from_store
+from filter_utils import extract_filter_dict_from_inputs  # 
 
 def register_kpi_callbacks(app):
     @app.callback(
