@@ -1,5 +1,15 @@
 FROM almalinux:8
 
+ARG GLOBAL_INDEX_URL
+ARG GLOBAL_CERT
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+
+ENV PIP_INDEX_URL=${GLOBAL_INDEX_URL}
+ENV PIP_CERT=${GLOBAL_CERT}
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
+
 RUN dnf update -y && \
     dnf module reset -y python36 && \
     dnf install -y \

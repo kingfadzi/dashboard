@@ -3,6 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GLOBAL_INDEX_URL: ${GLOBAL_INDEX_URL}
+        GLOBAL_CERT: ${GLOBAL_CERT}
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
     ports:
       - "8050:8050"
     env_file:
