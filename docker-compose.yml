@@ -11,11 +11,19 @@ services:
     ports:
       - "8050:8050"
     env_file:
-      - .env
+      - .env-mars
     environment:
       - PYTHONIOENCODING=utf-8
       - LANG=C.UTF-8
       - LC_ALL=C.UTF-8
     volumes:
       - .:/app
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
     restart: unless-stopped

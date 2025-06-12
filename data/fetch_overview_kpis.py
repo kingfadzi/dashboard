@@ -17,26 +17,32 @@ def fetch_overview_kpis(filters=None):
                 {f'AND {condition_string}' if condition_string else ''}
             )
             SELECT
+                -- Repository counts
                 (SELECT COUNT(*) FROM base) AS total_repos,
-                (SELECT COUNT(*) FROM base WHERE activity_status = 'active') AS active,
-                (SELECT COUNT(*) FROM base WHERE activity_status = 'inactive') AS inactive,
+                (SELECT COUNT(*) FROM base WHERE activity_status = 'ACTIVE') AS active,
+                (SELECT COUNT(*) FROM base WHERE activity_status = 'INACTIVE') AS inactive,
+                -- Activity
                 (SELECT COUNT(*) FROM base WHERE last_commit_date >= NOW() - INTERVAL '30 days') AS recently_updated,
                 (SELECT COUNT(*) FROM base WHERE repo_age_days <= 30) AS new_repos,
+                -- Build tool / runtime
                 (SELECT COUNT(DISTINCT bcc.repo_id) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE tool IS NOT NULL) AS build_tool_detected,
                 (SELECT COUNT(*) FROM build_config_cache bcc JOIN base USING (repo_id)) AS modules,
                 (SELECT COUNT(*) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE tool IS NULL) AS without_tool,
                 (SELECT COUNT(DISTINCT bcc.repo_id) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE runtime_version IS NOT NULL) AS runtime_detected,
                 (SELECT COUNT(DISTINCT ga.language) FROM go_enry_analysis ga JOIN base USING (repo_id)) AS languages,
-                (SELECT COUNT(DISTINCT iac.repo_id) FROM iac_components iac JOIN base USING (repo_id) WHERE framework IN ('gitlab', 'jenkins', 'github_actions', 'teamcity')) AS cicd_total,
-                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'jenkins') AS jenkins,
-                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'github_actions') AS gha,
-                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'teamcity') AS teamcity,
+                -- CI/CD breakdown
+                (SELECT COUNT(DISTINCT iac.repo_id) FROM iac_components iac JOIN base USING (repo_id)
+                    WHERE framework IN ('Azure Pipelines', 'Bitbucket Pipelines', 'Gitlab CI', 'Jenkins')) AS cicd_total,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Azure Pipelines') AS azure_pipelines,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Bitbucket Pipelines') AS bitbucket_pipelines,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Gitlab CI') AS gitlab_ci,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Jenkins') AS jenkins,
+                -- Source hosts count
                 (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,
-                (SELECT COUNT(*) FROM base WHERE host_name ILIKE '%github%') AS github,
-                (SELECT COUNT(*) FROM base WHERE host_name ILIKE '%gitlab%') AS gitlab,
-                (SELECT COUNT(*) FROM base WHERE host_name ILIKE '%bitbucket%') AS bitbucket,
+                -- Code metrics
                 (SELECT SUM(code) FROM cloc_metrics cm JOIN base USING (repo_id)) AS loc,
                 (SELECT SUM(files) FROM cloc_metrics cm JOIN base USING (repo_id)) AS source_files,
+                -- Contributors & branches
                 (SELECT COUNT(DISTINCT rm.repo_id) FROM repo_metrics rm JOIN base USING (repo_id) WHERE number_of_contributors = 1) AS solo_contributor,
                 (SELECT SUM(rm.number_of_contributors) FROM repo_metrics rm JOIN base USING (repo_id)) AS total_contributors,
                 (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl;

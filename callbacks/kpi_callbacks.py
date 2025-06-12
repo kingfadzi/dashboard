@@ -1,55 +1,90 @@
 from dash.dependencies import Input, Output
-from data.fetch_overview_kpis import fetch_overview_kpis  # updated fetcher
-from filter_utils import extract_filter_dict_from_inputs  # 
+from data.fetch_overview_kpis import fetch_overview_kpis
+from utils.filter_utils import extract_filter_dict_from_store
+
+def format_number_short(value):
+    if value is None:
+        return "0"
+    try:
+        n = int(value)
+        if n >= 1_000_000:
+            return f"{n/1_000_000:.1f}M"
+        if n >= 1_000:
+            return f"{n/1_000:.0f}K"
+        return str(n)
+    except (ValueError, TypeError):
+        return "0"
 
 def register_kpi_callbacks(app):
     @app.callback(
         [
             Output("kpi-total-repos", "children"),
             Output("kpi-total-repos-subtext", "children"),
+
             Output("kpi-avg-commits", "children"),
             Output("kpi-avg-commits-subtext", "children"),
+
             Output("kpi-avg-contributors", "children"),
             Output("kpi-avg-contributors-subtext", "children"),
+
             Output("kpi-avg-loc", "children"),
             Output("kpi-avg-loc-subtext", "children"),
-            Output("kpi-avg-ccn", "children"),
-            Output("kpi-ccn-subtext", "children"),
-            Output("kpi-avg-repo-size", "children"),
-            Output("kpi-avg-repo-size-subtext", "children"),
+
             Output("kpi-branches", "children"),
             Output("kpi-branches-subtext", "children"),
-            Output("kpi-repo-age", "children"),
-            Output("kpi-repo-age-subtext", "children"),
+
+            Output("kpi-build-tools", "children"),
+            Output("kpi-build-tools-subtext", "children"),
+
+            Output("kpi-runtime", "children"),
+            Output("kpi-runtime-subtext", "children"),
+
+            Output("kpi-cicd", "children"),
+            Output("kpi-cicd-subtext", "children"),
+
+            Output("kpi-sources", "children"),
+            Output("kpi-sources-subtext", "children"),
         ],
-        [
-            Input("host-name-filter", "value"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-        ],
+        [Input("default-filter-store", "data")],
     )
-    def update_kpi_values(*args):
-        filter_keys = [
-            "host_name",
-            "activity_status",
-            "transaction_cycle",
-            "main_language",
-            "classification_label",
-            "app_id",
-        ]
-        filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
+    def update_kpi_values(store_data):
+        filters = extract_filter_dict_from_store(store_data)
         kpi = fetch_overview_kpis(filters)
 
         return (
-            kpi["total_repos"], f"Active: {kpi['active']} · Inactive: {kpi['inactive']}",
-            kpi["recently_updated"], f"New: {kpi['new_repos']} · Last 30d",
-            kpi["build_tool_detected"], f"Modules: {kpi['modules']} · Unknown: {kpi['without_tool']}",
-            f"{kpi['loc']:,}", f"Files: {kpi['source_files']} · Repos: {kpi['total_repos']}",
-            kpi["runtime_detected"], f"Langs: {kpi['languages']}",
-            "-", "-",  # Placeholder for repo size
-            kpi["branch_sprawl"], f">10 branches · Total Repos: {kpi['total_repos']}",
-            "-", "-",  # Placeholder for repo age
+            # Repos
+            kpi.get("total_repos", 0),
+            f"A:{kpi.get('active', 0)} · I:{kpi.get('inactive', 0)}",
+
+            # Recent Updates
+            kpi.get("recently_updated", 0),
+            f"New:{kpi.get('new_repos', 0)} · 30d",
+
+            # Solo Devs
+            kpi.get("solo_contributor", 0),
+            f"All:{kpi.get('total_contributors', 0)}",
+
+            # LOC
+            format_number_short(kpi.get("loc")),
+            f"Files:{format_number_short(kpi.get('source_files'))} · Repos:{kpi.get('total_repos', 0)}",
+
+            # Branching
+            kpi.get("branch_sprawl", 0),
+            ">10 branches",
+
+            # Build Tools
+            kpi.get("build_tool_detected", 0),
+            f"Mod:{kpi.get('modules', 0)} · NoTool:{kpi.get('without_tool', 0)}",
+
+            # Runtimes
+            kpi.get("runtime_detected", 0),
+            f"Langs:{kpi.get('languages', 0)}",
+
+            # CI/CD (total + breakdown)
+            kpi.get("cicd_total", 0),
+            f"BP:{kpi.get('bitbucket_pipelines', 0)} · GL:{kpi.get('gitlab_ci', 0)} · J:{kpi.get('jenkins', 0)}",
+
+            # Source Hosts
+            kpi.get("sources_total", 0),
+            "Hosts",
         )
