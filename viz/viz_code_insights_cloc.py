@@ -39,7 +39,7 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
         x="files",
         y="code",
         size="code_size_bytes",
-        color="classification_label",
+        color="code_size_bytes",
         labels={
             "files": "File Count",
             "code": "Lines of Code",
