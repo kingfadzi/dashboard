@@ -139,10 +139,16 @@ def fetch_repo_age_buckets(filters=None):
         base_query = f"""
             SELECT 
                 CASE 
-                    WHEN repo_age_days < 365 THEN '< 1 year'
-                    WHEN repo_age_days < 1095 THEN '1 - 3 years'
-                    WHEN repo_age_days < 1825 THEN '3 - 5 years'
-                    ELSE '5+ years'
+                    WHEN repo_age_days < 30 THEN '<1 month'
+                    WHEN repo_age_days < 90 THEN '1-3 months'
+                    WHEN repo_age_days < 180 THEN '3-6 months'
+                    WHEN repo_age_days < 365 THEN '6-12 months'
+                    WHEN repo_age_days < 730 THEN '1-2 years'
+                    WHEN repo_age_days < 1095 THEN '2-3 years'
+                    WHEN repo_age_days < 1460 THEN '3-4 years'
+                    WHEN repo_age_days < 1825 THEN '4-5 years'
+                    WHEN repo_age_days < 2555 THEN '5-7 years'
+                    ELSE '7+ years'
                 END AS age_bucket,
                 hr.classification_label,
                 COUNT(*) AS repo_count
@@ -157,4 +163,5 @@ def fetch_repo_age_buckets(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 

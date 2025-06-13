@@ -95,7 +95,11 @@ def render_branch_sprawl_chart(df: pd.DataFrame):
 
 @stacked_bar_chart_style(x_col="age_bucket", y_col="repo_count")
 def render_repo_age_chart(df: pd.DataFrame):
-    age_order = ["< 1 year", "1 - 3 years", "3 - 5 years", "5+ years"]
+    age_order = [
+        "<1 month", "1-3 months", "3-6 months", "6-12 months",
+        "1-2 years", "2-3 years", "3-4 years", "4-5 years",
+        "5-7 years", "7+ years"
+    ]
     df["age_bucket"] = pd.Categorical(df["age_bucket"], categories=age_order, ordered=True)
     df = df.sort_values("age_bucket")
 
@@ -114,3 +118,4 @@ def render_repo_age_chart(df: pd.DataFrame):
     )
 
     return fig, df
+
