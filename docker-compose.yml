@@ -7,12 +7,10 @@ services:
         GLOBAL_INDEX_URL: ${GLOBAL_INDEX_URL}
         HTTP_PROXY: ${HTTP_PROXY}
         HTTPS_PROXY: ${HTTPS_PROXY}
-        HOST_UID: ${HOST_UID:-1000}
-        HOST_GID: ${HOST_GID:-1000}
+        HOST_UID: ${HOST_UID}
+        HOST_GID: ${HOST_GID}
     ports:
       - "8050:8050"
-    env_file:
-      - .env-mars
     environment:
       - PIP_INDEX_URL=${GLOBAL_INDEX_URL}
       - http_proxy=${HTTP_PROXY}

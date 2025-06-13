@@ -20,9 +20,11 @@ fi
 
 echo "Using environment: $ENV_FILE"
 
-# Export env vars for docker compose build
+# Export vars from env file and inject HOST_UID/GID
 set -a
 source "$ENV_FILE"
+export HOST_UID=$(id -u)
+export HOST_GID=$(id -g)
 set +a
 
 case "$COMMAND" in
