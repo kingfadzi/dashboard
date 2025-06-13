@@ -41,6 +41,7 @@ def fetch_spring_framework_versions(filters=None):
             {f"AND {condition_string}" if condition_string else ""}
             GROUP BY sd.normalized_version, hr.host_name
             ORDER BY repo_count DESC
+            limit 10
         """
         params = param_dict.copy()
         params["group_id"] = group_id
