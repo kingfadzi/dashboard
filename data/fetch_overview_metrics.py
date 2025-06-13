@@ -457,7 +457,6 @@ def fetch_language_distribution(filters=None):
 
 
 
-
 @cache.memoize()
 def fetch_package_types(filters=None):
     def query_data(condition_string, param_dict):
@@ -472,13 +471,14 @@ def fetch_package_types(filters=None):
         if condition_string:
             base_query += f" WHERE {condition_string}"
 
-        base_query += " GROUP BY sd.package_type ORDER BY repo_count DESC"
+        base_query += " GROUP BY sd.package_type ORDER BY repo_count DESC LIMIT 10"
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 def fetch_code_contributors(filters=None):
     @cache.memoize()
