@@ -110,8 +110,10 @@ def fetch_ccn_vs_function_count(filters=None):
             SELECT
                 lz.repo_id,
                 hr.repo_name,
+                hr.classification_label,
                 lz.function_count,
                 lz.total_ccn,
+                ROUND(lz.total_ccn::numeric / NULLIF(lz.function_count, 0), 2) AS avg_ccn,
                 rm.code_size_bytes
             FROM lizard_summary lz
             JOIN harvested_repositories hr ON lz.repo_id = hr.repo_id
@@ -124,4 +126,5 @@ def fetch_ccn_vs_function_count(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 

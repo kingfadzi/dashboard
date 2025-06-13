@@ -3,6 +3,7 @@ import plotly.express as px
 
 from components.chart_style import stacked_bar_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
+from utils.formattting import human_readable_size
 
 
 # 1. Total Cyclomatic Complexity
@@ -77,26 +78,59 @@ def render_total_nloc_chart(df: pd.DataFrame):
 
 # 4. Scatter: Function Count vs Total Complexity
 def render_ccn_vs_function_count_chart(df: pd.DataFrame):
-
+    df = df.copy()
     df["code_size_bytes"] = pd.to_numeric(df["code_size_bytes"], errors="coerce").fillna(0)
+    df["avg_ccn"] = df["total_ccn"] / df["function_count"]
+    df = df[df["function_count"] > 0]
 
+    # Strip outliers for function count only
+    function_threshold = df["function_count"].quantile(0.98)
+    df = df[df["function_count"] <= function_threshold]
+
+    # Format repo size for hover
+    df["repo_size_human"] = df["code_size_bytes"].apply(human_readable_size)
+
+    # Size color ticks
+    min_size = df["code_size_bytes"].min()
+    max_size = df["code_size_bytes"].max()
+    tickvals = [min_size, max_size/4, max_size/2, 3*max_size/4, max_size]
+    ticktext = [human_readable_size(v) for v in tickvals]
 
     fig = px.scatter(
         df,
         x="function_count",
-        y="total_ccn",
+        y="avg_ccn",
         size="code_size_bytes",
+        color="code_size_bytes",
         hover_name="repo_name",
+        color_continuous_scale=NEUTRAL_COLOR_SEQUENCE,
         labels={
             "function_count": "Function Count",
-            "total_ccn": "Total Cyclomatic Complexity",
-            "code_size_bytes": "Repo Size (Bytes)"
+            "avg_ccn": "Average Cyclomatic Complexity",
+            "code_size_bytes": "Repo Size (Bytes)",
+            "repo_size_human": "Repo Size"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE
+        hover_data={
+            "repo_name": True,
+            "repo_size_human": True,
+            "code_size_bytes": False,
+            "avg_ccn": True,
+            "function_count": True
+        }
     )
+
     fig.update_layout(
+        template="plotly_white",
         dragmode=False,
-        margin=dict(t=40, b=40, l=20, r=20)
+        autosize=True,
+        margin=dict(t=40, b=40, l=20, r=20),
+        coloraxis_colorbar=dict(
+            title=dict(text="Repository Size", side="top", font=dict(size=14)),
+            tickvals=tickvals,
+            ticktext=ticktext,
+            tickfont=dict(size=10)
+        )
     )
+
     fig.update_traces(marker=dict(opacity=0.7))
     return fig
