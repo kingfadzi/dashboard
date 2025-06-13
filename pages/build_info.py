@@ -160,8 +160,9 @@ layout = dbc.Container(
         # Fifth row
         dbc.Row(
             [
-                dbc.Col(interactive_card("Support Status (.NET)", "dotnet-support-status-chart"), width=6),
-                dbc.Col(interactive_card("Support Status (Java)", "java-support-status-chart"), width=6),
+                dbc.Col(interactive_card("Support Status (.NET)", "dotnet-support-status-chart"), width=4),
+                dbc.Col(interactive_card("Support Status (Java)", "java-support-status-chart"), width=4),
+                dbc.Col(interactive_card("Support Status (Go)", "go-support-status-chart"), width=4),
             ],
             className="mb-4",
         ),
@@ -169,26 +170,25 @@ layout = dbc.Container(
         # Sixth row
         dbc.Row(
             [
-                dbc.Col(interactive_card("Support Status (Python)", "python-support-status-chart"), width=4),
-                dbc.Col(interactive_card("Support Status (JavaScript)", "js-support-status-chart"), width=4),
-                dbc.Col(interactive_card("Support Status (Go)", "go-support-status-chart"), width=4),
+                dbc.Col(interactive_card("Support Status (Python)", "python-support-status-chart"), width=6),
+                dbc.Col(interactive_card("Support Status (JavaScript)", "js-support-status-chart"), width=6),
             ],
             className="mb-4",
         ),
 
-        dbc.Row(
-            [
-                dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),
-            ],
-            className="mb-4",
-        ),
-
-        dbc.Row(
-            [
-                dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
-            ],
-            className="mb-4",
-        ),
+        # dbc.Row(
+        #     [
+        #         dbc.Col(card("Detection Coverage", "detection-coverage-chart"), width=12),
+        #     ],
+        #     className="mb-4",
+        # ),
+        #
+        # dbc.Row(
+        #     [
+        #         dbc.Col(card("Confidence Distribution", "confidence-distribution-chart"), width=6),
+        #     ],
+        #     className="mb-4",
+        # ),
 
         modal_table(),
         dcc.Store(id="filters-applied-trigger"),

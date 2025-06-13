@@ -63,13 +63,13 @@ layout = dbc.Container(
 
         # Lizard charts
         dbc.Row([
-            dbc.Col(card("Total Cyclomatic Complexity", "total-ccn-chart"), width=6),
+            dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
             dbc.Col(card("Function Count (Modularity vs Monoliths)", "function-count-chart"), width=6),
         ]),
-        dbc.Row([
-            dbc.Col(card("Total Logical Lines of Code", "total-nloc-chart"), width=6),
-            dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
-        ]),
+        # dbc.Row([
+        #     dbc.Col(card("Total Cyclomatic Complexity", "total-ccn-chart"), width=6),
+        #     dbc.Col(card("Total Logical Lines of Code", "total-nloc-chart"), width=6),
+        # ]),
 
         modal_table(),
 
