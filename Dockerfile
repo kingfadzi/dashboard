@@ -33,13 +33,11 @@ RUN useradd -m dashuser
 USER dashuser
 
 WORKDIR /app
+RUN mkdir -p /app/certs
 
-# Optional: copy the cert if it exists in build context
 COPY --chown=dashuser:dashuser tls-ca-bundle.pem /app/certs/tls-ca-bundle.pem
-
 COPY --chown=dashuser:dashuser requirements.txt /app/
 
-# Check if cert exists; only pass it to pip if present
 RUN CERT_PATH="/app/certs/tls-ca-bundle.pem" && \
     if [ -f "$CERT_PATH" ]; then \
       echo "Installing with cert: $CERT_PATH" && \
