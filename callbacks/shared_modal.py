@@ -1,6 +1,6 @@
 from dash import Input, Output, State, ctx, callback
 import dash
-from modal_fetchers import fetch_modal_rows
+from data.modal_fetchers import fetch_modal_rows
 import pandas as pd
 
 def register_shared_modal_callbacks(app, chart_ids: list, filter_state_ids: list):
