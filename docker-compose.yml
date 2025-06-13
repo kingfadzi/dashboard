@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   dashapp:
     build:
@@ -8,13 +10,14 @@ services:
         GLOBAL_CERT: ${GLOBAL_CERT}
         HTTP_PROXY: ${HTTP_PROXY}
         HTTPS_PROXY: ${HTTPS_PROXY}
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
     ports:
       - "8050:8050"
     env_file:
       - .env-mars
     environment:
       - PIP_INDEX_URL=${GLOBAL_INDEX_URL}
-      - PIP_CERT=${GLOBAL_CERT}
       - http_proxy=${HTTP_PROXY}
       - https_proxy=${HTTPS_PROXY}
       - PYTHONIOENCODING=utf-8
