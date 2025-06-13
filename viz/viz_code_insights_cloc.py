@@ -34,6 +34,10 @@ def render_code_composition_chart(df: pd.DataFrame):
 
 
 def render_code_file_scatter_chart(df: pd.DataFrame):
+    df = df.copy()
+    df = df[pd.to_numeric(df["code_size_bytes"], errors="coerce").notnull()]
+    df = df[df["code_size_bytes"] > 0]
+
     fig = px.scatter(
         df,
         x="files",
@@ -46,7 +50,6 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
             "code_size_bytes": "Repo Size (Bytes)",
             "classification_label": "Size"
         },
-        color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         hover_name="repo_name"
     )
     fig.update_layout(
