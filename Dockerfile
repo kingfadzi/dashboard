@@ -1,12 +1,10 @@
 FROM almalinux:8
 
 ARG GLOBAL_INDEX_URL
-ARG GLOBAL_CERT
 ARG HTTP_PROXY
 ARG HTTPS_PROXY
 
 ENV PIP_INDEX_URL=${GLOBAL_INDEX_URL}
-ENV PIP_CERT=${GLOBAL_CERT}
 ENV http_proxy=${HTTP_PROXY}
 ENV https_proxy=${HTTPS_PROXY}
 ENV PYTHONIOENCODING=utf-8
@@ -36,14 +34,20 @@ USER dashuser
 
 WORKDIR /app
 
-# Always copy the cert if it's expected
+# Optional: copy the cert if it exists in build context
 COPY --chown=dashuser:dashuser tls-ca-bundle.pem /app/certs/tls-ca-bundle.pem
 
 COPY --chown=dashuser:dashuser requirements.txt /app/
 
-# Conditionally unset PIP_CERT if file is missing to prevent pip errors
-RUN if [ ! -f "$PIP_CERT" ]; then echo "Warning: cert file $PIP_CERT not found, disabling pip cert"; unset PIP_CERT; fi && \
-    python3 -m pip install --no-cache-dir -r requirements.txt
+# Check if cert exists; only pass it to pip if present
+RUN CERT_PATH="/app/certs/tls-ca-bundle.pem" && \
+    if [ -f "$CERT_PATH" ]; then \
+      echo "Installing with cert: $CERT_PATH" && \
+      python3 -m pip install --no-cache-dir --cert "$CERT_PATH" -r requirements.txt ; \
+    else \
+      echo "Installing without cert" && \
+      python3 -m pip install --no-cache-dir -r requirements.txt ; \
+    fi
 
 COPY --chown=dashuser:dashuser . /app/
 
