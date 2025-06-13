@@ -97,19 +97,19 @@ def register_kpi_callbacks(app):
         return (
             # Total repos
             format_with_commas(total_repos),
-            f"Active:{format_with_commas(active)} · Inactive:{format_with_commas(inactive)}",
+            f"Active:{format_number_si(active)} · Inactive:{format_number_si(inactive)}",
 
             # Recent updates
             format_with_commas(recently_updated),
-            f"New:{format_with_commas(new_repos)} · 30d",
+            f"New:{format_number_si(new_repos)} · 30d",
 
             # Solo contributors
             format_with_commas(solo),
-            f"All:{format_with_commas(total_contribs)}",
+            f"All:{format_number_si(total_contribs)}",
 
-            # LOC (SI-format), Files & Repos subtext
+            # LOC (main uses SI as before), subtext updated
             format_number_si(loc),
-            f"Files:{format_with_commas(source_files)} · Repos:{format_with_commas(total_repos)}",
+            f"Files:{format_number_si(source_files)} · Repos:{format_number_si(total_repos)}",
 
             # Branch sprawl
             format_with_commas(branch_sprawl),
@@ -117,15 +117,15 @@ def register_kpi_callbacks(app):
 
             # Build tools
             format_with_commas(build_detected),
-            f"Modules:{format_with_commas(modules)} · NoTool:{format_with_commas(without_tool)}",
+            f"Modules:{format_number_si(modules)} · NoTool:{format_number_si(without_tool)}",
 
             # Runtimes
             format_with_commas(runtime_detected),
-            f"Languages:{format_with_commas(languages)}",
+            f"Languages:{format_number_si(languages)}",
 
             # CI/CD
             format_with_commas(cicd_total),
-            f"BP:{format_with_commas(bp)} · GL:{format_with_commas(gl)} · J:{format_with_commas(jenkins)}",
+            f"GitLab:{format_number_si(gl)} · Jenkins:{format_number_si(jenkins)}",
 
             # Source hosts
             format_with_commas(sources_total),
