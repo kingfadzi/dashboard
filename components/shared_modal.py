@@ -14,8 +14,10 @@ shared_modal = [
                     id="generic-modal-table",
                     columnDefs=[],
                     rowData=[],
-                    pagination=True,
-                    paginationPageSize=15,
+                    dashGridOptions={
+                        "pagination": True,
+                        "paginationPageSize": 15
+                    },
                     style={"height": "400px", "width": "100%"},
                 )
             ),
