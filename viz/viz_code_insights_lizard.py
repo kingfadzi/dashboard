@@ -80,12 +80,11 @@ def render_total_nloc_chart(df: pd.DataFrame):
 def render_ccn_vs_function_count_chart(df: pd.DataFrame):
     df = df.copy()
     df["code_size_bytes"] = pd.to_numeric(df["code_size_bytes"], errors="coerce").fillna(0)
-    df["avg_ccn"] = df["total_ccn"] / df["function_count"]
-    df = df[df["function_count"] > 0]
 
-    # Strip outliers for function count only
-    function_threshold = df["function_count"].quantile(0.98)
-    df = df[df["function_count"] <= function_threshold]
+    # Strip outliers based on 95th percentile for both axes
+    fc_thresh = df["function_count"].quantile(0.95)
+    ccn_thresh = df["total_ccn"].quantile(0.95)
+    df = df[(df["function_count"] > 0) & (df["function_count"] <= fc_thresh) & (df["total_ccn"] <= ccn_thresh)]
 
     # Format repo size for hover
     df["repo_size_human"] = df["code_size_bytes"].apply(human_readable_size)
@@ -93,20 +92,20 @@ def render_ccn_vs_function_count_chart(df: pd.DataFrame):
     # Size color ticks
     min_size = df["code_size_bytes"].min()
     max_size = df["code_size_bytes"].max()
-    tickvals = [min_size, max_size/4, max_size/2, 3*max_size/4, max_size]
+    tickvals = [min_size, max_size / 4, max_size / 2, 3 * max_size / 4, max_size]
     ticktext = [human_readable_size(v) for v in tickvals]
 
     fig = px.scatter(
         df,
         x="function_count",
-        y="avg_ccn",
+        y="total_ccn",
         size="code_size_bytes",
         color="code_size_bytes",
         hover_name="repo_name",
         color_continuous_scale=NEUTRAL_COLOR_SEQUENCE,
         labels={
             "function_count": "Function Count",
-            "avg_ccn": "Average Cyclomatic Complexity",
+            "total_ccn": "Total Cyclomatic Complexity",
             "code_size_bytes": "Repo Size (Bytes)",
             "repo_size_human": "Repo Size"
         },
@@ -114,7 +113,7 @@ def render_ccn_vs_function_count_chart(df: pd.DataFrame):
             "repo_name": True,
             "repo_size_human": True,
             "code_size_bytes": False,
-            "avg_ccn": True,
+            "total_ccn": True,
             "function_count": True
         }
     )
