@@ -67,7 +67,11 @@ def render_contributor_dominance_chart(df: pd.DataFrame):
 
 @stacked_bar_chart_style(x_col="branch_bucket", y_col="repo_count")
 def render_branch_sprawl_chart(df: pd.DataFrame):
-    branch_order = ["0", "1-5", "6-15", "16-30", "30+"]
+    branch_order = [
+        "Only 1", "2-5", "6-8", "9-15", "16-20",
+        "21-30", "31-40", "41-60", "61-80", "80+"
+    ]
+    df["branch_bucket"] = df["branch_bucket"].replace({"1": "Only 1"})
     df["branch_bucket"] = pd.Categorical(df["branch_bucket"], categories=branch_order, ordered=True)
     df = df.sort_values("branch_bucket")
 

@@ -93,25 +93,34 @@ def fetch_branch_sprawl(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         base_query = f"""
-            SELECT 
-                CASE 
-                    WHEN active_branch_count = 0 THEN '0'
-                    WHEN active_branch_count <= 5 THEN '1-5'
-                    WHEN active_branch_count <= 15 THEN '6-15'
-                    WHEN active_branch_count <= 30 THEN '16-30'
-                    ELSE '30+'
-                END AS branch_bucket,
+            WITH bucketed AS (
+                SELECT 
+                    CASE 
+                        WHEN active_branch_count = 1 THEN '1'
+                        WHEN active_branch_count BETWEEN 2 AND 5 THEN '2-5'
+                        WHEN active_branch_count BETWEEN 6 AND 8 THEN '6-8'
+                        WHEN active_branch_count BETWEEN 9 AND 15 THEN '9-15'
+                        WHEN active_branch_count BETWEEN 16 AND 20 THEN '16-20'
+                        WHEN active_branch_count BETWEEN 21 AND 30 THEN '21-30'
+                        WHEN active_branch_count BETWEEN 31 AND 40 THEN '31-40'
+                        WHEN active_branch_count BETWEEN 41 AND 60 THEN '41-60'
+                        WHEN active_branch_count BETWEEN 61 AND 80 THEN '61-80'
+                        ELSE '80+'
+                    END AS branch_bucket,
 
-                {LANGUAGE_GROUP_CASE_SQL} AS language_group,
+                    {LANGUAGE_GROUP_CASE_SQL} AS language_group,
 
-                COUNT(*) AS repo_count
+                    COUNT(*) AS repo_count
 
-            FROM repo_metrics
-            JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
-            LEFT JOIN languages l ON hr.main_language = l.name
-            {f'WHERE {condition_string}' if condition_string else ''}
-            GROUP BY branch_bucket, language_group
-            HAVING {LANGUAGE_GROUP_CASE_SQL} NOT IN ('markup_or_data', 'no_language')
+                FROM repo_metrics
+                JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
+                LEFT JOIN languages l ON hr.main_language = l.name
+                {f'WHERE {condition_string}' if condition_string else ''}
+                GROUP BY branch_bucket, language_group
+                HAVING {LANGUAGE_GROUP_CASE_SQL} NOT IN ('markup_or_data', 'no_language')
+            )
+
+            SELECT * FROM bucketed
             ORDER BY branch_bucket, repo_count DESC
         """
         sql = text(base_query)
@@ -119,6 +128,8 @@ def fetch_branch_sprawl(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
+
 
 
 # 4. Repo Age Buckets (in days)
