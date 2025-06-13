@@ -6,7 +6,7 @@ from components.shared_modal import shared_modal
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
 
-def card(title, graph_id, height=400):
+def card(title, graph_id, height=400, config=None):
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -14,7 +14,7 @@ def card(title, graph_id, height=400):
                 dcc.Loading(
                     dcc.Graph(
                         id=graph_id,
-                        config={"staticPlot": True},
+                        config=config or {"displayModeBar": False},
                         style={"height": f"{height}px"},
                     )
                 ),
@@ -87,12 +87,12 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 4
+        # Row 4 — clickable Spring version charts
         dbc.Row(
             [
                 dbc.Col(card("EE API Usage (Jakarta vs Javax)", "ee-usage-chart"), width=4),
-                dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart"), width=4),
-                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=4),
+                dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart", config={"displayModeBar": False}), width=4),
+                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart", config={"displayModeBar": False}), width=4),
             ],
             className="mb-4",
         ),
@@ -125,7 +125,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="dev-frameworks-bar-chart",
-                                        config={"staticPlot": True},
+                                        config={"displayModeBar": False},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -138,8 +138,6 @@ layout = dbc.Container(
             ],
             className="mb-4",
         ),
-
-
 
         # Row 6: Middleware + App Servers
         dbc.Row(
@@ -171,7 +169,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="middleware-subcategory-chart",
-                                        config={"staticPlot": True},
+                                        config={"displayModeBar": False},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -195,17 +193,14 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-
         dbc.Row(
             [
-                #dbc.Col(card("Vulnerabilties by Severity", "trivy-severity-repo-count-chart"), width=4),
                 dbc.Col(card("Vulnerabilties by Resource Type", "trivy-resource-type-repo-count-chart"), width=4),
                 dbc.Col(card("Vulnerabilties by Fix Availability", "trivy-fix-status-repo-count-chart"), width=4),
                 dbc.Col(card("Top Vulnerable Dependencies", "top-expired-trivy-products-chart"), width=4),
             ],
             className="mb-4",
         ),
-
 
         dcc.Store(id="filters-applied-trigger"),
         *shared_modal
