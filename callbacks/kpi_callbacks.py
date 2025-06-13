@@ -1,17 +1,31 @@
+import dash
+from dash import html, dcc
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
+
 from data.fetch_overview_kpis import fetch_overview_kpis
 from utils.filter_utils import extract_filter_dict_from_store
 
-def format_number_short(value):
+def format_with_commas(value):
+    """Format integer with thousands separators."""
     if value is None:
         return "0"
     try:
-        n = int(value)
-        if n >= 1_000_000:
-            return f"{n/1_000_000:.1f}M"
-        if n >= 1_000:
-            return f"{n/1_000:.0f}K"
-        return str(n)
+        return f"{int(value):,}"
+    except (ValueError, TypeError):
+        return "0"
+
+def format_number_si(value):
+    """Format number using SI suffixes (K, M, B, T)."""
+    if value is None:
+        return "0"
+    try:
+        num = float(value)
+        for unit in ("", "K", "M", "B", "T"):
+            if abs(num) < 1000:
+                return f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
+            num /= 1000.0
+        return f"{num:.1f}E"
     except (ValueError, TypeError):
         return "0"
 
@@ -51,40 +65,69 @@ def register_kpi_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         kpi = fetch_overview_kpis(filters)
 
+        total_repos    = kpi.get("total_repos", 0)
+        active         = kpi.get("active", 0)
+        inactive       = kpi.get("inactive", 0)
+
+        recently_updated = kpi.get("recently_updated", 0)
+        new_repos        = kpi.get("new_repos", 0)
+
+        solo            = kpi.get("solo_contributor", 0)
+        total_contribs  = kpi.get("total_contributors", 0)
+
+        loc             = kpi.get("loc", 0)
+        source_files    = kpi.get("source_files", 0)
+
+        branch_sprawl   = kpi.get("branch_sprawl", 0)
+
+        build_detected  = kpi.get("build_tool_detected", 0)
+        modules         = kpi.get("modules", 0)
+        without_tool    = kpi.get("without_tool", 0)
+
+        runtime_detected = kpi.get("runtime_detected", 0)
+        languages        = kpi.get("languages", 0)
+
+        cicd_total = kpi.get("cicd_total", 0)
+        bp         = kpi.get("bitbucket_pipelines", 0)
+        gl         = kpi.get("gitlab_ci", 0)
+        jenkins    = kpi.get("jenkins", 0)
+
+        sources_total = kpi.get("sources_total", 0)
+
         return (
-            # Repos
-            kpi.get("total_repos", 0),
-            f"A:{kpi.get('active', 0)} · I:{kpi.get('inactive', 0)}",
+            # Total repos
+            format_with_commas(total_repos),
+            f"Active:{format_with_commas(active)} · Inactive:{format_with_commas(inactive)}",
 
-            # Recent Updates
-            kpi.get("recently_updated", 0),
-            f"New:{kpi.get('new_repos', 0)} · 30d",
+            # Recent updates
+            format_with_commas(recently_updated),
+            f"New:{format_with_commas(new_repos)} · 30d",
 
-            # Solo Devs
-            kpi.get("solo_contributor", 0),
-            f"All:{kpi.get('total_contributors', 0)}",
+            # Solo contributors
+            format_with_commas(solo),
+            f"All:{format_with_commas(total_contribs)}",
 
-            # LOC
-            format_number_short(kpi.get("loc")),
-            f"Files:{format_number_short(kpi.get('source_files'))} · Repos:{kpi.get('total_repos', 0)}",
+            # LOC (SI-format), Files & Repos subtext
+            format_number_si(loc),
+            f"Files:{format_with_commas(source_files)} · Repos:{format_with_commas(total_repos)}",
 
-            # Branching
-            kpi.get("branch_sprawl", 0),
+            # Branch sprawl
+            format_with_commas(branch_sprawl),
             ">10 branches",
 
-            # Build Tools
-            kpi.get("build_tool_detected", 0),
-            f"Mod:{kpi.get('modules', 0)} · NoTool:{kpi.get('without_tool', 0)}",
+            # Build tools
+            format_with_commas(build_detected),
+            f"Modules:{format_with_commas(modules)} · NoTool:{format_with_commas(without_tool)}",
 
             # Runtimes
-            kpi.get("runtime_detected", 0),
-            f"Langs:{kpi.get('languages', 0)}",
+            format_with_commas(runtime_detected),
+            f"Languages:{format_with_commas(languages)}",
 
-            # CI/CD (total + breakdown)
-            kpi.get("cicd_total", 0),
-            f"BP:{kpi.get('bitbucket_pipelines', 0)} · GL:{kpi.get('gitlab_ci', 0)} · J:{kpi.get('jenkins', 0)}",
+            # CI/CD
+            format_with_commas(cicd_total),
+            f"BP:{format_with_commas(bp)} · GL:{format_with_commas(gl)} · J:{format_with_commas(jenkins)}",
 
-            # Source Hosts
-            kpi.get("sources_total", 0),
+            # Source hosts
+            format_with_commas(sources_total),
             "Hosts",
         )

@@ -245,41 +245,44 @@ def fetch_commit_buckets(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = f"""
-        SELECT * FROM (
+        SELECT *
+        FROM (
             SELECT
                 CASE
-                    WHEN rm.last_commit_date >= NOW() - INTERVAL '1 month' THEN '< 1 month'
-                    WHEN rm.last_commit_date >= NOW() - INTERVAL '3 months' THEN '1-3 months'
-                    WHEN rm.last_commit_date >= NOW() - INTERVAL '6 months' THEN '3-6 months'
-                    WHEN rm.last_commit_date >= NOW() - INTERVAL '9 months' THEN '6-9 months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '1 month'   THEN '< 1 month'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '3 months'  THEN '1-3 months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '6 months'  THEN '3-6 months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '9 months'  THEN '6-9 months'
                     WHEN rm.last_commit_date >= NOW() - INTERVAL '12 months' THEN '9-12 months'
-                    WHEN rm.last_commit_date >= NOW() - INTERVAL '18 months' THEN '12-18 months'
-                    WHEN rm.last_commit_date >= NOW() - INTERVAL '24 months' THEN '18-24 months'
-                    ELSE '24+ months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '15 months' THEN '12-15 months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '18 months' THEN '15-18 months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '21 months' THEN '18-21 months'
+                    WHEN rm.last_commit_date >= NOW() - INTERVAL '24 months' THEN '21-24 months'
+                    ELSE                                                       '24+ months'
                 END AS commit_bucket,
                 {LANGUAGE_GROUP_CASE_SQL} AS language_group,
                 COUNT(DISTINCT rm.repo_id) AS repo_count
             FROM repo_metrics rm
-            INNER JOIN harvested_repositories hr ON rm.repo_id = hr.repo_id
-            LEFT JOIN languages l ON hr.main_language = l.name
+            INNER JOIN harvested_repositories hr
+              ON rm.repo_id = hr.repo_id
+            LEFT JOIN languages l
+              ON hr.main_language = l.name
             WHERE 1=1
-        """
-        if condition_string:
-            sql += f" AND {condition_string}"
-
-        sql += """
+              {f"AND {condition_string}" if condition_string else ""}
             GROUP BY 1, 2
-        ) subquery
-        ORDER BY 
-            CASE
-                WHEN commit_bucket = '< 1 month' THEN 1
-                WHEN commit_bucket = '1-3 months' THEN 2
-                WHEN commit_bucket = '3-6 months' THEN 3
-                WHEN commit_bucket = '6-9 months' THEN 4
-                WHEN commit_bucket = '9-12 months' THEN 5
-                WHEN commit_bucket = '12-18 months' THEN 6
-                WHEN commit_bucket = '18-24 months' THEN 7
-                ELSE 8
+        ) sub
+        ORDER BY
+            CASE commit_bucket
+                WHEN '< 1 month'     THEN 1
+                WHEN '1-3 months'    THEN 2
+                WHEN '3-6 months'    THEN 3
+                WHEN '6-9 months'    THEN 4
+                WHEN '9-12 months'   THEN 5
+                WHEN '12-15 months'  THEN 6
+                WHEN '15-18 months'  THEN 7
+                WHEN '18-21 months'  THEN 8
+                WHEN '21-24 months'  THEN 9
+                ELSE                   10
             END
         """
         stmt = text(sql)
@@ -287,6 +290,7 @@ def fetch_commit_buckets(filters=None):
 
     condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 

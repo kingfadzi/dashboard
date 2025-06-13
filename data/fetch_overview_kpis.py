@@ -12,7 +12,7 @@ def fetch_overview_kpis(filters=None):
                 SELECT hr.repo_id, hr.activity_status, hr.host_name,
                        rm.last_commit_date, rm.repo_age_days
                 FROM harvested_repositories hr
-                JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
+                LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
                 WHERE 1=1
                 {f'AND {condition_string}' if condition_string else ''}
             )
@@ -32,10 +32,10 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(DISTINCT ga.language) FROM go_enry_analysis ga JOIN base USING (repo_id)) AS languages,
                 -- CI/CD breakdown
                 (SELECT COUNT(DISTINCT iac.repo_id) FROM iac_components iac JOIN base USING (repo_id)
-                    WHERE framework IN ('Azure Pipelines', 'Bitbucket Pipelines', 'Gitlab CI', 'Jenkins')) AS cicd_total,
+                    WHERE framework IN ('Azure Pipelines', 'Bitbucket Pipelines', 'GitLab CI', 'Jenkins')) AS cicd_total,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Azure Pipelines') AS azure_pipelines,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Bitbucket Pipelines') AS bitbucket_pipelines,
-                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Gitlab CI') AS gitlab_ci,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'GitLab CI') AS gitlab_ci,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Jenkins') AS jenkins,
                 -- Source hosts count
                 (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,

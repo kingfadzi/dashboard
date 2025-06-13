@@ -1,12 +1,5 @@
-from functools import wraps
 from typing import Callable
-
 from components.colors import NEUTRAL_COLOR_SEQUENCE
-from functools import wraps
-
-from functools import wraps
-
-from functools import wraps
 
 def standard_chart_style(_func=None, *, tickformat: str = ".2~s", texttemplate: str | None = None):
 

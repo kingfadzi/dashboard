@@ -150,6 +150,8 @@ def render_package_type_chart(df: pd.DataFrame):
     return fig
 
 
+import plotly.graph_objects as go
+
 def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
     # Define the correct contributor bucket order
     bucket_order = [
@@ -200,16 +202,20 @@ def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
         title_x=0.5,
         template="plotly_white",
         dragmode=False,
-        xaxis_title="",
+        xaxis=dict(
+            title="",
+            tickfont=dict(size=10),
+            tickangle=-45
+        ),
         yaxis=dict(
             title="Number of Contributors",
+            tickfont=dict(size=10),
             categoryorder="array",
             categoryarray=bucket_order
         )
     )
-
-
     return fig
+
 
 
 
@@ -359,6 +365,9 @@ def render_cloc_chart(filtered_df: pd.DataFrame):
     return fig, melted_df
 
 
+import plotly.express as px
+import plotly.graph_objects as go
+
 def render_contribution_scatter(filtered_df: pd.DataFrame):
     filtered_df["repo_size"] = filtered_df["repo_size"].fillna(0)
     filtered_df["repo_size_human"] = filtered_df["repo_size"].apply(human_readable_size)
@@ -367,14 +376,14 @@ def render_contribution_scatter(filtered_df: pd.DataFrame):
     def truncate(text, max_len=60):
         return text if pd.isna(text) or len(str(text)) <= max_len else str(text)[:max_len] + "..."
 
-    filtered_df["web_url"] = filtered_df["web_url"].apply(lambda x: truncate(x, 60))
-    filtered_df["all_languages"] = filtered_df["all_languages"].apply(lambda x: truncate(x, 60))
+    filtered_df["web_url"]      = filtered_df["web_url"].apply(lambda x: truncate(x, 60))
+    filtered_df["all_languages"]= filtered_df["all_languages"].apply(lambda x: truncate(x, 60))
 
     # Setup size scale ticks
     min_size = filtered_df["repo_size"].min()
     max_size = filtered_df["repo_size"].max()
-    tickvals = [min_size, max_size / 4, max_size / 2, 3 * max_size / 4, max_size]
-    ticktext = [human_readable_size(val) for val in tickvals]
+    tickvals = [min_size, max_size/4, max_size/2, 3*max_size/4, max_size]
+    ticktext = [human_readable_size(v) for v in tickvals]
 
     fig = px.scatter(
         filtered_df,
@@ -385,15 +394,13 @@ def render_contribution_scatter(filtered_df: pd.DataFrame):
         color="repo_size",
         color_continuous_scale=NEUTRAL_COLOR_SEQUENCE,
         labels={
-            "main_language": "Main Language",
-            "repo_size_human": "Size",
-            "repo_age_human": "Age",
-            "contributors": "Number of Contributors",
-            "commits": "Total Commits",
-            "web_url": "URL",
-            "all_languages": "Languages Used",
-            "total_lines_of_code": "LOC",
-            "file_count": "File Count",
+            "contributors":      "Number of Contributors",
+            "commits":           "Total Commits",
+            "repo_size_human":   "Size",
+            "web_url":           "URL",
+            "all_languages":     "Languages Used",
+            "total_lines_of_code":"LOC",
+            "file_count":        "File Count",
         },
         hover_data={
             "main_language": True,
@@ -423,14 +430,22 @@ def render_contribution_scatter(filtered_df: pd.DataFrame):
             ),
             tickvals=tickvals,
             ticktext=ticktext,
+            tickfont=dict(size=10)
         ),
         legend=dict(
-            font=dict(size=12),
+            font=dict(size=10),
             itemsizing="trace",
         ),
+        xaxis=dict(
+            tickfont=dict(size=10)
+        ),
+        yaxis=dict(
+            tickfont=dict(size=10)
+        )
     )
 
     return fig
+
 
 @stacked_bar_chart_style(x_col="main_language", y_col="repo_count")
 def render_primary_language_chart(filtered_df: pd.DataFrame):
@@ -453,27 +468,32 @@ def render_primary_language_chart(filtered_df: pd.DataFrame):
 
 @stacked_bar_chart_style(x_col="commit_bucket", y_col="repo_count")
 def render_commit_buckets_chart(df: pd.DataFrame):
-    # Define the desired order
+
     ordered_buckets = [
         "< 1 month", "1-3 months", "3-6 months", "6-9 months",
-        "9-12 months", "12-18 months", "18-24 months", "24+ months"
+        "9-12 months", "12-15 months", "15-18 months", "18-21 months",
+        "21-24 months", "24+ months"
     ]
 
-    # Apply categorical ordering
-    df["commit_bucket"] = pd.Categorical(df["commit_bucket"], categories=ordered_buckets, ordered=True)
+    df["commit_bucket"] = pd.Categorical(
+        df["commit_bucket"],
+        categories=ordered_buckets,
+        ordered=True
+    )
 
     fig = px.bar(
         df,
         x="commit_bucket",
         y="repo_count",
         color="language_group",
-        barmode="stack",
         labels={
             "commit_bucket": "Commit Recency",
             "repo_count": "Repository Count",
             "language_group": "Language Group"
         },
+        category_orders={"commit_bucket": ordered_buckets},
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
+        barmode="stack"
     )
     return fig, df
 
