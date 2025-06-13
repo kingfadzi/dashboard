@@ -45,10 +45,16 @@ def fetch_function_count_buckets(filters=None):
         base_query = f"""
             SELECT
                 CASE
-                    WHEN function_count < 10 THEN '< 10'
-                    WHEN function_count < 50 THEN '10-49'
-                    WHEN function_count < 200 THEN '50-199'
-                    ELSE '200+'
+                    WHEN function_count < 21 THEN '1–20'
+                    WHEN function_count < 51 THEN '21–50'
+                    WHEN function_count < 101 THEN '51–100'
+                    WHEN function_count < 201 THEN '101–200'
+                    WHEN function_count < 401 THEN '201–400'
+                    WHEN function_count < 801 THEN '401–800'
+                    WHEN function_count < 1201 THEN '801–1200'
+                    WHEN function_count < 1601 THEN '1201–1600'
+                    WHEN function_count < 2001 THEN '1601–2000'
+                    ELSE '2000+'
                 END AS function_bucket,
 
                 {LANGUAGE_GROUP_CASE_SQL} AS language_group,
@@ -68,6 +74,7 @@ def fetch_function_count_buckets(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 
 # 3. Total NLOC (bucketed)

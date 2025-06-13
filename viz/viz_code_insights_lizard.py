@@ -32,7 +32,10 @@ def render_total_ccn_chart(df: pd.DataFrame):
 # 2. Function Count
 @stacked_bar_chart_style(x_col="function_bucket", y_col="repo_count")
 def render_function_count_chart(df: pd.DataFrame):
-    bucket_order = ["< 10", "10-49", "50-199", "200+"]
+    bucket_order = [
+        "1–20", "21–50", "51–100", "101–200", "201–400",
+        "401–800", "801–1200", "1201–1600", "1601–2000", "2000+"
+    ]
     df["function_bucket"] = pd.Categorical(df["function_bucket"], categories=bucket_order, ordered=True)
     df = df.sort_values("function_bucket")
 
