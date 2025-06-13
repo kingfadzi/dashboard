@@ -208,7 +208,7 @@ layout = dbc.Container(
 
 
         dcc.Store(id="filters-applied-trigger"),
-        **shared_modal
+        *shared_modal
     ],
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},
