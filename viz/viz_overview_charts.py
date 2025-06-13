@@ -21,7 +21,7 @@ def render_repo_status_chart(filtered_df: pd.DataFrame):
         barmode="stack",
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         labels={
-            "activity_status": "Activity Status",
+            "activity_status": "",
             "repo_count": "Repository Count",
             "host_name": "Host"
         }
@@ -287,9 +287,15 @@ def render_dev_frameworks_chart(df: pd.DataFrame):
 
 @stacked_bar_chart_style(x_col="language_bucket", y_col="repo_count")
 def render_multilang_chart(filtered_df: pd.DataFrame):
+
+    categories = [
+        '1 language', '2 languages', '3 languages', '4 languages', '5 languages',
+        '6 languages', '7 languages', '8 languages', '9 languages', '10+ languages'
+    ]
+
     filtered_df["language_bucket"] = pd.Categorical(
         filtered_df["language_bucket"],
-        categories=["Single Language", "2-5", "6-10", "10+"],
+        categories=categories,
         ordered=True
     )
 
@@ -300,17 +306,15 @@ def render_multilang_chart(filtered_df: pd.DataFrame):
         color="classification_label",
         text="repo_count",
         labels={
-            "language_bucket": "Number of Languages per Repo",
+            "language_bucket": "",
             "repo_count": "Repository Count",
             "classification_label": "Repo Size"
         },
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
-        barmode="stack"
+        barmode="stack",
+        category_orders={"language_bucket": categories}
     )
     return fig, filtered_df
-
-
-
 
 @stacked_bar_chart_style(x_col="main_language", y_col="count")
 def render_cloc_chart(filtered_df: pd.DataFrame):

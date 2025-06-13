@@ -177,10 +177,9 @@ def stacked_bar_chart_style(
         *,
         tickformat: str = ".2s",
         total_formatter: Callable[[float], str] | None = None,
-        annotation_font_size: int = 10,     # ← font size for the top-of-bar values
+        annotation_font_size: int = 10,  # font size for the top‐of‐bar annotations
 ):
-
-    # default SI-prefix formatter
+    # Default SI‐prefix formatter
     if total_formatter is None:
         def total_formatter(v: float) -> str:
             num = float(v)
@@ -193,17 +192,21 @@ def stacked_bar_chart_style(
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            # Expect the wrapped function to return (fig, df)
             fig, df = func(*args, **kwargs)
 
+            # Extract category ordering if the dataframe column is categorical
             categoryarray = (
                 df[x_col].cat.categories.tolist()
                 if pd.api.types.is_categorical_dtype(df[x_col])
                 else None
             )
 
+            # Base layout that fills its container completely
             fig.update_layout(
+                autosize=True,
+                margin=dict(l=0, r=0, t=0, b=0),
                 font=dict(family="Arial", size=10),
-                margin=dict(t=40, b=20, l=20, r=20),
                 plot_bgcolor="white",
                 paper_bgcolor="white",
                 colorway=NEUTRAL_COLOR_SEQUENCE,
@@ -228,13 +231,14 @@ def stacked_bar_chart_style(
                     xanchor="right", x=1, title_text="", font_size=10
                 ),
                 hoverlabel=dict(bgcolor="white", font_size=12, bordercolor="#cccccc"),
-                dragmode=False, title=None
+                dragmode=False,
+                title=None,
             )
 
-            # remove any per-segment text
+            # Remove any per‐segment text so we can add our own totals
             fig.update_traces(text=None)
 
-            # compute totals and annotate with smaller font
+            # Compute total per x‐category and annotate
             totals = df.groupby(x_col)[y_col].sum().reset_index()
             for _, row in totals.iterrows():
                 fig.add_annotation(
@@ -243,11 +247,14 @@ def stacked_bar_chart_style(
                     text=total_formatter(row[y_col]),
                     showarrow=False,
                     yshift=5,
-                    font=dict(size=annotation_font_size),  # ← uses your new, smaller size
+                    font=dict(size=annotation_font_size),
                 )
 
+            # **Return only the figure** (Dash callbacks expect a JSON‐serializable Figure)
             return fig
 
         return wrapper
+
     return decorator
+
 

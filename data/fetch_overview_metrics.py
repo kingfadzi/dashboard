@@ -290,8 +290,8 @@ def fetch_commit_buckets(filters=None):
 
 
 
+@cache.memoize()
 def fetch_multilang_usage(filters=None):
-    @cache.memoize()
     def query_data(condition_string, param_dict):
         sql = f"""
         WITH language_counts AS (
@@ -300,30 +300,43 @@ def fetch_multilang_usage(filters=None):
                 COUNT(DISTINCT gea.language) AS language_count
             FROM go_enry_analysis gea
             JOIN languages l ON gea.language = l.name
-            WHERE gea.percent_usage > 0 AND l.type = 'programming'
+            WHERE gea.percent_usage > 0
+              AND l.type = 'programming'
             GROUP BY gea.repo_id
+        ),
+        bucketed_data AS (
+            SELECT
+                hr.classification_label,
+                CASE
+                    WHEN lc.language_count BETWEEN 1 AND 9 
+                        THEN CAST(lc.language_count AS TEXT) || ' language' || 
+                             CASE WHEN lc.language_count > 1 THEN 's' ELSE '' END
+                    ELSE '10+ languages'
+                END AS language_bucket
+            FROM language_counts lc
+            JOIN harvested_repositories hr
+                ON lc.repo_id = hr.repo_id
+            {f"WHERE {condition_string}" if condition_string else ""}
         )
         SELECT
-            hr.classification_label,
-            CASE
-                WHEN lc.language_count = 1 THEN 'Single Language'
-                WHEN lc.language_count BETWEEN 2 AND 5 THEN '2-5'
-                WHEN lc.language_count BETWEEN 6 AND 10 THEN '6-10'
-                ELSE '10+'
-            END AS language_bucket,
+            classification_label,
+            language_bucket,
             COUNT(*) AS repo_count
-        FROM language_counts lc
-        JOIN harvested_repositories hr ON lc.repo_id = hr.repo_id
-        {f"WHERE {condition_string}" if condition_string else ""}
-        GROUP BY hr.classification_label, language_bucket
-        ORDER BY language_bucket
+        FROM bucketed_data
+        GROUP BY classification_label, language_bucket
+        ORDER BY
+            classification_label,
+            CASE 
+                WHEN language_bucket = '10+ languages' THEN 10
+                ELSE CAST(SPLIT_PART(language_bucket, ' ', 1) AS INTEGER)
+            END
         """
-
         stmt = text(sql)
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
+    condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 def fetch_cloc(filters=None):
