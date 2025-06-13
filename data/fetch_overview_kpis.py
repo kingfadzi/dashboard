@@ -40,9 +40,9 @@ def fetch_overview_kpis(filters=None):
                 -- Source hosts count
                 (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,
                 -- Code metrics
-                (SELECT SUM(code) FROM cloc_metrics cm JOIN base USING (repo_id)) AS loc,
-                (SELECT SUM(files) FROM cloc_metrics cm JOIN base USING (repo_id)) AS source_files,
-                -- Contributors & branches
+                (SELECT SUM(code) FROM cloc_metrics cm JOIN base USING (repo_id) WHERE cm.language != 'SUM') AS loc,
+                (SELECT SUM(files) FROM cloc_metrics cm JOIN base USING (repo_id) WHERE cm.language != 'SUM') AS source_files,
+              -- Contributors & branches
                 (SELECT COUNT(DISTINCT rm.repo_id) FROM repo_metrics rm JOIN base USING (repo_id) WHERE number_of_contributors = 1) AS solo_contributor,
                 (SELECT SUM(rm.number_of_contributors) FROM repo_metrics rm JOIN base USING (repo_id)) AS total_contributors,
                 (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl;

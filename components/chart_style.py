@@ -170,32 +170,34 @@ def stacked_bar_chart_style(
         *,
         tickformat: str = ".2s",
         total_formatter: Callable[[float], str] | None = None,
-        annotation_font_size: int = 10,  # font size for the top‐of‐bar annotations
+        annotation_font_size: int = 10,
 ):
-    # Default SI‐prefix formatter
+    # Default SI‐prefix formatter with debug output
     if total_formatter is None:
         def total_formatter(v: float) -> str:
+            original = v
             num = float(v)
             for unit in ("", "k", "M", "B", "T"):
                 if abs(num) < 1000:
-                    return f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
+                    formatted = f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
+                    print(f"[format] value: {original}, formatted: {formatted}")
+                    return formatted
                 num /= 1000.0
-            return f"{num:.1f}E"
+            formatted = f"{num:.1f}E"
+            print(f"[format] value: {original}, formatted: {formatted}")
+            return formatted
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Expect the wrapped function to return (fig, df)
             fig, df = func(*args, **kwargs)
 
-            # Extract category ordering if the dataframe column is categorical
             categoryarray = (
                 df[x_col].cat.categories.tolist()
                 if pd.api.types.is_categorical_dtype(df[x_col])
                 else None
             )
 
-            # Base layout that fills its container completely
             fig.update_layout(
                 autosize=True,
                 margin=dict(l=0, r=0, t=0, b=0),
@@ -228,26 +230,26 @@ def stacked_bar_chart_style(
                 title=None,
             )
 
-            # Remove any per‐segment text so we can add our own totals
             fig.update_traces(text=None)
 
-            # Compute total per x‐category and annotate
             totals = df.groupby(x_col)[y_col].sum().reset_index()
-            for _, row in totals.iterrows():
+            for idx, row in totals.iterrows():
+                formatted = total_formatter(row[y_col])
+                print(f"[annotate] row {idx}, x={row[x_col]}, y={row[y_col]}, formatted={formatted}")
                 fig.add_annotation(
                     x=row[x_col],
                     y=row[y_col],
-                    text=total_formatter(row[y_col]),
+                    text=formatted,
                     showarrow=False,
                     yshift=5,
                     font=dict(size=annotation_font_size),
                 )
 
-            # **Return only the figure** (Dash callbacks expect a JSON‐serializable Figure)
             return fig
 
         return wrapper
 
     return decorator
+
 
 

@@ -346,7 +346,7 @@ def fetch_multilang_usage(filters=None):
 def fetch_cloc(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
-        base_query = """
+        base_query = f"""
             SELECT 
                 cloc.language AS main_language,
                 SUM(cloc.blank) AS blank_lines,
@@ -355,15 +355,11 @@ def fetch_cloc(filters=None):
                 COUNT(*) AS source_code_file_count
             FROM cloc_metrics cloc
             JOIN languages l ON cloc.language = l.name
+            JOIN harvested_repositories hr ON cloc.repo_id = hr.repo_id
             WHERE cloc.language IS NOT NULL 
               AND cloc.language != 'SUM'
               AND l.type = 'programming'
-        """
-
-        if condition_string:
-            base_query += f" AND cloc.repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
-
-        base_query += """
+              {f'AND {condition_string}' if condition_string else ''}
             GROUP BY cloc.language
             ORDER BY total_lines_of_code DESC
             LIMIT 10
@@ -379,8 +375,9 @@ def fetch_cloc(filters=None):
 
         return df
 
-    condition_string, param_dict = build_filter_conditions(filters)
+    condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 def fetch_contribution_activity(filters=None):
     @cache.memoize()
