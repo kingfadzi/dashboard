@@ -9,6 +9,9 @@ ENV PIP_INDEX_URL=${GLOBAL_INDEX_URL}
 ENV PIP_CERT=${GLOBAL_CERT}
 ENV http_proxy=${HTTP_PROXY}
 ENV https_proxy=${HTTPS_PROXY}
+ENV PYTHONIOENCODING=utf-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 RUN dnf update -y && \
     dnf module reset -y python36 && \
@@ -23,10 +26,6 @@ RUN dnf update -y && \
         wget && \
     dnf clean all
 
-ENV PYTHONIOENCODING=utf-8
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
 RUN alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
     alternatives --set python3 /usr/bin/python3.11 && \
     python3 -m ensurepip && \
@@ -37,9 +36,15 @@ USER dashuser
 
 WORKDIR /app
 
+# Copy cert only if it exists
 COPY --chown=dashuser:dashuser requirements.txt /app/
 
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+RUN if [ -n "$PIP_CERT" ] && [ -f "$PIP_CERT" ]; then \
+        echo "Using cert at $PIP_CERT"; \
+    else \
+        unset PIP_CERT; \
+    fi && \
+    python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=dashuser:dashuser . /app/
 

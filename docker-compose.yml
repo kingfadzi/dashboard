@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   dashapp:
     build:
@@ -5,7 +7,7 @@ services:
       dockerfile: Dockerfile
       args:
         GLOBAL_INDEX_URL: ${GLOBAL_INDEX_URL}
-        GLOBAL_CERT: ${GLOBAL_CERT}
+        GLOBAL_CERT: ${GLOBAL_CERT:-}
         HTTP_PROXY: ${HTTP_PROXY}
         HTTPS_PROXY: ${HTTPS_PROXY}
     ports:
@@ -16,6 +18,10 @@ services:
       - PYTHONIOENCODING=utf-8
       - LANG=C.UTF-8
       - LC_ALL=C.UTF-8
+      - PIP_INDEX_URL=${GLOBAL_INDEX_URL}
+      - PIP_CERT=${GLOBAL_CERT:-}
+      - http_proxy=${HTTP_PROXY}
+      - https_proxy=${HTTPS_PROXY}
     volumes:
       - .:/app
     restart: unless-stopped
