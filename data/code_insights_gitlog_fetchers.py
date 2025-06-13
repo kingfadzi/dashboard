@@ -13,10 +13,16 @@ def fetch_avg_file_size_buckets(filters=None):
         base_query = f"""
             SELECT 
                 CASE 
-                    WHEN code_size_bytes / NULLIF(file_count, 0) < 500 THEN '< 500B'
-                    WHEN code_size_bytes / NULLIF(file_count, 0) < 1000 THEN '500B - 1KB'
-                    WHEN code_size_bytes / NULLIF(file_count, 0) < 5000 THEN '1KB - 5KB'
-                    WHEN code_size_bytes / NULLIF(file_count, 0) < 20000 THEN '5KB - 20KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 1024 THEN '0–1KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 2048 THEN '1–2KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 4096 THEN '2–4KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 6144 THEN '4–6KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 8192 THEN '6–8KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 10240 THEN '8–10KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 12288 THEN '10–12KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 14336 THEN '12–14KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 16384 THEN '14–16KB'
+                    WHEN code_size_bytes / NULLIF(file_count, 0) < 20480 THEN '16–20KB'
                     ELSE '20KB+' 
                 END AS size_bucket,
 
@@ -36,6 +42,7 @@ def fetch_avg_file_size_buckets(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
+
 
 
 # 2. Contributor Dominance (top contributor commits / total)

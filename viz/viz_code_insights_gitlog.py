@@ -8,8 +8,13 @@ from components.colors import NEUTRAL_COLOR_SEQUENCE
 
 @stacked_bar_chart_style(x_col="size_bucket", y_col="repo_count")
 def render_avg_file_size_chart(df: pd.DataFrame):
+    size_order = [
+        "0–1KB", "1–2KB", "2–4KB", "4–6KB", "6–8KB",
+        "8–10KB", "10–12KB", "12–14KB", "14–16KB", "16–20KB", "20KB+"
+    ]
 
-    size_order = ["< 500B", "500B - 1KB", "1KB - 5KB", "5KB - 20KB", "20KB+"]
+    # Normalize dashes
+    df["size_bucket"] = df["size_bucket"].str.replace("-", "–").str.strip()
     df["size_bucket"] = pd.Categorical(df["size_bucket"], categories=size_order, ordered=True)
     df = df.sort_values("size_bucket")
 
@@ -28,6 +33,7 @@ def render_avg_file_size_chart(df: pd.DataFrame):
     )
 
     return fig, df
+
 
 
 @stacked_bar_chart_style(x_col="dominance_bucket", y_col="repo_count")
