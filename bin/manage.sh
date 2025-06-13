@@ -11,8 +11,8 @@ fi
 
 case "$COMMAND" in
   start)
-    echo "Building and starting the container..."
-    docker compose build
+    echo "Building and starting the container (no cache)..."
+    docker compose build --no-cache
     docker compose up -d
     ;;
   stop)
@@ -20,9 +20,9 @@ case "$COMMAND" in
     docker compose down
     ;;
   restart)
-    echo "Restarting the container..."
+    echo "Restarting the container (no cache)..."
     docker compose down
-    docker compose build
+    docker compose build --no-cache
     docker compose up -d
     ;;
   *)
