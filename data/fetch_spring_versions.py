@@ -40,34 +40,37 @@ def fetch_spring_framework_versions(filters=None):
             WHERE sd.group_id = :group_id
             {f"AND {condition_string}" if condition_string else ""}
             GROUP BY sd.normalized_version, hr.host_name
-            ORDER BY repo_count DESC
-            limit 10
+            ORDER BY repo_count DESC            
         """
         params = param_dict.copy()
         params["group_id"] = group_id
 
-        # 1) Read raw data
         df = pd.read_sql(text(sql), engine, params=params)
-
-        # 2) Enforce repo_count as integer (no decimals)
         df["repo_count"] = df["repo_count"].fillna(0).astype(int)
-
-        # 3) Derive version_bucket = "major.minor"
         df["version_bucket"] = df["version"].apply(get_version_bucket)
 
-        # 4) Group by version_bucket & host_name, summing repo_count
         df_grouped = (
             df.groupby(["version_bucket", "host_name"], as_index=False)["repo_count"]
             .sum()
-            .sort_values("repo_count", ascending=False)
         )
 
-        # 5) Ensure grouped counts stay integers
-        df_grouped["repo_count"] = df_grouped["repo_count"].astype(int)
+        # Calculate total repo_count per version_bucket
+        top_versions = (
+            df_grouped.groupby("version_bucket", as_index=False)["repo_count"]
+            .sum()
+            .sort_values("repo_count", ascending=False)
+            .head(10)["version_bucket"]
+            .tolist()
+        )
 
+        # Filter to only top 10 version buckets
+        df_grouped = df_grouped[df_grouped["version_bucket"].isin(top_versions)]
+
+        df_grouped["repo_count"] = df_grouped["repo_count"].astype(int)
         return df_grouped
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     df_core = query_data(condition_string, param_dict, "org.springframework")
     df_boot = query_data(condition_string, param_dict, "org.springframework.boot")
     return df_core, df_boot
+
