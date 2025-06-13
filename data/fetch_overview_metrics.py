@@ -493,7 +493,7 @@ def fetch_code_contributors(filters=None):
                 WHERE hr.main_language != 'SUM' AND l.type = 'programming'
                 GROUP BY hr.main_language
                 ORDER BY total_repos DESC
-                LIMIT 20
+                LIMIT 15
             )
             SELECT 
                 hr.main_language AS language,

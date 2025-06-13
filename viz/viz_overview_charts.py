@@ -195,7 +195,9 @@ def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
     ))
 
     fig.update_layout(
-        title={"x": 0.5},
+        autosize=True,
+        margin=dict(l=20, r=20, t=40, b=20),
+        title_x=0.5,
         template="plotly_white",
         dragmode=False,
         xaxis_title="",
@@ -205,6 +207,7 @@ def render_language_contributors_heatmap(filtered_df: pd.DataFrame):
             categoryarray=bucket_order
         )
     )
+
 
     return fig
 
