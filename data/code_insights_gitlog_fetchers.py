@@ -53,17 +53,28 @@ def fetch_contributor_dominance(filters=None):
             SELECT 
                 CASE 
                     WHEN total_commits = 0 THEN 'No Commits'
-                    WHEN top_contributor_commits::float / total_commits >= 0.9 THEN '90%+'
-                    WHEN top_contributor_commits::float / total_commits >= 0.75 THEN '75%-89%'
-                    WHEN top_contributor_commits::float / total_commits >= 0.5 THEN '50%-74%'
-                    ELSE '< 50%'
+                    WHEN ratio < 0.1 THEN '0–10%'
+                    WHEN ratio < 0.2 THEN '10–20%'
+                    WHEN ratio < 0.3 THEN '20–30%'
+                    WHEN ratio < 0.4 THEN '30–40%'
+                    WHEN ratio < 0.5 THEN '40–50%'
+                    WHEN ratio < 0.6 THEN '50–60%'
+                    WHEN ratio < 0.7 THEN '60–70%'
+                    WHEN ratio < 0.8 THEN '70–80%'
+                    WHEN ratio < 0.9 THEN '80–90%'
+                    ELSE '90–100%'
                 END AS dominance_bucket,
 
                 {LANGUAGE_GROUP_CASE_SQL} AS language_group,
 
                 COUNT(*) AS repo_count
-            FROM repo_metrics
-            JOIN harvested_repositories hr ON repo_metrics.repo_id = hr.repo_id
+
+            FROM (
+                SELECT *,
+                       CASE WHEN total_commits > 0 THEN top_contributor_commits::float / total_commits ELSE NULL END AS ratio
+                FROM repo_metrics
+            ) rm
+            JOIN harvested_repositories hr ON rm.repo_id = hr.repo_id
             LEFT JOIN languages l ON hr.main_language = l.name
             {f'WHERE {condition_string}' if condition_string else ''}
             GROUP BY dominance_bucket, language_group

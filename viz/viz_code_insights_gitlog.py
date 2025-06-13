@@ -38,7 +38,11 @@ def render_avg_file_size_chart(df: pd.DataFrame):
 
 @stacked_bar_chart_style(x_col="dominance_bucket", y_col="repo_count")
 def render_contributor_dominance_chart(df: pd.DataFrame):
-    dominance_order = ["No Commits", "90%+", "75%-89%", "50%-74%", "< 50%"]
+    dominance_order = [
+        "0–10%", "10–20%", "20–30%", "30–40%", "40–50%",
+        "50–60%", "60–70%", "70–80%", "80–90%", "90–100%"
+    ]
+    df = df[df["dominance_bucket"].isin(dominance_order)]
     df["dominance_bucket"] = pd.Categorical(df["dominance_bucket"], categories=dominance_order, ordered=True)
     df = df.sort_values("dominance_bucket")
 
@@ -48,7 +52,7 @@ def render_contributor_dominance_chart(df: pd.DataFrame):
         y="repo_count",
         color="language_group",
         labels={
-            "dominance_bucket": "Top Contributor Share",
+            "dominance_bucket": "Top Contributor % of Commits",
             "repo_count": "Repository Count",
             "language_group": "Language Group"
         },
@@ -57,6 +61,7 @@ def render_contributor_dominance_chart(df: pd.DataFrame):
     )
 
     return fig, df
+
 
 
 
