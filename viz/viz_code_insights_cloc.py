@@ -39,10 +39,10 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
     df = df[(df["code"] > 0) & (df["code_size_bytes"] > 0)]
 
     threshold = df["code"].quantile(0.95)
-    normal_df = df[df["code"] <= threshold]
+    df = df[df["code"] <= threshold]
 
     fig = px.scatter(
-        normal_df,
+        df,
         x="files",
         y="code",
         size="code_size_bytes",
@@ -50,7 +50,7 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
         labels={
             "files": "File Count",
             "code": "Lines of Code",
-            "code_size_bytes": "Repo Size (Bytes)",
+            "code_size_bytes": "Code Size (MB)",
             "classification_label": "Size"
         },
         hover_name="repo_name"
@@ -60,9 +60,11 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
         dragmode=False,
         margin=dict(t=40, b=40, l=20, r=20)
     )
+
     fig.update_yaxes(type="linear", title="Lines of Code")
 
     return fig
+
 
 
 
