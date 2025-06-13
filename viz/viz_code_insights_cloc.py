@@ -34,12 +34,15 @@ def render_code_composition_chart(df: pd.DataFrame):
 
 
 def render_code_file_scatter_chart(df: pd.DataFrame):
-    # Ensure valid and positive LOC
-    df = df[df["code"].notnull() & (df["code"] > 0)]
-    df = df[df["code_size_bytes"].notnull() & (df["code_size_bytes"] > 0)]
+
+    df = df[df["code"].notnull() & df["code_size_bytes"].notnull()]
+    df = df[(df["code"] > 0) & (df["code_size_bytes"] > 0)]
+
+    threshold = df["code"].quantile(0.95)
+    normal_df = df[df["code"] <= threshold]
 
     fig = px.scatter(
-        df,
+        normal_df,
         x="files",
         y="code",
         size="code_size_bytes",
@@ -57,10 +60,9 @@ def render_code_file_scatter_chart(df: pd.DataFrame):
         dragmode=False,
         margin=dict(t=40, b=40, l=20, r=20)
     )
-
-    # Apply log scale to Y-axis
-    fig.update_yaxes(type="log", title="Lines of Code (log scale)")
+    fig.update_yaxes(type="linear", title="Lines of Code")
 
     return fig
+
 
 
