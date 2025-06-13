@@ -1,6 +1,7 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
+from components.shared_modal import shared_modal
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
@@ -207,6 +208,7 @@ layout = dbc.Container(
 
 
         dcc.Store(id="filters-applied-trigger"),
+        **shared_modal
     ],
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},

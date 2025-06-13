@@ -12,6 +12,8 @@ from .repo_profile_callback import register_repo_profile_callbacks
 from .table_callbacks import register_table_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .dependency_insights import register_dependency_insights_callbacks
+from components.shared_modal import shared_modal
+from callbacks.shared_modal import register_shared_modal_callbacks
 
 
 def register_all_callbacks(app):
@@ -32,3 +34,14 @@ def register_all_callbacks(app):
 
     register_filter_tags_callbacks(app)
 
+    register_shared_modal_callbacks(
+        app,
+        chart_ids=[
+            "spring-core-version-chart",
+            "spring-boot-version-chart",
+        ],
+        filter_state_ids=[
+            "main_language",
+            "host_name",
+        ]
+    )
