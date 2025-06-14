@@ -18,8 +18,8 @@ def query_spring_core_by_version(version: str, filters: dict):
 
     sql = text(f"""
         SELECT hr.repo_id,
-               hr.repo_name,
-               hr.web_url,
+               hr.app_id,
+               hr.browse_url,
                sd.package_name,
                sd.normalized_version
         FROM syft_dependencies sd
@@ -37,8 +37,8 @@ def query_spring_boot_by_version(version: str, filters: dict):
 
     sql = text(f"""
         SELECT hr.repo_id,
-               hr.repo_name,
-               hr.web_url,
+               hr.app_id,
+               hr.browse_url,
                sd.package_name,
                sd.normalized_version
         FROM syft_dependencies sd
