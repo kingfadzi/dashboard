@@ -9,20 +9,23 @@ def fetch_cloc_by_language(filters=None):
     def query_data(condition_string, param_dict):
         base_query = """
             SELECT 
-                language AS main_language,
-                SUM(blank) AS blank_lines,
-                SUM(comment) AS comment_lines,
-                SUM(code) AS total_lines_of_code,
+                cloc.language AS main_language,
+                SUM(cloc.blank) AS blank_lines,
+                SUM(cloc.comment) AS comment_lines,
+                SUM(cloc.code) AS total_lines_of_code,
                 COUNT(*) AS source_code_file_count
-            FROM cloc_metrics
-            WHERE language IS NOT NULL AND language != 'SUM'
+            FROM cloc_metrics cloc
+            JOIN languages l ON cloc.language = l.name
+            WHERE cloc.language IS NOT NULL 
+              AND cloc.language != 'SUM'
+              AND l.type = 'programming'
         """
 
         if condition_string:
-            base_query += f" AND repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
+            base_query += f" AND cloc.repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
 
         base_query += """
-            GROUP BY language
+            GROUP BY cloc.language
             ORDER BY total_lines_of_code DESC
             LIMIT 20
         """

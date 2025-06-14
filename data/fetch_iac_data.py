@@ -2,8 +2,8 @@ import logging
 import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
-from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
+from utils.sql_filter_utils import build_repo_filter_conditions
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,8 @@ def fetch_iac_data(filters=None):
                 ic.framework AS iac_type,
                 COUNT(DISTINCT ic.repo_id) AS repo_count
             FROM iac_components ic
-            JOIN harvested_repositories crm ON crm.repo_id = ic.repo_id
+            JOIN harvested_repositories hr ON hr.repo_id = ic.repo_id
+            JOIN repo_metrics rm ON rm.repo_id = ic.repo_id
         """
 
         if condition_string:
@@ -31,5 +32,37 @@ def fetch_iac_data(filters=None):
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters)
+    condition_string, param_dict = build_repo_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
+@cache.memoize()
+def fetch_iac_server_orchestration_usage(filters=None):
+    def query_data(condition_string, param_dict):
+        sql = f"""
+            SELECT 
+                ic.framework,
+                hr.classification_label,
+                COUNT(DISTINCT ic.repo_id) AS repo_count
+            FROM iac_components ic
+            JOIN harvested_repositories hr 
+              ON ic.repo_id = hr.repo_id
+            WHERE ic.subcategory ILIKE ANY (
+                ARRAY['application servers', 'kubernetes orchestration']
+            )
+            {f"AND {condition_string}" if condition_string else ""}
+            GROUP BY ic.framework, hr.classification_label
+            ORDER BY repo_count DESC
+            LIMIT 10 
+        """
+
+        logger.debug("Executing IaC server/orchestration query:")
+        logger.debug(sql)
+        logger.debug("With parameters:")
+        logger.debug(param_dict)
+
+        return pd.read_sql(text(sql), engine, params=param_dict)
+
+    condition_string, param_dict = build_repo_filter_conditions(filters)
+    return query_data(condition_string, param_dict)
+
+

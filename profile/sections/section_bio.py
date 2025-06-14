@@ -15,7 +15,7 @@ def render(profile_data):
     vcs_hostname = profile_data.get("VCS Hostname", "Unknown")
     browse_url = profile_data.get("Browse URL", "#")
     investment_status = profile_data.get("Investment Status", "Unknown")
-    investment_color = "success" if investment_status.lower() == "invest" else "warning"
+    investment_color = "success" if investment_status.lower() == "Invest" else "warning"
     short_description = profile_data.get("Short Description", "")
 
     def info_card(title, fields_dict):
@@ -87,7 +87,7 @@ def render(profile_data):
                     }
                 )
             ]),
-            className="shadow-sm mb-4"  # << add margin-bottom here
+            className="shadow-sm mb-4"
         )
     ])
 

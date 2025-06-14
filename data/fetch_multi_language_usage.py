@@ -10,11 +10,12 @@ def fetch_multi_language_usage(filters=None):
         sql = """
         WITH language_counts AS (
             SELECT
-                repo_id,
-                COUNT(DISTINCT language) AS language_count
-            FROM go_enry_analysis
-            WHERE percent_usage > 0
-            GROUP BY repo_id
+                gea.repo_id,
+                COUNT(DISTINCT gea.language) AS language_count
+            FROM go_enry_analysis gea
+            JOIN languages l ON gea.language = l.name
+            WHERE gea.percent_usage > 0 AND l.type = 'programming'
+            GROUP BY gea.repo_id
         )
         SELECT
             CASE
@@ -26,6 +27,7 @@ def fetch_multi_language_usage(filters=None):
             COUNT(*) AS repo_count
         FROM language_counts
         """
+
         if condition_string:
             sql += f" WHERE repo_id IN (SELECT repo_id FROM harvested_repositories WHERE {condition_string})"
 

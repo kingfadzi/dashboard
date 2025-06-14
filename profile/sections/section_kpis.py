@@ -2,9 +2,16 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 def render(profile_data):
-    activity_status = profile_data.get('Activity Status', 'Inactive')
+    activity_status = profile_data.get('Activity Status')
     last_commit_date = profile_data.get('Last Commit Date', 'N/A')
-    badge_color = "success" if activity_status.upper() == "ACTIVE" else "danger"
+
+    # Determine badge text and color
+    if activity_status is None:
+        activity_status_display = "Unknown"
+        badge_color = "secondary"
+    else:
+        activity_status_display = activity_status
+        badge_color = "success" if activity_status.upper() == "ACTIVE" else "danger"
 
     return dbc.Row(
         [
@@ -15,7 +22,7 @@ def render(profile_data):
                         dbc.CardHeader("Activity Status", className="text-center bg-light", style={"fontSize": "0.8rem"}),
                         dbc.CardBody([
                             html.Div(
-                                dbc.Badge(activity_status, color=badge_color, className="p-2", style={"fontSize": "0.9rem"}),
+                                dbc.Badge(activity_status_display, color=badge_color, className="p-2", style={"fontSize": "0.9rem"}),
                                 className="text-center mb-2"
                             ),
                             html.Small(
@@ -108,8 +115,6 @@ def render(profile_data):
                 ),
                 xs=12, sm=6, md=4, lg=2
             ),
-
-
         ],
         className="g-3 mb-4",
         justify="around"

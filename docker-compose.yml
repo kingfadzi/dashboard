@@ -1,0 +1,36 @@
+services:
+  dashapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GLOBAL_INDEX_URL: ${GLOBAL_INDEX_URL}
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
+        HOST_UID: ${HOST_UID}
+        HOST_GID: ${HOST_GID}
+    ports:
+      - "8050:8050"
+    environment:
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+      - FILTER_YAML_PATH=${FILTER_YAML_PATH}
+      - GLOBAL_INDEX_URL=${GLOBAL_INDEX_URL}
+      - http_proxy=${HTTP_PROXY}
+      - https_proxy=${HTTPS_PROXY}
+      - PYTHONIOENCODING=utf-8
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      - CACHE_TYPE=${CACHE_TYPE}
+      - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+      - CACHE_REDIS_URL=${CACHE_REDIS_URL}
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

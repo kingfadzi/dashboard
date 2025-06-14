@@ -7,3 +7,8 @@ dash_bootstrap_components==1.6.0
 flask_caching
 redis
 python-dotenv
+dash_ag_grid
+univers
+scikit-learn
+dash-mantine-components
+pyaml

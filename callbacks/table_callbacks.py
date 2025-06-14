@@ -1,56 +1,114 @@
-import math
-from dash import Input, Output
+# table_callbacks.py
+
+from dash import Input, Output, callback, State
+import urllib.parse
+
+from dash.exceptions import PreventUpdate
+
 from data.fetch_table_data import fetch_table_data
-from viz.viz_table_data import viz_table_data
+
+def get_table_outputs_from_store(store_data, table_id=None):
+    filters = { k: v for k, v in (store_data or {}).items() if v not in (None, "") }
+    df, _ = fetch_table_data(filters, 0, 1000)
+    table_data = df.to_dict("records")
+
+    # Build a “returnUrl” for any link in the table (optional)
+    return_url = f"/table-{table_id}"
+    encoded_return_url = urllib.parse.quote(return_url)
+
+    column_defs = [
+        {
+            "headerName": "Repo Name",
+            "field": "repo_id",
+            "cellRenderer": "markdown",
+            "valueGetter": {
+                "function": (
+                    f"`[${'{'}params.data.repo_id{'}'}]("
+                    f"/repo?repo_id=${'{'}params.data.repo_id{'}'}&returnUrl={encoded_return_url})`"
+                )
+            },
+            "filterValueGetter": {"function": "params.data.repo_id"},
+            "cellRendererParams": {"linkTarget": "_self", "html": True},
+            # Constrain displayed length with ellipsis
+            "minWidth": 200,
+            "maxWidth": 300,
+            "cellStyle": {
+                "whiteSpace": "nowrap",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis"
+            },
+            # Show full text on hover
+            "tooltipField": "repo_id",
+        },
+        {
+            "headerName": "App ID",
+            "field": "app_id",
+            "cellRenderer": "markdown",
+            "valueGetter": {
+                "function": (
+                    f"`[${'{'}params.data.app_id{'}'}](${ '{' }params.data.browse_url{'}'})`"
+                )
+            },
+            "filterValueGetter": {"function": "params.data.app_id"},
+            "cellRendererParams": {"linkTarget": "_blank", "html": True},
+        },
+        {"headerName": "TC", "field": "transaction_cycle"},
+        {"headerName": "Status", "field": "activity_status"},
+        {"headerName": "Size", "field": "classification_label"},
+        {"headerName": "Age", "field": "repo_age_days", "type": "numericColumn"},
+        {"headerName": "Language", "field": "main_language"},
+        {"headerName": "Scope", "field": "scope"},
+        {"headerName": "Commits", "field": "total_commits", "type": "numericColumn"},
+        {"headerName": "Contributors", "field": "number_of_contributors", "type": "numericColumn"},
+        {
+            "headerName": "Last Commit",
+            "field": "last_commit_date",
+            "valueFormatter": {
+                "function": "params.value ? new Date(params.value).toLocaleDateString() : ''"
+            },
+        },
+    ]
+
+    return table_data, column_defs
+
 
 def register_table_callbacks(app):
-    @app.callback(
-        [
-            Output("temp-table", "data"),
-            Output("temp-table", "tooltip_data"),
-            Output("temp-table", "page_count"),
-        ],
-        [
-            Input("host-name-filter", "value"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-            Input("temp-table", "page_current"),
-            Input("temp-table", "page_size"),
-        ],
-    )
-    def update_table(
-            host_names,
-            statuses,
-            tcs,
-            languages,
-            classifications,
-            app_id_input,
-            page_current,
-            page_size,
-    ):
-        filters = {
-            "host_name": host_names or [],
-            "activity_status": statuses or [],
-            "tc": tcs or [],
-            "main_language": languages or [],
-            "classification_label": classifications or [],
-            "app_id": app_id_input.strip() if app_id_input else None,
-        }
+    # For each of the four “table” pages, only run when pathname matches
+    for table_id in ["overview", "build-info", "code-insights", "dependencies"]:
+        @app.callback(
+            Output(f"{table_id}-table", "rowData"),
+            Output(f"{table_id}-table", "columnDefs"),
+            Input("default-filter-store", "data"),
+            State("url", "pathname"),
+        )
+        def update_table(store_data, pathname, table_id=table_id):
+            if not pathname.startswith(f"/table-{table_id}"):
+                raise PreventUpdate
 
-        df, total_count = fetch_table_data(filters, page_current, page_size)
-        table_data = viz_table_data(df)
+            table_data, column_defs = get_table_outputs_from_store(store_data, table_id=table_id)
+            return table_data, column_defs
 
-        tooltip_data = []
-        for row in table_data:
-            row_tooltip = {}
-            for key, value in row.items():
-                if key in ["tc", "app_id"]:
-                    row_tooltip[key] = {"value": str(value), "type": "text"}
-                else:
-                    row_tooltip[key] = {"value": "", "type": "text"}
-            tooltip_data.append(row_tooltip)
+    # Build each “Table” button’s href from the current dropdown values
+    for table_id in ["overview", "build-info", "code-insights", "dependencies"]:
+        @app.callback(
+            Output(f"{table_id}-table-btn", "href"),
+            [
+                Input("activity-status-filter",   "value"),
+                Input("tc-filter",                "value"),
+                Input("language-filter",          "value"),
+                Input("classification-filter",    "value"),
+                Input("app-id-filter",            "value"),
+                Input("host-name-filter",         "value"),
+            ],
+        )
+        def update_table_button_href(activity, tc, lang, classification, app_id, host, table_id=table_id):
+            qs = {}
+            if activity:       qs["activity_status"] = activity
+            if tc:             qs["transaction_cycle"] = tc
+            if lang:           qs["main_language"] = lang
+            if classification: qs["classification_label"] = classification
+            if app_id:         qs["app_id"] = app_id
+            if host:           qs["host_name"] = host
 
-        return table_data, tooltip_data, math.ceil(total_count / page_size)
+            base = f"/table-{table_id}"
+            return base + "?" + urllib.parse.urlencode(qs) if qs else base

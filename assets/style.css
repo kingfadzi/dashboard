@@ -5,3 +5,9 @@
     text-overflow: ellipsis !important;
     max-width: 250px !important;
 }
+.scrollable-tags {
+    max-height: 64px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+}

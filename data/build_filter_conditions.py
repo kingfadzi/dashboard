@@ -2,7 +2,7 @@ def build_filter_conditions(filters, alias=None, field_alias_map=None):
     if not filters:
         return None, {}
 
-    text_search_fields = {"app_id", "all_languages", "name"}
+    text_search_fields = {"app_id", "all_languages", "name", "transaction_cycle"}
     conditions = []
     param_dict = {}
     placeholder_counter = 1
@@ -57,7 +57,7 @@ def build_filter_conditions(filters, alias=None, field_alias_map=None):
 
     condition_string = " AND ".join(conditions)
 
-    print("\nDEBUG: Final SQL WHERE Clause:", condition_string)
-    print("DEBUG: SQL Parameters:", param_dict)
+    #print("\nDEBUG: Final SQL WHERE Clause:", condition_string)
+    #print("DEBUG: SQL Parameters:", param_dict)
 
     return condition_string, param_dict

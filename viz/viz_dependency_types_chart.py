@@ -2,7 +2,7 @@ import plotly.express as px
 
 def viz_package_type_distribution_chart(df):
     if df.empty:
-        return px.bar(title="No Package Type Data Found")
+        return px.bar(title=None)
 
     df["package_type"] = df["package_type"].fillna("Unknown").replace("", "Unknown")
 
@@ -15,7 +15,7 @@ def viz_package_type_distribution_chart(df):
     ).update_layout(
         xaxis=dict(categoryorder="total descending"),
         template="plotly_white",
-        title={"text": "Package Type Distribution", "x": 0.5},
+        title=None,
         xaxis_title=None,
         dragmode=False,
         showlegend=False

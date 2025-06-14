@@ -2,8 +2,7 @@ import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
 from data.cache_instance import cache
-from data.sql_filter_utils import build_repo_filter_conditions
-
+from utils.sql_filter_utils import build_repo_filter_conditions
 
 def fetch_language_contributors_heatmap(filters=None):
     @cache.memoize()
@@ -14,7 +13,8 @@ def fetch_language_contributors_heatmap(filters=None):
                     hr.main_language,
                     COUNT(DISTINCT hr.repo_id) AS total_repos
                 FROM harvested_repositories hr
-                WHERE hr.main_language != 'SUM'
+                JOIN languages l ON hr.main_language = l.name
+                WHERE hr.main_language != 'SUM' AND l.type = 'programming'
                 GROUP BY hr.main_language
                 ORDER BY total_repos DESC
                 LIMIT 20
@@ -34,10 +34,10 @@ def fetch_language_contributors_heatmap(filters=None):
                 COUNT(DISTINCT hr.repo_id) AS repo_count
             FROM harvested_repositories hr
             LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
-            INNER JOIN top_languages tl ON hr.main_language = tl.main_language
-            WHERE 1=1
+            JOIN top_languages tl ON hr.main_language = tl.main_language
+            JOIN languages l ON hr.main_language = l.name
+            WHERE l.type = 'programming'
         """
-
 
         if condition_string:
             base_query += f" AND {condition_string}"

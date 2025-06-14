@@ -37,10 +37,11 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
             SELECT
                 hr.repo_id,
                 hr.browse_url,
-                hr.transaction_cycle,
-                hr.app_id,
+                COALESCE(NULLIF(hr.transaction_cycle, ''), '-None-') AS transaction_cycle,
+                COALESCE(NULLIF(hr.app_id, ''), '-None-') AS app_id,
                 hr.scope,
                 hr.all_languages,
+                hr.main_language,
                 hr.classification_label,
                 rm.total_commits,
                 rm.activity_status,
@@ -61,6 +62,7 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
             "transaction_cycle": "hr",
             "app_id": "hr",
             "all_languages": "hr",
+            "main_language": "hr",
             "classification_label": "hr",
             "name": "hr",
             "scope": "hr",
@@ -108,11 +110,6 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
         if "last_commit_date" in df.columns:
             df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%Y-%m-%dT%H:%M:%S")
 
-        if "repo_id" in df.columns:
-            df["repo_id"] = df["repo_id"].apply(
-                lambda repo_id: f"<a href='/repo?repo_id={repo_id}' style='text-decoration: none; color: #007bff;'>{repo_id}</a>"
-            )
-
         if "repo_age_days" in df.columns:
             df["repo_age_days"] = df["repo_age_days"].apply(format_repo_age)
 
@@ -127,6 +124,7 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
         "transaction_cycle": "hr",
         "app_id": "hr",
         "all_languages": "hr",
+        "main_language": "hr",
         "classification_label": "hr",
         "name": "hr",
         "repo_slug": "hr"

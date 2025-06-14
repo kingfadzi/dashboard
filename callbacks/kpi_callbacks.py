@@ -1,94 +1,133 @@
+import dash
+from dash import html, dcc
 from dash.dependencies import Input, Output
-from data.fetch_kpi_data import fetch_kpi_data
+import dash_bootstrap_components as dbc
+
+from data.fetch_overview_kpis import fetch_overview_kpis
+from utils.filter_utils import extract_filter_dict_from_store
+
+def format_with_commas(value):
+    """Format integer with thousands separators."""
+    if value is None:
+        return "0"
+    try:
+        return f"{int(value):,}"
+    except (ValueError, TypeError):
+        return "0"
+
+def format_number_si(value):
+    """Format number using SI suffixes (K, M, B, T)."""
+    if value is None:
+        return "0"
+    try:
+        num = float(value)
+        for unit in ("", "K", "M", "B", "T"):
+            if abs(num) < 1000:
+                return f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
+            num /= 1000.0
+        return f"{num:.1f}E"
+    except (ValueError, TypeError):
+        return "0"
 
 def register_kpi_callbacks(app):
     @app.callback(
         [
             Output("kpi-total-repos", "children"),
             Output("kpi-total-repos-subtext", "children"),
+
             Output("kpi-avg-commits", "children"),
             Output("kpi-avg-commits-subtext", "children"),
+
             Output("kpi-avg-contributors", "children"),
             Output("kpi-avg-contributors-subtext", "children"),
+
             Output("kpi-avg-loc", "children"),
             Output("kpi-avg-loc-subtext", "children"),
-            Output("kpi-avg-ccn", "children"),
-            Output("kpi-ccn-subtext", "children"),
-            Output("kpi-avg-repo-size", "children"),
-            Output("kpi-avg-repo-size-subtext", "children"),
-            Output("kpi-dockerfiles", "children"),
-            Output("kpi-dockerfiles-subtext", "children"),
+
+            Output("kpi-branches", "children"),
+            Output("kpi-branches-subtext", "children"),
+
+            Output("kpi-build-tools", "children"),
+            Output("kpi-build-tools-subtext", "children"),
+
+            Output("kpi-runtime", "children"),
+            Output("kpi-runtime-subtext", "children"),
+
+            Output("kpi-cicd", "children"),
+            Output("kpi-cicd-subtext", "children"),
+
+            Output("kpi-sources", "children"),
+            Output("kpi-sources-subtext", "children"),
         ],
-        [
-            Input("host-name-filter", "value"),
-            Input("activity-status-filter", "value"),
-            Input("tc-filter", "value"),
-            Input("language-filter", "value"),
-            Input("classification-filter", "value"),
-            Input("app-id-filter", "value"),
-        ],
+        [Input("default-filter-store", "data")],
     )
-    def update_kpi_values(*args):
-        filter_keys = [
-            "host_name",
-            "activity_status",
-            "tc",
-            "main_language",
-            "classification_label",
-            "app_id",
-        ]
-        filters = {key: (arg if arg else None) for key, arg in zip(filter_keys, args)}
+    def update_kpi_values(store_data):
+        filters = extract_filter_dict_from_store(store_data)
+        kpi = fetch_overview_kpis(filters)
 
-        kpi_data = fetch_kpi_data(filters)
+        total_repos    = kpi.get("total_repos", 0)
+        active         = kpi.get("active", 0)
+        inactive       = kpi.get("inactive", 0)
 
-        # Total Repos
-        total_repos = kpi_data.get("total_repos", "0")
-        total_repos_subtext = f"Total={total_repos}"
+        recently_updated = kpi.get("recently_updated", 0)
+        new_repos        = kpi.get("new_repos", 0)
 
-        # Avg Commits
-        avg_commits_data = kpi_data.get("avg_commits", {})
-        avg_commits = avg_commits_data.get("value", "0")
-        avg_commits_subtext = f"Min={avg_commits_data.get('min', '0')} | Max={avg_commits_data.get('max', '0')}"
+        solo            = kpi.get("solo_contributor", 0)
+        total_contribs  = kpi.get("total_contributors", 0)
 
-        # Avg Contributors
-        avg_contributors_data = kpi_data.get("avg_contributors", {})
-        avg_contributors = avg_contributors_data.get("value", "0")
-        avg_contributors_subtext = f"Min={avg_contributors_data.get('min', '0')} | Max={avg_contributors_data.get('max', '0')}"
+        loc             = kpi.get("loc", 0)
+        source_files    = kpi.get("source_files", 0)
 
-        # Avg Lines of Code
-        avg_loc_data = kpi_data.get("avg_loc", {})
-        avg_loc = avg_loc_data.get("value", "0")
-        avg_loc_subtext = f"Min={avg_loc_data.get('min', '0')} | Max={avg_loc_data.get('max', '0')}"
+        branch_sprawl   = kpi.get("branch_sprawl", 0)
 
-        # Avg CCN (without tokens)
-        avg_ccn_data = kpi_data.get("avg_ccn", {})
-        avg_ccn = avg_ccn_data.get("value", "0")
-        formatted_function_count = avg_ccn_data.get("function_count", "0")
-        formatted_total_ccn = avg_ccn_data.get("total_cyclomatic_complexity", "0")
-        avg_ccn_subtext = f"Fn={formatted_function_count} | Total CCN={formatted_total_ccn}"
+        build_detected  = kpi.get("build_tool_detected", 0)
+        modules         = kpi.get("modules", 0)
+        without_tool    = kpi.get("without_tool", 0)
 
-        # Avg Repo Size
-        avg_repo_size_data = kpi_data.get("avg_repo_size", {})
-        avg_repo_size = avg_repo_size_data.get("value", "0")
-        avg_repo_size_subtext = f"Min={avg_repo_size_data.get('min', '0')} | Max={avg_repo_size_data.get('max', '0')}"
+        runtime_detected = kpi.get("runtime_detected", 0)
+        languages        = kpi.get("languages", 0)
 
-        # Dockerfiles
-        dockerfiles = kpi_data.get("dockerfiles", "0")
-        dockerfiles_subtext = f"Total={dockerfiles}"
+        cicd_total = kpi.get("cicd_total", 0)
+        bp         = kpi.get("bitbucket_pipelines", 0)
+        gl         = kpi.get("gitlab_ci", 0)
+        jenkins    = kpi.get("jenkins", 0)
+
+        sources_total = kpi.get("sources_total", 0)
 
         return (
-            total_repos,
-            total_repos_subtext,
-            avg_commits,
-            avg_commits_subtext,
-            avg_contributors,
-            avg_contributors_subtext,
-            avg_loc,
-            avg_loc_subtext,
-            avg_ccn,
-            avg_ccn_subtext,
-            avg_repo_size,
-            avg_repo_size_subtext,
-            dockerfiles,
-            dockerfiles_subtext,
+            # Total repos
+            format_with_commas(total_repos),
+            f"Active: {format_number_si(active)} · Inactive: {format_number_si(inactive)}",
+
+            # Recent updates
+            format_with_commas(recently_updated),
+            f"New: {format_number_si(new_repos)} · 30d",
+
+            # Solo contributors
+            format_with_commas(solo),
+            f"All: {format_number_si(total_contribs)}",
+
+            # LOC (main uses SI as before), subtext updated
+            format_number_si(loc),
+            f"Files: {format_number_si(source_files)} · Repos: {format_number_si(total_repos)}",
+
+            # Branch sprawl
+            format_with_commas(branch_sprawl),
+            ">10 branches",
+
+            # Build tools
+            format_with_commas(build_detected),
+            f"Modules: {format_number_si(modules)} · NoTool: {format_number_si(without_tool)}",
+
+            # Runtimes
+            format_with_commas(runtime_detected),
+            f"Languages: {format_number_si(languages)}",
+
+            # CI/CD
+            format_with_commas(cicd_total),
+            f"GitLab: {format_number_si(gl)} · Jenkins: {format_number_si(jenkins)}",
+
+            # Source hosts
+            format_with_commas(sources_total),
+            "Hosts",
         )

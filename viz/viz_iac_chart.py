@@ -24,5 +24,8 @@ def viz_iac_chart(filtered_df):
         height=450,
         margin=dict(t=60, b=100)
     )
-
+    fig.update_layout(
+        xaxis_title=None,
+        title=None
+    )
     return fig

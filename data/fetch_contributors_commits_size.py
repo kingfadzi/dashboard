@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
 from data.cache_instance import cache
-from data.sql_filter_utils import build_repo_filter_conditions
+from utils.sql_filter_utils import build_repo_filter_conditions
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -54,10 +54,12 @@ def fetch_contributors_commits_size(filters=None):
             FROM harvested_repositories hr
             LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
             LEFT JOIN lizard_summary lz ON hr.repo_id = lz.repo_id
+            JOIN languages l ON hr.main_language = l.name
+            WHERE l.type = 'programming'
         """
 
         if condition_string:
-            base_query += f" WHERE {condition_string}"
+            base_query += f" AND {condition_string}"
 
         logger.debug("Executing contributors/commits/size query:")
         logger.debug(base_query)

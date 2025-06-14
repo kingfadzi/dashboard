@@ -23,7 +23,7 @@ def register_iac_callbacks(app):
         filters = {
             "host_name": host_name or None,
             "activity_status": activity_status or None,
-            "tc": tc or None,
+            "transaction_cycle": tc or None,
             "main_language": language or None,
             "classification_label": classification or None,
             "app_id": app_id or None,

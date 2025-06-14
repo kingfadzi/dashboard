@@ -1,0 +1,26 @@
+host_name:
+  - github.com
+  - eros.butterflycluster.com
+  - helios.butterflycluster.com:7990
+
+activity_status:
+  - ACTIVE
+  - INACTIVE
+
+transaction_cycle:
+  - Q1
+  - Q2
+  - Q3
+  - Q4
+
+main_language:
+  - Python
+  - Java
+  - dotnet
+
+classification_label:
+  - Tiny
+  - Small
+  - Medium
+  - Large
+  - Massive

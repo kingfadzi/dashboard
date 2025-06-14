@@ -4,6 +4,15 @@ from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
 from data.cache_instance import cache
 
+
+def clean_classification_label(label):
+    if isinstance(label, str):
+        if "->" in label:
+            return label.split("->", 1)[1].strip()
+        return label.strip()
+    return label
+
+
 def fetch_classification_data(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
@@ -18,13 +27,11 @@ def fetch_classification_data(filters=None):
         stmt = text(sql)
         df = pd.read_sql(stmt, engine, params=param_dict)
 
-        df['classification_value'] = (
-            df['classification_label']
-            .apply(lambda x: x.split("->", 1)[1].strip() if "->" in x else x.strip())
-        )
+        df['classification_value'] = df['classification_label'].apply(clean_classification_label)
 
         df = df.groupby('classification_value', as_index=False)['repo_count'].sum()
 
+        # Rename back to classification_label for consistency
         df.rename(columns={'classification_value': 'classification_label'}, inplace=True)
 
         return df

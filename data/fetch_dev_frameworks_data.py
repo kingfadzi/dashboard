@@ -13,16 +13,21 @@ def fetch_dev_frameworks_data(filters=None):
                 COUNT(DISTINCT sd.repo_id) AS repo_count
             FROM syft_dependencies sd
             JOIN harvested_repositories crm ON crm.repo_id = sd.repo_id
-            WHERE (
-                sd.sub_category IS NULL
-                OR TRIM(sd.sub_category) NOT ILIKE ANY (ARRAY[
-                    '%utility%',
-                    '%utilities%',
-                    '%general%',
-                    '%general purpose%',
-                    '%helper%',
-                    '%misc%'
-                ])
+            WHERE TRIM(sd.sub_category) IN (
+                'Caching Libraries',
+                'Cloud & DevOps Tools',
+                'Cloud SDKs',
+                'Database Libraries',
+                'Dependency Injection',
+                'Frontend Frameworks',
+                'Message Brokers & ETL Tools',
+                'Messaging Frameworks',
+                'Networking',
+                'NoSQL & Big Data',
+                'Relational Databases',
+                'Spring Boot',
+                'Spring Framework Core',
+                'Web Frameworks'
             )
         """
 
