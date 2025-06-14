@@ -251,5 +251,82 @@ def stacked_bar_chart_style(
 
     return decorator
 
+def stacked_bar_interactiive_chart_style(
+        x_col="x",
+        y_col="y",
+        *,
+        tickformat: str = ".2s",
+        total_formatter: Callable[[float], str] | None = None,
+        annotation_font_size: int = 10,
+):
+    if total_formatter is None:
+        def total_formatter(v: float) -> str:
+            num = float(v)
+            for unit in ("", "k", "M", "B", "T"):
+                if abs(num) < 1000:
+                    return f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
+                num /= 1000.0
+            return f"{num:.1f}E"
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            fig, df = func(*args, **kwargs)
+
+            categoryarray = (
+                df[x_col].cat.categories.tolist()
+                if pd.api.types.is_categorical_dtype(df[x_col])
+                else None
+            )
+
+            fig.update_layout(
+                autosize=True,
+                margin=dict(l=20, r=20, t=40, b=40),
+                font=dict(family="Arial", size=10),
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                colorway=NEUTRAL_COLOR_SEQUENCE,
+                barmode="stack",
+                xaxis=dict(
+                    showline=True, mirror=True, ticklen=6, fixedrange=True,
+                    showgrid=False, zeroline=False, showticklabels=True,
+                    title_standoff=15,
+                    categoryorder="array" if categoryarray else "trace",
+                    categoryarray=categoryarray,
+                ),
+                yaxis=dict(
+                    showline=True, mirror=True, ticklen=6, fixedrange=True,
+                    showgrid=True, gridcolor="#e5e5e5", gridwidth=1,
+                    zeroline=False, title_standoff=15,
+                    tickformat=tickformat,
+                ),
+                legend=dict(
+                    orientation="h", yanchor="bottom", y=1.02,
+                    xanchor="right", x=1, title_text="", font_size=10
+                ),
+                hoverlabel=dict(bgcolor="white", font_size=12, bordercolor="#cccccc"),
+                dragmode=False,
+                title=None,
+            )
+
+            fig.update_traces(text=None)
+
+            # Annotate total per bar
+            totals = df.groupby(x_col)[y_col].sum().reset_index()
+            for _, row in totals.iterrows():
+                fig.add_annotation(
+                    x=row[x_col],
+                    y=row[y_col],
+                    text=total_formatter(row[y_col]),
+                    showarrow=False,
+                    yshift=5,
+                    font=dict(size=annotation_font_size),
+                )
+
+            return fig, df  # IMPORTANT: return df for drilldown/click callbacks
+
+        return wrapper
+
+    return decorator
 
 
