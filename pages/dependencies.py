@@ -7,6 +7,14 @@ dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
 
 def card(title, graph_id, height=400, config=None):
+    final_config = {
+        "displayModeBar": False,
+        "staticPlot": False,
+        "scrollZoom": False,
+    }
+    if config:
+        final_config.update(config)
+
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -14,7 +22,7 @@ def card(title, graph_id, height=400, config=None):
                 dcc.Loading(
                     dcc.Graph(
                         id=graph_id,
-                        config=config or {"displayModeBar": False},
+                        config=final_config,
                         style={"height": f"{height}px"},
                     )
                 ),
@@ -91,12 +99,13 @@ layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(card("EE API Usage (Jakarta vs Javax)", "ee-usage-chart"), width=4),
-                dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart", config={"displayModeBar": False}), width=4),
-                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart", config={"displayModeBar": False}), width=4),
+                dbc.Col(card("Spring Framework Version Usage", "spring-core-version-chart"), width=4),
+                dbc.Col(card("Spring Boot Core Version Usage", "spring-boot-version-chart"), width=4),
             ],
             className="mb-4",
         ),
 
+        # Row 5 — Framework dropdown
         dbc.Row(
             [
                 dbc.Col(
@@ -125,7 +134,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="dev-frameworks-bar-chart",
-                                        config={"displayModeBar": False},
+                                        config={"displayModeBar": False, "staticPlot": False},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -169,7 +178,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="middleware-subcategory-chart",
-                                        config={"displayModeBar": False},
+                                        config={"displayModeBar": False, "staticPlot": False},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -193,6 +202,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+        # Row 8: Vulnerability Charts
         dbc.Row(
             [
                 dbc.Col(card("Vulnerabilties by Resource Type", "trivy-resource-type-repo-count-chart"), width=4),
