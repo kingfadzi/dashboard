@@ -16,19 +16,73 @@ def card(title, graph_id, height=300):
         className="mb-4",
     )
 
+# Header + Table button + KPI Cards
 header_with_button = dbc.Row(
     [
-        dbc.Col(html.H2("Code Insights"), width="auto"),
+        dbc.Col(html.H2("Code Insights"), width="auto", className="d-flex align-items-center"),
         dbc.Col(
             html.Div(
                 dbc.Button("Table", id="code-insights-table-btn", color="secondary", size="sm"),
                 id="code-insights-table-link-container",
-                className="d-flex justify-content-end"
+                className="d-flex justify-content-end align-items-center"
             ),
             width="auto",
         ),
+        dbc.Col(
+            dbc.Card(
+                [
+                    dbc.CardHeader("Files", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardBody([
+                        html.H5("0", id="kpi-total-files", className="text-center"),
+                        html.Small("LOC: 0", id="kpi-total-files-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
+                    ])
+                ],
+                className="mb-2",
+            ),
+            width=2,
+        ),
+        dbc.Col(
+            dbc.Card(
+                [
+                    dbc.CardHeader("Functions", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardBody([
+                        html.H5("0", id="kpi-total-functions", className="text-center"),
+                        html.Small("Avg CCN: 0", id="kpi-total-functions-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
+                    ])
+                ],
+                className="mb-2",
+            ),
+            width=2,
+        ),
+        dbc.Col(
+            dbc.Card(
+                [
+                    dbc.CardHeader("Complexity", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardBody([
+                        html.H5("0", id="kpi-total-ccn", className="text-center"),
+                        html.Small("per 1000 LOC", id="kpi-total-ccn-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
+                    ])
+                ],
+                className="mb-2",
+            ),
+            width=2,
+        ),
+        dbc.Col(
+            dbc.Card(
+                [
+                    dbc.CardHeader("Repos", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardBody([
+                        html.H5("0", id="kpi-total-repos", className="text-center"),
+                        html.Small("w/ Lizard Data", id="kpi-total-repos-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
+                    ])
+                ],
+                className="mb-2",
+            ),
+            width=2,
+        ),
     ],
-    className="mb-2 align-items-center",
+    className="mb-3 align-items-center g-2",
+    justify="start"
 )
 
 layout = dbc.Container(
@@ -66,10 +120,6 @@ layout = dbc.Container(
             dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
             dbc.Col(card("Function Count (Modularity vs Monoliths)", "function-count-chart"), width=6),
         ]),
-        # dbc.Row([
-        #     dbc.Col(card("Total Cyclomatic Complexity", "total-ccn-chart"), width=6),
-        #     dbc.Col(card("Total Logical Lines of Code", "total-nloc-chart"), width=6),
-        # ]),
 
         modal_table(),
 
