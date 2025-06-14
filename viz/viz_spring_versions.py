@@ -1,5 +1,4 @@
 import re
-
 import pandas as pd
 import plotly.express as px
 from components.chart_style import standard_chart_style, status_chart_style, stacked_bar_chart_style
@@ -29,7 +28,12 @@ def render_spring_version_chart(df, title=None):
     df["repo_count"] = df["repo_count"].astype(int)
 
     # Preserve sorted order
-    ordered_versions = df["version_bucket"].drop_duplicates().sort_values(key=lambda s: s.str.extract(r"(\d+(?:\.\d+)*)")[0].astype(float, errors='ignore')).tolist()
+    ordered_versions = (
+        df["version_bucket"]
+        .drop_duplicates()
+        .sort_values(key=lambda s: s.str.extract(r"(\d+(?:\.\d+)*)")[0].astype(float, errors='ignore'))
+        .tolist()
+    )
     df["version_bucket"] = pd.Categorical(df["version_bucket"], categories=ordered_versions, ordered=True)
 
     fig = px.bar(
@@ -45,5 +49,8 @@ def render_spring_version_chart(df, title=None):
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
         barmode="stack"
     )
+
+    # ✅ Enable interactivity
+    fig.update_layout(staticPlot=False)
 
     return fig, df
