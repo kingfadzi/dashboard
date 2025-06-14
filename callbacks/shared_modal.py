@@ -1,29 +1,27 @@
 from dash import Input, Output, State, ctx, callback
-import dash
 from data.modal_fetchers import fetch_modal_rows
 import pandas as pd
+import dash
 
-def register_shared_modal_callbacks(app, chart_ids: list, filter_state_ids: list):
-    # Register click capture callback
+def register_shared_modal_callbacks(app, chart_ids: list, filter_store_id: str = "default-filter-store"):
+    # Callback: save chart click + filters to store
     @app.callback(
         Output("modal-clicked-chart", "data"),
         [Input(chart_id, "clickData") for chart_id in chart_ids],
-        [State(f_id, "value") for f_id in filter_state_ids],
+        State(filter_store_id, "data"),
         prevent_initial_call=True
     )
-    def capture_chart_click(*click_datas_and_filters):
-        # Slice the args into clickData and filter values
-        click_datas = click_datas_and_filters[:len(chart_ids)]
-        filter_values = click_datas_and_filters[len(chart_ids):]
+    def capture_chart_click(*clicks_and_filters):
+        click_datas = clicks_and_filters[:-1]
+        filters = clicks_and_filters[-1] or {}
 
         triggered_chart = ctx.triggered_id
         clicked_data = ctx.triggered[0]["value"]
+
         if not triggered_chart or not clicked_data:
             return dash.no_update
 
         clicked_value = clicked_data["points"][0]["x"]
-
-        filters = {fid: val for fid, val in zip(filter_state_ids, filter_values)}
 
         return {
             "chart_id": triggered_chart,
@@ -31,7 +29,7 @@ def register_shared_modal_callbacks(app, chart_ids: list, filter_state_ids: list
             "filters": filters
         }
 
-    # Register modal display + data loader callback
+    # Callback: open modal + load filtered data
     @app.callback(
         Output("generic-modal", "is_open"),
         Output("generic-modal-table", "columnDefs"),

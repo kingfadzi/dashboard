@@ -35,12 +35,6 @@ def register_all_callbacks(app):
 
     register_shared_modal_callbacks(
         app,
-        chart_ids=[
-            "spring-core-version-chart",
-            "spring-boot-version-chart",
-        ],
-        filter_state_ids=[
-            "main_language",
-            "host_name",
-        ]
-    )
+        chart_ids=["spring-core-version-chart", "spring-boot-version-chart"],
+        filter_store_id="default-filter-store"
+        )
