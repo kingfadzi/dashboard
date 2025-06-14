@@ -1,20 +1,21 @@
-import os
-import pandas as pd
 from sqlalchemy import text
-from data.db_connection import engine
+import pandas as pd
 from data.cache_instance import cache
+from data.db_connection import engine
 from data.build_filter_conditions import build_filter_conditions
-
-BITBUCKET_HOSTNAME = os.environ.get("BITBUCKET_HOSTNAME")
-GITLAB_HOSTNAME = os.environ.get("GITLAB_HOSTNAME")
 
 def fetch_overview_kpis(filters=None):
     @cache.memoize()
     def query_data(condition_string, param_dict):
         query = f"""
             WITH base AS (
-                SELECT hr.repo_id, hr.activity_status, hr.host_name,
-                       rm.last_commit_date, rm.repo_age_days
+                SELECT
+                    hr.repo_id,
+                    hr.activity_status,
+                    hr.host_name,
+                    hr.classification_label,
+                    rm.last_commit_date,
+                    rm.repo_age_days
                 FROM harvested_repositories hr
                 LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
                 WHERE 1=1
@@ -29,6 +30,10 @@ def fetch_overview_kpis(filters=None):
                 -- Activity
                 (SELECT COUNT(*) FROM base WHERE last_commit_date >= NOW() - INTERVAL '30 days') AS recently_updated,
                 (SELECT COUNT(*) FROM base WHERE repo_age_days <= 30) AS new_repos,
+                (SELECT COUNT(*) FROM base WHERE repo_age_days > 365) AS old_repos,
+
+                -- Massive
+                (SELECT COUNT(*) FROM base WHERE classification_label = 'Massive') AS massive_repos,
 
                 -- Build tool / runtime
                 (SELECT COUNT(DISTINCT bcc.repo_id) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE tool IS NOT NULL) AS build_tool_detected,
@@ -51,17 +56,13 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'GitLab CI') AS gitlab_ci,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Jenkins') AS jenkins,
 
-                -- IaC Breakdown: Docker/Helm
-                (SELECT COUNT(DISTINCT iac.repo_id) FROM iac_components iac JOIN base USING (repo_id)
-                    WHERE framework IN ('Dockerfile', 'docker-compose', 'Helm Charts')) AS iac_total,
-                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Dockerfile') AS dockerfile,
+                -- IaC: Docker & Helm
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Dockerfile') AS dockerfiles,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'docker-compose') AS docker_compose,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Helm Charts') AS helm_charts,
 
-                -- Source hosts
+                -- Source hosts count
                 (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,
-                (SELECT COUNT(*) FROM base WHERE host_name = :bitbucket_host) AS from_bitbucket,
-                (SELECT COUNT(*) FROM base WHERE host_name = :gitlab_host) AS from_gitlab,
 
                 -- Code metrics (programming only)
                 (SELECT SUM(cm.code)
@@ -80,12 +81,9 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(DISTINCT rm.repo_id) FROM repo_metrics rm JOIN base USING (repo_id)
                     WHERE number_of_contributors = 1) AS solo_contributor,
                 (SELECT SUM(rm.number_of_contributors) FROM repo_metrics rm JOIN base USING (repo_id)) AS total_contributors,
-                (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl;
+                (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl
+            ;
         """
-
-        param_dict["bitbucket_host"] = BITBUCKET_HOSTNAME
-        param_dict["gitlab_host"] = GITLAB_HOSTNAME
-
         return pd.read_sql(text(query), engine, params=param_dict).iloc[0].to_dict()
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
