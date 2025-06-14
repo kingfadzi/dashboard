@@ -262,12 +262,15 @@ def render_no_dependency_buildtool_summary_chart(df):
     return fig
 
 
-@standard_chart_style
+@standard_chart_style(tickformat=",d")
 def render_ee_usage_chart(df):
     if df.empty:
         return px.bar(title="No data available")
 
     df["repo_count"] = 1
+
+    # Force string category and group
+    df["ee_usage"] = df["ee_usage"].astype(str).str.strip()
     df = df.groupby("ee_usage", as_index=False)["repo_count"].sum()
 
     fig = px.bar(
@@ -283,14 +286,14 @@ def render_ee_usage_chart(df):
         color_discrete_sequence=NEUTRAL_COLOR_SEQUENCE,
     )
 
-    fig.update_traces(textposition="outside")
-
     fig.update_layout(
         xaxis=dict(
             type="category",
+            categoryorder="total descending",
             showticklabels=True,
             tickangle=0
         )
     )
 
     return fig
+
