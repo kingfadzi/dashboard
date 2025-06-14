@@ -1,18 +1,11 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from components.shared_modal import shared_modal
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
-def card(title, graph_id, height=400, config=None):
-    final_config = {
-        "displayModeBar": False,
-        "scrollZoom": False,
-    }
-    if config:
-        final_config.update(config)
 
+def card(title, graph_id, height=400):
     return dbc.Card(
         [
             dbc.CardHeader(html.B(title, className="text-center"), className="bg-light"),
@@ -20,7 +13,7 @@ def card(title, graph_id, height=400, config=None):
                 dcc.Loading(
                     dcc.Graph(
                         id=graph_id,
-                        config=final_config,
+                        config={"staticPlot": True},
                         style={"height": f"{height}px"},
                     )
                 ),
@@ -29,6 +22,7 @@ def card(title, graph_id, height=400, config=None):
         ],
         className="mb-4",
     )
+
 
 header_with_button = dbc.Row(
     [
@@ -74,7 +68,11 @@ layout = dbc.Container(
                             dcc.Loading(
                                 dcc.Graph(
                                     id="no-deps-scatter-chart",
-                                    config={"displayModeBar": False, "scrollZoom": False},
+                                    config={
+                                        "staticPlot": False,
+                                        "displayModeBar": False,
+                                        "scrollZoom": False,
+                                    },
                                     style={"height": "400px"},
                                 )
                             ),
@@ -88,7 +86,7 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 4 — clickable Spring version charts
+        # Row 4
         dbc.Row(
             [
                 dbc.Col(card("EE API Usage (Jakarta vs Javax)", "ee-usage-chart"), width=4),
@@ -98,7 +96,6 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 5 — Framework dropdown
         dbc.Row(
             [
                 dbc.Col(
@@ -112,7 +109,7 @@ layout = dbc.Container(
                                             dcc.Dropdown(
                                                 id="framework-language-dropdown",
                                                 placeholder="Select Ecosystem/Language",
-                                                options=[],
+                                                options=[],  # populated dynamically
                                                 clearable=True,
                                                 style={"width": "250px", "fontSize": "14px"},
                                             ),
@@ -127,7 +124,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="dev-frameworks-bar-chart",
-                                        config={"displayModeBar": False, "scrollZoom": False},
+                                        config={"staticPlot": True},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -140,6 +137,8 @@ layout = dbc.Container(
             ],
             className="mb-4",
         ),
+
+
 
         # Row 6: Middleware + App Servers
         dbc.Row(
@@ -171,7 +170,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="middleware-subcategory-chart",
-                                        config={"displayModeBar": False, "scrollZoom": False},
+                                        config={"staticPlot": True},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -195,9 +194,10 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
-        # Row 8: Vulnerability Charts
+
         dbc.Row(
             [
+                #dbc.Col(card("Vulnerabilties by Severity", "trivy-severity-repo-count-chart"), width=4),
                 dbc.Col(card("Vulnerabilties by Resource Type", "trivy-resource-type-repo-count-chart"), width=4),
                 dbc.Col(card("Vulnerabilties by Fix Availability", "trivy-fix-status-repo-count-chart"), width=4),
                 dbc.Col(card("Top Vulnerable Dependencies", "top-expired-trivy-products-chart"), width=4),
@@ -205,8 +205,8 @@ layout = dbc.Container(
             className="mb-4",
         ),
 
+
         dcc.Store(id="filters-applied-trigger"),
-        *shared_modal
     ],
     fluid=True,
     style={"marginTop": "0px", "paddingTop": "0px"},
