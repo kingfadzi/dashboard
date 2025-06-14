@@ -1,34 +1,3 @@
-import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output
-import dash_bootstrap_components as dbc
-
-from data.fetch_overview_kpis import fetch_overview_kpis
-from utils.filter_utils import extract_filter_dict_from_store
-
-def format_with_commas(value):
-    """Format integer with thousands separators."""
-    if value is None:
-        return "0"
-    try:
-        return f"{int(value):,}"
-    except (ValueError, TypeError):
-        return "0"
-
-def format_number_si(value):
-    """Format number using SI suffixes (K, M, B, T)."""
-    if value is None:
-        return "0"
-    try:
-        num = float(value)
-        for unit in ("", "K", "M", "B", "T"):
-            if abs(num) < 1000:
-                return f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
-            num /= 1000.0
-        return f"{num:.1f}E"
-    except (ValueError, TypeError):
-        return "0"
-
 def register_kpi_callbacks(app):
     @app.callback(
         [
@@ -56,6 +25,9 @@ def register_kpi_callbacks(app):
             Output("kpi-cicd", "children"),
             Output("kpi-cicd-subtext", "children"),
 
+            Output("kpi-iac", "children"),
+            Output("kpi-iac-subtext", "children"),
+
             Output("kpi-sources", "children"),
             Output("kpi-sources-subtext", "children"),
         ],
@@ -65,53 +37,69 @@ def register_kpi_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         kpi = fetch_overview_kpis(filters)
 
-        total_repos    = kpi.get("total_repos", 0)
-        active         = kpi.get("active", 0)
-        inactive       = kpi.get("inactive", 0)
+        # Repo status
+        total_repos = kpi.get("total_repos", 0)
+        active = kpi.get("active", 0)
+        inactive = kpi.get("inactive", 0)
 
+        # Recent activity
         recently_updated = kpi.get("recently_updated", 0)
-        new_repos        = kpi.get("new_repos", 0)
+        new_repos = kpi.get("new_repos", 0)
 
-        solo            = kpi.get("solo_contributor", 0)
-        total_contribs  = kpi.get("total_contributors", 0)
+        # Contributors
+        solo = kpi.get("solo_contributor", 0)
+        total_contribs = kpi.get("total_contributors", 0)
 
-        loc             = kpi.get("loc", 0)
-        source_files    = kpi.get("source_files", 0)
+        # Code metrics
+        loc = kpi.get("loc", 0)
+        source_files = kpi.get("source_files", 0)
 
-        branch_sprawl   = kpi.get("branch_sprawl", 0)
+        # Branching
+        branch_sprawl = kpi.get("branch_sprawl", 0)
 
-        build_detected  = kpi.get("build_tool_detected", 0)
-        modules         = kpi.get("modules", 0)
-        without_tool    = kpi.get("without_tool", 0)
+        # Build tools
+        build_detected = kpi.get("build_tool_detected", 0)
+        modules = kpi.get("modules", 0)
+        without_tool = kpi.get("without_tool", 0)
 
+        # Runtime
         runtime_detected = kpi.get("runtime_detected", 0)
-        languages        = kpi.get("languages", 0)
+        languages = kpi.get("languages", 0)
 
+        # CI/CD
         cicd_total = kpi.get("cicd_total", 0)
-        bp         = kpi.get("bitbucket_pipelines", 0)
-        gl         = kpi.get("gitlab_ci", 0)
-        jenkins    = kpi.get("jenkins", 0)
+        gl = kpi.get("gitlab_ci", 0)
+        jenkins = kpi.get("jenkins", 0)
 
+        # IaC
+        iac_total = kpi.get("iac_total", 0)
+        dockerfile = kpi.get("dockerfile", 0)
+        docker_compose = kpi.get("docker_compose", 0)
+        helm_charts = kpi.get("helm_charts", 0)
+
+        # Sources
         sources_total = kpi.get("sources_total", 0)
+        from_bitbucket = kpi.get("from_bitbucket", 0)
+        from_gitlab = kpi.get("from_gitlab", 0)
 
         return (
             # Total repos
             format_with_commas(total_repos),
             f"Active: {format_number_si(active)} · Inactive: {format_number_si(inactive)}",
 
-            # Recent updates
+            # Commits (recent update + new)
             format_with_commas(recently_updated),
             f"New: {format_number_si(new_repos)} · 30d",
 
-            # Solo contributors
+            # Contributors
             format_with_commas(solo),
             f"All: {format_number_si(total_contribs)}",
 
-            # LOC (main uses SI as before), subtext updated
+            # Code size
             format_number_si(loc),
             f"Files: {format_number_si(source_files)} · Repos: {format_number_si(total_repos)}",
 
-            # Branch sprawl
+            # Branches
             format_with_commas(branch_sprawl),
             ">10 branches",
 
@@ -119,7 +107,7 @@ def register_kpi_callbacks(app):
             format_with_commas(build_detected),
             f"Modules: {format_number_si(modules)} · NoTool: {format_number_si(without_tool)}",
 
-            # Runtimes
+            # Runtime
             format_with_commas(runtime_detected),
             f"Languages: {format_number_si(languages)}",
 
@@ -127,7 +115,11 @@ def register_kpi_callbacks(app):
             format_with_commas(cicd_total),
             f"GitLab: {format_number_si(gl)} · Jenkins: {format_number_si(jenkins)}",
 
-            # Source hosts
+            # IaC
+            format_with_commas(iac_total),
+            f"Dockerfile: {format_number_si(dockerfile)} · Compose: {format_number_si(docker_compose)} · Helm: {format_number_si(helm_charts)}",
+
+            # Sources
             format_with_commas(sources_total),
-            "Hosts",
+            f"Bitbucket: {format_number_si(from_bitbucket)} · GitLab: {format_number_si(from_gitlab)}",
         )
