@@ -180,11 +180,11 @@ def stacked_bar_chart_style(
             for unit in ("", "k", "M", "B", "T"):
                 if abs(num) < 1000:
                     formatted = f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
-                    print(f"[format] value: {original}, formatted: {formatted}")
+                    #print(f"[format] value: {original}, formatted: {formatted}")
                     return formatted
                 num /= 1000.0
             formatted = f"{num:.1f}E"
-            print(f"[format] value: {original}, formatted: {formatted}")
+            #print(f"[format] value: {original}, formatted: {formatted}")
             return formatted
 
     def decorator(func):
@@ -235,7 +235,7 @@ def stacked_bar_chart_style(
             totals = df.groupby(x_col)[y_col].sum().reset_index()
             for idx, row in totals.iterrows():
                 formatted = total_formatter(row[y_col])
-                print(f"[annotate] row {idx}, x={row[x_col]}, y={row[y_col]}, formatted={formatted}")
+                #print(f"[annotate] row {idx}, x={row[x_col]}, y={row[y_col]}, formatted={formatted}")
                 fig.add_annotation(
                     x=row[x_col],
                     y=row[y_col],
@@ -251,13 +251,11 @@ def stacked_bar_chart_style(
 
     return decorator
 
-def stacked_bar_interactiive_chart_style(
-        x_col="x",
-        y_col="y",
-        *,
-        tickformat: str = ".2s",
+def stacked_bar_interactive_chart_style(
+        x_col="x", y_col="y",
+        *, tickformat: str=".2s",
         total_formatter: Callable[[float], str] | None = None,
-        annotation_font_size: int = 10,
+        annotation_font_size: int = 10
 ):
     if total_formatter is None:
         def total_formatter(v: float) -> str:
@@ -272,13 +270,11 @@ def stacked_bar_interactiive_chart_style(
         @wraps(func)
         def wrapper(*args, **kwargs):
             fig, df = func(*args, **kwargs)
-
             categoryarray = (
                 df[x_col].cat.categories.tolist()
                 if pd.api.types.is_categorical_dtype(df[x_col])
                 else None
             )
-
             fig.update_layout(
                 autosize=True,
                 margin=dict(l=20, r=20, t=40, b=40),
@@ -308,10 +304,8 @@ def stacked_bar_interactiive_chart_style(
                 dragmode=False,
                 title=None,
             )
-
             fig.update_traces(text=None)
 
-            # Annotate total per bar
             totals = df.groupby(x_col)[y_col].sum().reset_index()
             for _, row in totals.iterrows():
                 fig.add_annotation(
@@ -322,11 +316,8 @@ def stacked_bar_interactiive_chart_style(
                     yshift=5,
                     font=dict(size=annotation_font_size),
                 )
-
-            return fig, df  # IMPORTANT: return df for drilldown/click callbacks
-
+            return fig, df
         return wrapper
-
     return decorator
 
 

@@ -9,6 +9,7 @@ from .dropdown_callbacks import register_dropdown_callbacks
 from .overview_callbacks import register_overview_callbacks
 from .register_filter_callbacks import register_filter_callbacks
 from .repo_profile_callback import register_repo_profile_callbacks
+from .shared_modal_callbacks import register_modal_callbacks
 from .table_callbacks import register_table_callbacks
 from .kpi_callbacks import register_kpi_callbacks
 from .dependency_insights import register_dependency_insights_callbacks
@@ -31,4 +32,6 @@ def register_all_callbacks(app):
     #register_dropdown_callbacks(app)
 
     register_filter_tags_callbacks(app)
+
+    register_modal_callbacks(app)
 

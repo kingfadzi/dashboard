@@ -71,11 +71,12 @@ def register_dependencies_callbacks(app):
     def update_spring_versions(store_data):
         filters = extract_filter_dict_from_store(store_data)
         df_core, df_boot = fetch_spring_framework_versions(filters)
-        return (
-            render_spring_version_chart(df_core, "Spring Core Version Usage"),
-            render_spring_version_chart(df_boot, "Spring Boot Version Usage")
-        )
-    
+
+        fig_core, _ = render_spring_version_chart(df_core, "Spring Core Version Usage")
+        fig_boot, _ = render_spring_version_chart(df_boot, "Spring Boot Version Usage")
+
+        return fig_core, fig_boot
+
     generate_redirect_callbacks(
         app,
         target_href="/table-dependencies",
