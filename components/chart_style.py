@@ -162,7 +162,9 @@ def status_chart_style(func):
 
 
 from functools import wraps
+from typing import Callable
 import pandas as pd
+from components.colors import NEUTRAL_COLOR_SEQUENCE
 
 def stacked_bar_chart_style(
         x_col="x",
@@ -172,26 +174,21 @@ def stacked_bar_chart_style(
         total_formatter: Callable[[float], str] | None = None,
         annotation_font_size: int = 10,
 ):
-    # Default SI‐prefix formatter with debug output
     if total_formatter is None:
         def total_formatter(v: float) -> str:
-            original = v
             num = float(v)
             for unit in ("", "k", "M", "B", "T"):
                 if abs(num) < 1000:
-                    formatted = f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
-                    print(f"[format] value: {original}, formatted: {formatted}")
-                    return formatted
+                    return f"{num:.0f}{unit}" if unit == "" else f"{num:.1f}{unit}"
                 num /= 1000.0
-            formatted = f"{num:.1f}E"
-            print(f"[format] value: {original}, formatted: {formatted}")
-            return formatted
+            return f"{num:.1f}E"
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             fig, df = func(*args, **kwargs)
 
+            # preserve order if categorical
             categoryarray = (
                 df[x_col].cat.categories.tolist()
                 if pd.api.types.is_categorical_dtype(df[x_col])
@@ -208,7 +205,7 @@ def stacked_bar_chart_style(
                 barmode="stack",
                 xaxis=dict(
                     showline=True, linewidth=1, mirror=True,
-                    ticks="outside", ticklen=6, fixedrange=True,
+                    ticks="outside", ticklen=6, fixedrange=False,  # allow click interactivity
                     showgrid=False, zeroline=False, showticklabels=True,
                     title_standoff=15,
                     categoryorder="array" if categoryarray else "trace",
@@ -216,7 +213,7 @@ def stacked_bar_chart_style(
                 ),
                 yaxis=dict(
                     showline=True, linewidth=1, mirror=True,
-                    ticks="outside", ticklen=6, fixedrange=True,
+                    ticks="outside", ticklen=6, fixedrange=False,
                     showgrid=True, gridcolor="#e5e5e5", gridwidth=1,
                     zeroline=False, title_standoff=15,
                     tickformat=tickformat
@@ -230,12 +227,17 @@ def stacked_bar_chart_style(
                 title=None,
             )
 
-            fig.update_traces(text=None)
+            # Set hover and click data visibility
+            fig.update_traces(
+                text=None,
+                hoverinfo="x+y+name",
+                hovertemplate="%{y:,}<extra>%{fullData.name}</extra>",
+            )
 
+            # Add annotation with totals above each bar group
             totals = df.groupby(x_col)[y_col].sum().reset_index()
-            for idx, row in totals.iterrows():
+            for _, row in totals.iterrows():
                 formatted = total_formatter(row[y_col])
-                print(f"[annotate] row {idx}, x={row[x_col]}, y={row[y_col]}, formatted={formatted}")
                 fig.add_annotation(
                     x=row[x_col],
                     y=row[y_col],
@@ -250,6 +252,5 @@ def stacked_bar_chart_style(
         return wrapper
 
     return decorator
-
 
 
