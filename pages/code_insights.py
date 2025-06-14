@@ -31,57 +31,65 @@ header_with_button = dbc.Row(
         dbc.Col(
             dbc.Card(
                 [
-                    dbc.CardHeader("Files", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardHeader("Files", className="text-center bg-light",
+                                   style={"fontSize": "0.75rem", "padding": "0.25rem"}),
                     dbc.CardBody([
-                        html.H5("0", id="kpi-total-files", className="text-center"),
-                        html.Small("LOC: 0", id="kpi-total-files-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
-                    ])
+                        html.H6("0", id="kpi-total-files", className="text-center mb-1", style={"fontSize": "1.1rem"}),
+                        html.Small("LOC: 0", id="kpi-total-files-subtext",
+                                   className="text-center text-muted d-block", style={"fontSize": "0.65rem"}),
+                    ], style={"padding": "0.5rem"})
                 ],
-                className="mb-2",
+                className="mb-1 shadow-sm",
             ),
             width=2,
         ),
         dbc.Col(
             dbc.Card(
                 [
-                    dbc.CardHeader("Functions", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardHeader("Functions", className="text-center bg-light",
+                                   style={"fontSize": "0.75rem", "padding": "0.25rem"}),
                     dbc.CardBody([
-                        html.H5("0", id="kpi-total-functions", className="text-center"),
-                        html.Small("Avg CCN: 0", id="kpi-total-functions-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
-                    ])
+                        html.H6("0", id="kpi-total-functions", className="text-center mb-1", style={"fontSize": "1.1rem"}),
+                        html.Small("Avg CCN: 0", id="kpi-total-functions-subtext",
+                                   className="text-center text-muted d-block", style={"fontSize": "0.65rem"}),
+                    ], style={"padding": "0.5rem"})
                 ],
-                className="mb-2",
+                className="mb-1 shadow-sm",
             ),
             width=2,
         ),
         dbc.Col(
             dbc.Card(
                 [
-                    dbc.CardHeader("Complexity", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardHeader("Complexity", className="text-center bg-light",
+                                   style={"fontSize": "0.75rem", "padding": "0.25rem"}),
                     dbc.CardBody([
-                        html.H5("0", id="kpi-total-ccn", className="text-center"),
-                        html.Small("per 1000 LOC", id="kpi-total-ccn-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
-                    ])
+                        html.H6("0", id="kpi-total-ccn", className="text-center mb-1", style={"fontSize": "1.1rem"}),
+                        html.Small("per 1000 LOC", id="kpi-total-ccn-subtext",
+                                   className="text-center text-muted d-block", style={"fontSize": "0.65rem"}),
+                    ], style={"padding": "0.5rem"})
                 ],
-                className="mb-2",
+                className="mb-1 shadow-sm",
             ),
             width=2,
         ),
         dbc.Col(
             dbc.Card(
                 [
-                    dbc.CardHeader("Repos", className="text-center bg-light", style={"fontSize": "0.8rem", "whiteSpace": "nowrap"}),
+                    dbc.CardHeader("Repos", className="text-center bg-light",
+                                   style={"fontSize": "0.75rem", "padding": "0.25rem"}),
                     dbc.CardBody([
-                        html.H5("0", id="kpi-total-repos", className="text-center"),
-                        html.Small("w/ Lizard Data", id="kpi-total-repos-subtext", className="text-center text-muted d-block", style={"fontSize": "0.7rem"}),
-                    ])
+                        html.H6("0", id="kpi-total-repos", className="text-center mb-1", style={"fontSize": "1.1rem"}),
+                        html.Small("w/ Lizard Data", id="kpi-total-repos-subtext",
+                                   className="text-center text-muted d-block", style={"fontSize": "0.65rem"}),
+                    ], style={"padding": "0.5rem"})
                 ],
-                className="mb-2",
+                className="mb-1 shadow-sm",
             ),
             width=2,
         ),
     ],
-    className="mb-3 align-items-center g-2",
+    className="mb-2 align-items-center g-1",
     justify="start"
 )
 
@@ -94,13 +102,11 @@ layout = dbc.Container(
         # Charts
         card("Language Role Distribution", "role-distribution-chart"),
 
-        # Normalized + Markup side by side (50:50)
         dbc.Row([
             dbc.Col(card("Language Usage vs. Code Density", "language-bubble-chart"), width=6),
             dbc.Col(card("Markup/Data Language Usage", "markup-language-usage-chart"), width=6),
         ], className="mb-4"),
 
-        # Gitlog charts
         dbc.Row([
             dbc.Col(card("Average File Size (code_size / file_count)", "avg-file-size-chart"), width=6),
             dbc.Col(card("Top Contributor Dominance", "contributor-dominance-chart"), width=6),
@@ -109,13 +115,10 @@ layout = dbc.Container(
             dbc.Col(card("Branch Sprawl", "branch-sprawl-chart"), width=6),
             dbc.Col(card("Repository Age Buckets", "repo-age-chart"), width=6),
         ]),
-
         dbc.Row([
             dbc.Col(card("Code Composition", "code-composition-chart"), width=6),
             dbc.Col(card("File Size Scatter", "code-file-scatter-chart"), width=6),
         ]),
-
-        # Lizard charts
         dbc.Row([
             dbc.Col(card("Complexity vs Function Count", "ccn-vs-function-count-chart"), width=6),
             dbc.Col(card("Function Count (Modularity vs Monoliths)", "function-count-chart"), width=6),
