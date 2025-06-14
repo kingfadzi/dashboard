@@ -5,11 +5,9 @@ from components.shared_modal import shared_modal
 
 dash.register_page(__name__, path="/dependencies", name="Dependencies")
 
-
 def card(title, graph_id, height=400, config=None):
     final_config = {
         "displayModeBar": False,
-        "staticPlot": False,
         "scrollZoom": False,
     }
     if config:
@@ -31,7 +29,6 @@ def card(title, graph_id, height=400, config=None):
         ],
         className="mb-4",
     )
-
 
 header_with_button = dbc.Row(
     [
@@ -77,11 +74,7 @@ layout = dbc.Container(
                             dcc.Loading(
                                 dcc.Graph(
                                     id="no-deps-scatter-chart",
-                                    config={
-                                        "staticPlot": False,
-                                        "displayModeBar": False,
-                                        "scrollZoom": False,
-                                    },
+                                    config={"displayModeBar": False, "scrollZoom": False},
                                     style={"height": "400px"},
                                 )
                             ),
@@ -119,7 +112,7 @@ layout = dbc.Container(
                                             dcc.Dropdown(
                                                 id="framework-language-dropdown",
                                                 placeholder="Select Ecosystem/Language",
-                                                options=[],  # populated dynamically
+                                                options=[],
                                                 clearable=True,
                                                 style={"width": "250px", "fontSize": "14px"},
                                             ),
@@ -134,7 +127,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="dev-frameworks-bar-chart",
-                                        config={"displayModeBar": False, "staticPlot": False},
+                                        config={"displayModeBar": False, "scrollZoom": False},
                                         style={"height": "400px"},
                                     )
                                 ),
@@ -178,7 +171,7 @@ layout = dbc.Container(
                                 dcc.Loading(
                                     dcc.Graph(
                                         id="middleware-subcategory-chart",
-                                        config={"displayModeBar": False, "staticPlot": False},
+                                        config={"displayModeBar": False, "scrollZoom": False},
                                         style={"height": "400px"},
                                     )
                                 ),
