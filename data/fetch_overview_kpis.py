@@ -9,8 +9,13 @@ def fetch_overview_kpis(filters=None):
     def query_data(condition_string, param_dict):
         query = f"""
             WITH base AS (
-                SELECT hr.repo_id, hr.activity_status, hr.host_name,
-                       rm.last_commit_date, rm.repo_age_days
+                SELECT
+                    hr.repo_id,
+                    hr.activity_status,
+                    hr.host_name,
+                    hr.classification_label,
+                    rm.last_commit_date,
+                    rm.repo_age_days
                 FROM harvested_repositories hr
                 LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
                 WHERE 1=1
@@ -25,6 +30,10 @@ def fetch_overview_kpis(filters=None):
                 -- Activity
                 (SELECT COUNT(*) FROM base WHERE last_commit_date >= NOW() - INTERVAL '30 days') AS recently_updated,
                 (SELECT COUNT(*) FROM base WHERE repo_age_days <= 30) AS new_repos,
+                (SELECT COUNT(*) FROM base WHERE repo_age_days > 365) AS old_repos,
+
+                -- Massive
+                (SELECT COUNT(*) FROM base WHERE classification_label = 'Massive') AS massive_repos,
 
                 -- Build tool / runtime
                 (SELECT COUNT(DISTINCT bcc.repo_id) FROM build_config_cache bcc JOIN base USING (repo_id) WHERE tool IS NOT NULL) AS build_tool_detected,
@@ -47,6 +56,11 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'GitLab CI') AS gitlab_ci,
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Jenkins') AS jenkins,
 
+                -- IaC: Docker & Helm
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Dockerfile') AS dockerfiles,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'docker-compose') AS docker_compose,
+                (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Helm Charts') AS helm_charts,
+
                 -- Source hosts count
                 (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,
 
@@ -67,7 +81,8 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(DISTINCT rm.repo_id) FROM repo_metrics rm JOIN base USING (repo_id)
                     WHERE number_of_contributors = 1) AS solo_contributor,
                 (SELECT SUM(rm.number_of_contributors) FROM repo_metrics rm JOIN base USING (repo_id)) AS total_contributors,
-                (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl;
+                (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl
+            ;
         """
         return pd.read_sql(text(query), engine, params=param_dict).iloc[0].to_dict()
 
