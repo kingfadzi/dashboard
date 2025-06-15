@@ -1,4 +1,6 @@
 from dash import Input, Output
+
+from callbacks.overview.kpi_callbacks import format_number_si
 from data.dependencies.dependencies_fetchers import (
     fetch_dependency_detection_by_language,
     fetch_iac_detection_coverage,
@@ -6,6 +8,7 @@ from data.dependencies.dependencies_fetchers import (
     fetch_package_type_distribution,
     fetch_dependency_volume_buckets,
 )
+from data.dependencies.fetch_dependencies_kpis import fetch_dependencies_kpis
 from data.dependencies.fetch_spring_versions import fetch_spring_framework_versions
 from data.dependencies.fetch_iac_data import fetch_iac_server_orchestration_usage
 
@@ -73,6 +76,24 @@ def register_dependencies_callbacks(app):
 
         return fig_core, fig_boot
 
+    @app.callback(
+        Output("dependencies_kpi-total-repos", "children"),
+        Output("dependencies_kpi-total-deps", "children"),
+        Output("dependencies_kpi-repos-with-deps", "children"),
+        Output("dependencies_kpi-repos-without-deps", "children"),
+        Input("default-filter-store", "data"),
+    )
+    def update_dependencies_kpis(store_data):
+
+        filters = extract_filter_dict_from_store(store_data)
+        kpis = fetch_dependencies_kpis(filters)
+
+        return (
+            f"{kpis['total_repos']:,}",
+            format_number_si(kpis["total_deps"]),
+            format_number_si(kpis["repos_with_deps"]),
+            format_number_si(kpis["repos_without_deps"])
+        )
     generate_redirect_callbacks(
         app,
         target_href="/table-dependencies",

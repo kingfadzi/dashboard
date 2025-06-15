@@ -12,6 +12,7 @@ from data.buildtools.build_info_fetchers import (
     fetch_go_support_status_summary,
 )
 from callbacks.redirect_callbacks import generate_redirect_callbacks
+from data.buildtools.fetch_build_tools_kpis import fetch_build_tools_kpis
 from viz.buildtools.viz_build_info import (
     render_detection_coverage_chart,
     render_module_count_chart,
@@ -61,6 +62,25 @@ def register_build_info_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         df = fetch_confidence_distribution(filters)
         return render_confidence_distribution_chart(df)
+
+    @app.callback(
+        Output("build_tools_kpi-total-repos", "children"),
+        Output("build_tools_kpi-total-variants", "children"),
+        Output("build_tools_kpi-total-runtimes", "children"),
+        Output("build_tools_kpi-no-tool", "children"),
+        Input("default-filter-store", "data"),
+    )
+    def update_build_tools_kpis(filter_data):
+
+        filters = extract_filter_dict_from_store(filter_data)
+        kpis = fetch_build_tools_kpis(filters)
+
+        return (
+            f"{kpis['repos']:,}",
+            f"{kpis['variants']:,}",
+            f"{kpis['runtimes']:,}",
+            f"{kpis['no_tool']:,}",
+        )
 
 
     @app.callback(
