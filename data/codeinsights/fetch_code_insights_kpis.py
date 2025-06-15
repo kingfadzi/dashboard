@@ -22,7 +22,7 @@ def fetch_code_insights_kpis(filters=None):
                     WHERE LOWER(lang.type) IN ('markup', 'data')
                 ) AS markup_data_repos,
 
-                SUM(cloc.code) AS total_loc,
+                SUM(CASE WHEN lang.type = 'programming' THEN cloc.code ELSE 0 END) AS total_loc,
                 SUM(cloc.files) AS total_files,
                 SUM(lizard.function_count) AS total_functions
             FROM harvested_repositories hr
