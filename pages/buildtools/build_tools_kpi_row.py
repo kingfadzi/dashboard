@@ -1,6 +1,5 @@
 from dash import html
 
-
 def kpi_stat(label, value_id):
     return html.Div(
         [
@@ -14,10 +13,13 @@ def kpi_stat(label, value_id):
 def build_tools_kpi_row():
     return html.Div(
         [
-            kpi_stat("Repos", "build_tools_kpi-total-repos"),
+            kpi_stat("Code Repos", "build_tools_kpi-code-repos"),
+            kpi_stat("No Lang", "build_tools_kpi-no-lang"),
+            kpi_stat("Markup/Data", "build_tools_kpi-markup-data"),
             kpi_stat("Build Tools", "build_tools_kpi-total-variants"),
             kpi_stat("Runtime Versions", "build_tools_kpi-total-runtimes"),
             kpi_stat("No Tool Detected", "build_tools_kpi-no-tool"),
+
         ],
         className="d-flex flex-wrap align-items-center ms-3",
         style={"fontSize": "0.9rem"}

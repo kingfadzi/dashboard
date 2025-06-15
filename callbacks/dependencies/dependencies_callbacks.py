@@ -76,24 +76,29 @@ def register_dependencies_callbacks(app):
 
         return fig_core, fig_boot
 
+
     @app.callback(
-        Output("dependencies_kpi-total-repos", "children"),
         Output("dependencies_kpi-total-deps", "children"),
         Output("dependencies_kpi-repos-with-deps", "children"),
         Output("dependencies_kpi-repos-without-deps", "children"),
+        Output("dependencies_kpi-code-repos", "children"),
+        Output("dependencies_kpi-no-lang", "children"),
+        Output("dependencies_kpi-markup-data", "children"),
         Input("default-filter-store", "data"),
     )
-    def update_dependencies_kpis(store_data):
-
-        filters = extract_filter_dict_from_store(store_data)
+    def update_dependencies_kpis(filter_data):
+        filters = extract_filter_dict_from_store(filter_data)
         kpis = fetch_dependencies_kpis(filters)
 
         return (
-            f"{kpis['total_repos']:,}",
             format_number_si(kpis["total_deps"]),
             format_number_si(kpis["repos_with_deps"]),
-            format_number_si(kpis["repos_without_deps"])
+            format_number_si(kpis["repos_without_deps"]),
+            f"{kpis['code_repos']:,}",
+            f"{kpis['no_language_repos']:,}",
+            f"{kpis['markup_data_repos']:,}",
         )
+
     generate_redirect_callbacks(
         app,
         target_href="/table-dependencies",

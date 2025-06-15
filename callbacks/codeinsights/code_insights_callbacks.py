@@ -57,11 +57,11 @@ def register_code_insights_callbacks(app):
             f"{kpis['markup_data_repos']:,}",             # Markup/Data
         )
 
-        generate_redirect_callbacks(
-            app,
-            target_href="/table-code-insights",
-            button_id="code-insights-table-btn",
-            output_container_id="code-insights-table-link-container",
-            reverse_href="/code-insights",
-            reverse_button_id="back-to-charts-btn-code-insights",
-        )
+    generate_redirect_callbacks(
+        app,
+        target_href="/table-code-insights",
+        button_id="code-insights-table-btn",
+        output_container_id="code-insights-table-link-container",
+        reverse_href="/code-insights",
+        reverse_button_id="back-to-charts-btn-code-insights",
+    )

@@ -1,6 +1,5 @@
 from dash import html
 
-
 def kpi_stat(label, value_id):
     return html.Div(
         [
@@ -14,7 +13,9 @@ def kpi_stat(label, value_id):
 def dependencies_kpi_row():
     return html.Div(
         [
-            kpi_stat("Repos", "dependencies_kpi-total-repos"),
+            kpi_stat("Code Repos", "dependencies_kpi-code-repos"),
+            kpi_stat("No Lang", "dependencies_kpi-no-lang"),
+            kpi_stat("Markup/Data", "dependencies_kpi-markup-data"),
             kpi_stat("Dependencies", "dependencies_kpi-total-deps"),
             kpi_stat("Repos with Deps", "dependencies_kpi-repos-with-deps"),
             kpi_stat("Repos without Deps", "dependencies_kpi-repos-without-deps"),

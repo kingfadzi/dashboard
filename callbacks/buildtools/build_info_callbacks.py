@@ -64,22 +64,25 @@ def register_build_info_callbacks(app):
         return render_confidence_distribution_chart(df)
 
     @app.callback(
-        Output("build_tools_kpi-total-repos", "children"),
         Output("build_tools_kpi-total-variants", "children"),
         Output("build_tools_kpi-total-runtimes", "children"),
         Output("build_tools_kpi-no-tool", "children"),
+        Output("build_tools_kpi-code-repos", "children"),
+        Output("build_tools_kpi-no-lang", "children"),
+        Output("build_tools_kpi-markup-data", "children"),
         Input("default-filter-store", "data"),
     )
     def update_build_tools_kpis(filter_data):
-
         filters = extract_filter_dict_from_store(filter_data)
         kpis = fetch_build_tools_kpis(filters)
 
         return (
-            f"{kpis['repos']:,}",
             f"{kpis['variants']:,}",
             f"{kpis['runtimes']:,}",
             f"{kpis['no_tool']:,}",
+            f"{kpis['code_repos']:,}",
+            f"{kpis['no_language_repos']:,}",
+            f"{kpis['markup_data_repos']:,}",
         )
 
 
