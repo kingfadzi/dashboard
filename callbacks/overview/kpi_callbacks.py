@@ -75,23 +75,23 @@ def register_kpi_callbacks(app):
 
         return (
             # Total repos
-            format_with_commas(kpi.get("total_repos", 0)),
+            format_with_commas(kpi.get("total_repos")),
             f"Active: {format_number_si(kpi.get('active'))} · Inactive: {format_number_si(kpi.get('inactive'))}",
 
-            # Updates
-            format_with_commas(kpi.get("recently_updated", 0)),
+            # Recent activity
+            format_with_commas(kpi.get("recently_updated")),
             f"New: {format_number_si(kpi.get('new_repos'))} · 30d",
 
-            # Oldest repos
-            format_with_commas(kpi.get("old_repos_total", 0)),
-            f"3y: {format_number_si(kpi.get('repos_3y'))} · 4y: {format_number_si(kpi.get('repos_4y'))} · 5y: {format_number_si(kpi.get('repos_5y'))}",
+            # Old repos
+            format_with_commas(kpi.get("old_repos_total")),
+            f">3y: {format_number_si(kpi.get('repos_3y'))} · 5y: {format_number_si(kpi.get('repos_5y'))} · 10y: {format_number_si(kpi.get('repos_10y'))}",
 
-            # Massive repos
-            format_with_commas(kpi.get("massive_repos", 0)),
-            f">500K LOC",
+            # Massive
+            format_with_commas(kpi.get("massive_repos")),
+            kpi.get("massive_top_languages", "—"),
 
             # Contributors
-            format_with_commas(kpi.get("solo_contributor", 0)),
+            format_with_commas(kpi.get("solo_contributor")),
             f"All: {format_number_si(kpi.get('total_contributors'))}",
 
             # LOC
@@ -99,26 +99,26 @@ def register_kpi_callbacks(app):
             f"Files: {format_number_si(kpi.get('source_files'))} · Repos: {format_number_si(kpi.get('total_repos'))}",
 
             # Branches
-            format_with_commas(kpi.get("branch_sprawl", 0)),
+            format_with_commas(kpi.get("branch_sprawl")),
             ">10 branches",
 
             # Build tools
-            format_with_commas(kpi.get("build_tool_detected", 0)),
+            format_with_commas(kpi.get("build_tool_detected")),
             f"Modules: {format_number_si(kpi.get('modules'))} · NoTool: {format_number_si(kpi.get('without_tool'))}",
 
             # Runtime
-            format_with_commas(kpi.get("runtime_detected", 0)),
+            format_with_commas(kpi.get("runtime_detected")),
             f"Languages: {format_number_si(kpi.get('languages'))}",
 
             # CI/CD
-            format_with_commas(kpi.get("cicd_total", 0)),
+            format_with_commas(kpi.get("cicd_total")),
             f"GL: {format_number_si(kpi.get('gitlab_ci'))} · Jenkins: {format_number_si(kpi.get('jenkins'))}",
 
-            # Containerization
-            format_with_commas(kpi.get("dockerfiles", 0)),
+            # Containers
+            format_with_commas(kpi.get("dockerfiles")),
             f"Helm: {format_number_si(kpi.get('helm_charts'))} · Compose: {format_number_si(kpi.get('docker_compose'))}",
 
             # Sources
-            format_with_commas(kpi.get("sources_total", 0)),
-            "Hosts",
+            format_with_commas(kpi.get("sources_total")),
+            kpi.get("source_subtext", "—"),
         )
