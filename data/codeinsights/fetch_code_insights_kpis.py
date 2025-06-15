@@ -22,12 +22,17 @@ def fetch_code_insights_kpis(filters=None):
                     WHERE LOWER(lang.type) IN ('markup', 'data')
                 ) AS markup_data_repos,
 
-                SUM(CASE WHEN lang.type = 'programming' THEN cloc.code ELSE 0 END) AS total_loc,
-                SUM(cloc.files) AS total_files,
-                SUM(lizard.function_count) AS total_functions
+                SUM(CASE 
+                        WHEN cm.language != 'SUM' AND lang.type = 'programming' 
+                        THEN cm.code 
+                        ELSE 0 
+                    END) AS total_loc,
+
+                SUM(cm.files) AS total_files,
+                SUM(lz.function_count) AS total_functions
             FROM harvested_repositories hr
-            LEFT JOIN cloc_metrics cloc ON hr.repo_id = cloc.repo_id
-            LEFT JOIN lizard_summary lizard ON hr.repo_id = lizard.repo_id
+            LEFT JOIN cloc_metrics cm ON hr.repo_id = cm.repo_id
+            LEFT JOIN lizard_summary lz ON hr.repo_id = lz.repo_id
             LEFT JOIN languages lang ON LOWER(hr.main_language) = LOWER(lang.name)
             {f"WHERE {condition_string}" if condition_string else ""}
         """
