@@ -73,22 +73,28 @@ def register_kpi_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         kpi = fetch_overview_kpis(filters)
 
+        # Massive repo breakdown subtext
+        massive_subtext = (
+            f"Code: {format_number_si(kpi.get('massive_other_programming'))} · "
+            f"Data: {format_number_si(kpi.get('massive_markup_or_data'))} · "
+            f"None: {format_number_si(kpi.get('massive_no_language'))}"
+        )
+
         return (
-            # Total repos
             format_with_commas(kpi.get("total_repos")),
             f"Active: {format_number_si(kpi.get('active'))} · Inactive: {format_number_si(kpi.get('inactive'))}",
 
-            # Recent activity
-            format_with_commas(kpi.get("recently_updated")),
-            f"New: {format_number_si(kpi.get('new_repos'))} · 30d",
+            # Updates
+            format_with_commas(kpi.get("new_repos")),
+            f"Recent: {format_number_si(kpi.get('recently_updated'))} · 30d",
 
-            # Old repos
-            format_with_commas(kpi.get("old_repos_total")),
+            # Oldest Repos
+            format_with_commas(kpi.get("repos_3y")),
             f">3y: {format_number_si(kpi.get('repos_3y'))} · 5y: {format_number_si(kpi.get('repos_5y'))} · 10y: {format_number_si(kpi.get('repos_10y'))}",
 
-            # Massive
+            # Massive Repos
             format_with_commas(kpi.get("massive_repos")),
-            kpi.get("massive_top_languages", "—"),
+            massive_subtext,
 
             # Contributors
             format_with_commas(kpi.get("solo_contributor")),
@@ -120,5 +126,5 @@ def register_kpi_callbacks(app):
 
             # Sources
             format_with_commas(kpi.get("sources_total")),
-            kpi.get("source_subtext", "—"),
+            f"GitLab: {format_number_si(kpi.get('gitlab'))} · Bitbucket: {format_number_si(kpi.get('bitbucket'))}",
         )
