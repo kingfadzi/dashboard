@@ -1,10 +1,11 @@
-from dash.dependencies import Input, Output
+from dash import Input, Output
+from dash.exceptions import PreventUpdate
 
 from data.overview.fetch_overview_kpis import fetch_overview_kpis
 from utils.filter_utils import extract_filter_dict_from_store
 
+
 def format_with_commas(value):
-    """Format integer with thousands separators."""
     if value is None:
         return "0"
     try:
@@ -12,8 +13,8 @@ def format_with_commas(value):
     except (ValueError, TypeError):
         return "0"
 
+
 def format_number_si(value):
-    """Format number using SI suffixes (K, M, B, T)."""
     if value is None:
         return "0"
     try:
@@ -26,6 +27,7 @@ def format_number_si(value):
     except (ValueError, TypeError):
         return "0"
 
+
 def register_kpi_callbacks(app):
     @app.callback(
         [
@@ -34,6 +36,12 @@ def register_kpi_callbacks(app):
 
             Output("kpi-avg-commits", "children"),
             Output("kpi-avg-commits-subtext", "children"),
+
+            Output("kpi-oldest-repos", "children"),
+            Output("kpi-oldest-repos-subtext", "children"),
+
+            Output("kpi-massive-repos", "children"),
+            Output("kpi-massive-repos-subtext", "children"),
 
             Output("kpi-avg-contributors", "children"),
             Output("kpi-avg-contributors-subtext", "children"),
@@ -53,6 +61,9 @@ def register_kpi_callbacks(app):
             Output("kpi-cicd", "children"),
             Output("kpi-cicd-subtext", "children"),
 
+            Output("kpi-container", "children"),
+            Output("kpi-container-subtext", "children"),
+
             Output("kpi-sources", "children"),
             Output("kpi-sources-subtext", "children"),
         ],
@@ -62,69 +73,52 @@ def register_kpi_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         kpi = fetch_overview_kpis(filters)
 
-        total_repos    = kpi.get("total_repos", 0)
-        active         = kpi.get("active", 0)
-        inactive       = kpi.get("inactive", 0)
-
-        recently_updated = kpi.get("recently_updated", 0)
-        new_repos        = kpi.get("new_repos", 0)
-
-        solo            = kpi.get("solo_contributor", 0)
-        total_contribs  = kpi.get("total_contributors", 0)
-
-        loc             = kpi.get("loc", 0)
-        source_files    = kpi.get("source_files", 0)
-
-        branch_sprawl   = kpi.get("branch_sprawl", 0)
-
-        build_detected  = kpi.get("build_tool_detected", 0)
-        modules         = kpi.get("modules", 0)
-        without_tool    = kpi.get("without_tool", 0)
-
-        runtime_detected = kpi.get("runtime_detected", 0)
-        languages        = kpi.get("languages", 0)
-
-        cicd_total = kpi.get("cicd_total", 0)
-        bp         = kpi.get("bitbucket_pipelines", 0)
-        gl         = kpi.get("gitlab_ci", 0)
-        jenkins    = kpi.get("jenkins", 0)
-
-        sources_total = kpi.get("sources_total", 0)
-
         return (
             # Total repos
-            format_with_commas(total_repos),
-            f"Active: {format_number_si(active)} · Inactive: {format_number_si(inactive)}",
+            format_with_commas(kpi.get("total_repos", 0)),
+            f"Active: {format_number_si(kpi.get('active'))} · Inactive: {format_number_si(kpi.get('inactive'))}",
 
-            # Recent updates
-            format_with_commas(recently_updated),
-            f"New: {format_number_si(new_repos)} · 30d",
+            # Updates
+            format_with_commas(kpi.get("recently_updated", 0)),
+            f"New: {format_number_si(kpi.get('new_repos'))} · 30d",
 
-            # Solo contributors
-            format_with_commas(solo),
-            f"All: {format_number_si(total_contribs)}",
+            # Oldest repos
+            format_with_commas(kpi.get("old_repos_total", 0)),
+            f"3y: {format_number_si(kpi.get('repos_3y'))} · 4y: {format_number_si(kpi.get('repos_4y'))} · 5y: {format_number_si(kpi.get('repos_5y'))}",
 
-            # LOC (main uses SI as before), subtext updated
-            format_number_si(loc),
-            f"Files: {format_number_si(source_files)} · Repos: {format_number_si(total_repos)}",
+            # Massive repos
+            format_with_commas(kpi.get("massive_repos", 0)),
+            f">500K LOC",
 
-            # Branch sprawl
-            format_with_commas(branch_sprawl),
+            # Contributors
+            format_with_commas(kpi.get("solo_contributor", 0)),
+            f"All: {format_number_si(kpi.get('total_contributors'))}",
+
+            # LOC
+            format_number_si(kpi.get("loc")),
+            f"Files: {format_number_si(kpi.get('source_files'))} · Repos: {format_number_si(kpi.get('total_repos'))}",
+
+            # Branches
+            format_with_commas(kpi.get("branch_sprawl", 0)),
             ">10 branches",
 
             # Build tools
-            format_with_commas(build_detected),
-            f"Modules: {format_number_si(modules)} · NoTool: {format_number_si(without_tool)}",
+            format_with_commas(kpi.get("build_tool_detected", 0)),
+            f"Modules: {format_number_si(kpi.get('modules'))} · NoTool: {format_number_si(kpi.get('without_tool'))}",
 
-            # Runtimes
-            format_with_commas(runtime_detected),
-            f"Languages: {format_number_si(languages)}",
+            # Runtime
+            format_with_commas(kpi.get("runtime_detected", 0)),
+            f"Languages: {format_number_si(kpi.get('languages'))}",
 
             # CI/CD
-            format_with_commas(cicd_total),
-            f"GitLab: {format_number_si(gl)} · Jenkins: {format_number_si(jenkins)}",
+            format_with_commas(kpi.get("cicd_total", 0)),
+            f"GL: {format_number_si(kpi.get('gitlab_ci'))} · Jenkins: {format_number_si(kpi.get('jenkins'))}",
 
-            # Source hosts
-            format_with_commas(sources_total),
+            # Containerization
+            format_with_commas(kpi.get("dockerfiles", 0)),
+            f"Helm: {format_number_si(kpi.get('helm_charts'))} · Compose: {format_number_si(kpi.get('docker_compose'))}",
+
+            # Sources
+            format_with_commas(kpi.get("sources_total", 0)),
             "Hosts",
         )
