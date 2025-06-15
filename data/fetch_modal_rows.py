@@ -1,8 +1,7 @@
 import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
-from data.cache_instance import cache
-from data.build_filter_conditions import build_filter_conditions
+from data.buildtools.build_filter_conditions import build_filter_conditions
 
 
 def fetch_modal_rows(chart_id: str, click_data: dict, filters: dict | None = None):

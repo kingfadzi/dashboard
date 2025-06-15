@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-from layouts.layout_kpi import kpi_layout
+from pages.layout_kpi import kpi_layout
 
 dash.register_page(__name__, path="/overview", name="Overview")
 

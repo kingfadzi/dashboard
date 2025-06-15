@@ -11,7 +11,7 @@ from dash.dependencies import Input, Output, State
 
 from data.cache_instance import cache
 from callbacks.register_all_callbacks import register_all_callbacks
-from filters.layout_filters import filter_layout
+from pages.layout_filters import filter_layout
 
 
 
