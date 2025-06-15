@@ -91,13 +91,14 @@ def register_dependencies_callbacks(app):
         kpis = fetch_dependencies_kpis(filters)
 
         return (
-            format_number_si(kpis["total_deps"]),
-            format_number_si(kpis["repos_with_deps"]),
-            format_number_si(kpis["repos_without_deps"]),
-            f"{kpis['code_repos']:,}",
-            f"{kpis['no_language_repos']:,}",
-            f"{kpis['markup_data_repos']:,}",
+            format_number_si(kpis.get("total_deps", 0)),
+            format_number_si(kpis.get("repos_with_deps", 0)),
+            format_number_si(kpis.get("repos_without_deps", 0)),
+            f"{int(kpis.get('code_repos', 0)):,}",
+            f"{int(kpis.get('no_language_repos', 0)):,}",
+            f"{int(kpis.get('markup_data_repos', 0)):,}",
         )
+
 
     generate_redirect_callbacks(
         app,

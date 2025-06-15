@@ -6,6 +6,7 @@ import pandas as pd
 from data.cache_instance import cache
 from data.db_connection import engine
 from data.buildtools.build_filter_conditions import build_filter_conditions
+from data.shared_kpi_query import fetch_kpi_totals
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -44,7 +45,9 @@ def fetch_overview_kpis(filters=None):
                     hr.repo_id,
                     CASE
                         WHEN l.type = 'programming' THEN 'code'
-                        WHEN LOWER(hr.main_language) = 'no language' THEN 'no_language'
+                        WHEN LOWER(hr.main_language) = 'no language'
+                             OR hr.main_language IS NULL
+                             OR TRIM(hr.main_language) = '' THEN 'no_language'
                         WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
                         ELSE 'no_language'
                     END AS lang_group
@@ -57,8 +60,10 @@ def fetch_overview_kpis(filters=None):
                     hr.repo_id,
                     CASE
                         WHEN l.type = 'programming' THEN 'code'
-                        WHEN LOWER(hr.main_language) = 'no language' THEN 'no_language'
-                        WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'                        
+                        WHEN LOWER(hr.main_language) = 'no language'
+                             OR hr.main_language IS NULL
+                             OR TRIM(hr.main_language) = '' THEN 'no_language'
+                        WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
                         ELSE 'no_language'
                     END AS lang_group
                 FROM base hr
@@ -73,7 +78,7 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'code') AS lang_group_code,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'markup_or_data') AS lang_group_markup_or_data,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'no_language') AS lang_group_no_language,
-                
+
                 -- Activity
                 (SELECT COUNT(*) FROM base WHERE last_commit_date >= NOW() - INTERVAL '30 days') AS recently_updated,
                 (SELECT COUNT(*) FROM base WHERE repo_age_days <= 30) AS new_repos,
@@ -120,26 +125,28 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(*) FROM base WHERE host_name ILIKE :gitlab_host) AS gitlab,
                 (SELECT COUNT(*) FROM base WHERE host_name ILIKE :bitbucket_host) AS bitbucket,
 
-                -- Code metrics (programming only)
-                (SELECT SUM(cm.code)
-                 FROM cloc_metrics cm
-                 JOIN languages l ON cm.language = l.name
-                 JOIN base USING (repo_id)
-                 WHERE cm.language != 'SUM' AND l.type = 'programming') AS loc,
-
-                (SELECT SUM(cm.files)
-                 FROM cloc_metrics cm
-                 JOIN languages l ON cm.language = l.name
-                 JOIN base USING (repo_id)
-                 WHERE cm.language != 'SUM' AND l.type = 'programming') AS source_files,
-
                 -- Contributors & branches
                 (SELECT COUNT(DISTINCT rm.repo_id) FROM repo_metrics rm JOIN base USING (repo_id)
                     WHERE number_of_contributors = 1) AS solo_contributor,
                 (SELECT SUM(rm.number_of_contributors) FROM repo_metrics rm JOIN base USING (repo_id)) AS total_contributors,
                 (SELECT COUNT(*) FROM repo_metrics rm JOIN base USING (repo_id) WHERE active_branch_count > 10) AS branch_sprawl;
         """
-        return pd.read_sql(text(query), engine, params=param_dict).iloc[0].to_dict()
+
+        # Fetch primary overview metrics
+        results = pd.read_sql(text(query), engine, params=param_dict).iloc[0].to_dict()
+
+        # Append canonical KPI values (LOC, files, functions)
+        shared_kpis = fetch_kpi_totals(condition_string, param_dict)
+        results.update({
+            "loc": int(shared_kpis["total_loc"] or 0),
+            "source_files": int(shared_kpis["total_files"] or 0),
+            "functions": int(shared_kpis["total_functions"] or 0),
+            "code_repos": int(shared_kpis["code_repos"] or 0),
+            "markup_data_repos": int(shared_kpis["markup_data_repos"] or 0),
+            "no_language_repos": int(shared_kpis["no_language_repos"] or 0),
+        })
+
+        return results
 
     condition_string, param_dict = build_filter_conditions(filters, alias="hr")
     return query_data(condition_string, param_dict)
