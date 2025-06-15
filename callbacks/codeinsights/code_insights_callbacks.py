@@ -36,10 +36,12 @@ def register_code_insights_callbacks(app):
         return render_markup_language_usage_chart(fetch_markup_language_usage(filters))
 
     @app.callback(
-        Output("code_insights_kpi-total-repos", "children"),
         Output("code_insights_kpi-total-loc", "children"),
         Output("code_insights_kpi-total-functions", "children"),
         Output("code_insights_kpi-total-files", "children"),
+        Output("code_insights_kpi-code-repos", "children"),
+        Output("code_insights_kpi-no-lang", "children"),
+        Output("code_insights_kpi-markup-data", "children"),
         Input("default-filter-store", "data")
     )
     def update_code_insights_kpis(filter_data):
@@ -47,17 +49,19 @@ def register_code_insights_callbacks(app):
         kpis = fetch_code_insights_kpis(filters)
 
         return (
-            f"{kpis['repos']:,}",                         # exact
-            human_readable_counts(kpis['loc']),
-            human_readable_counts(kpis['functions']),
-            human_readable_counts(kpis['files']),
+            human_readable_counts(kpis["loc"]),           # LOC
+            human_readable_counts(kpis["functions"]),     # Functions
+            human_readable_counts(kpis["files"]),         # Files
+            f"{kpis['code_repos']:,}",                    # Code Repos (exact)
+            f"{kpis['no_language_repos']:,}",             # No Lang
+            f"{kpis['markup_data_repos']:,}",             # Markup/Data
         )
 
-    generate_redirect_callbacks(
-        app,
-        target_href="/table-code-insights",
-        button_id="code-insights-table-btn",
-        output_container_id="code-insights-table-link-container",
-        reverse_href="/code-insights",
-        reverse_button_id="back-to-charts-btn-code-insights",
-    )
+        generate_redirect_callbacks(
+            app,
+            target_href="/table-code-insights",
+            button_id="code-insights-table-btn",
+            output_container_id="code-insights-table-link-container",
+            reverse_href="/code-insights",
+            reverse_button_id="back-to-charts-btn-code-insights",
+        )

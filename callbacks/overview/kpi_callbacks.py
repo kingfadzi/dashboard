@@ -75,14 +75,22 @@ def register_kpi_callbacks(app):
 
         # Massive repo breakdown subtext
         massive_subtext = (
-            f"Code: {format_number_si(kpi.get('massive_other_programming'))} · "
+            f"Code: {format_number_si(kpi.get('massive_code'))} · "
             f"Data: {format_number_si(kpi.get('massive_markup_or_data'))} · "
             f"None: {format_number_si(kpi.get('massive_no_language'))}"
         )
 
+        # Lang group subtext
+        lang_group_subtext = (
+            f"Code: {format_number_si(kpi.get('lang_group_code'))} · "
+            f"Data: {format_number_si(kpi.get('lang_group_markup_or_data'))} · "
+            f"None: {format_number_si(kpi.get('lang_group_no_language'))}"
+        )
+
         return (
+            # Total Repos
             format_with_commas(kpi.get("total_repos")),
-            f"Active: {format_number_si(kpi.get('active'))} · Inactive: {format_number_si(kpi.get('inactive'))}",
+            lang_group_subtext,
 
             # Updates
             format_with_commas(kpi.get("new_repos")),
@@ -90,7 +98,7 @@ def register_kpi_callbacks(app):
 
             # Oldest Repos
             format_with_commas(kpi.get("repos_3y")),
-            f">3y: {format_number_si(kpi.get('repos_3y'))} · 5y: {format_number_si(kpi.get('repos_5y'))} · 10y: {format_number_si(kpi.get('repos_10y'))}",
+            f">3y: {format_number_si(kpi.get('repos_5y'))} · 10y: {format_number_si(kpi.get('repos_10y'))}",
 
             # Massive Repos
             format_with_commas(kpi.get("massive_repos")),

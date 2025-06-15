@@ -14,7 +14,9 @@ def kpi_stat(label, value_id):
 def code_insights_kpi_row():
     return html.Div(
         [
-            kpi_stat("Repos", "code_insights_kpi-total-repos"),
+            kpi_stat("Code Repos", "code_insights_kpi-code-repos"),
+            kpi_stat("No Lang", "code_insights_kpi-no-lang"),
+            kpi_stat("Markup/Data", "code_insights_kpi-markup-data"),
             kpi_stat("LOC", "code_insights_kpi-total-loc"),
             kpi_stat("Functions", "code_insights_kpi-total-functions"),
             kpi_stat("Files", "code_insights_kpi-total-files"),
