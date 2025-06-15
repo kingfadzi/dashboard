@@ -14,17 +14,13 @@ def fetch_build_tools_kpis(filters=None):
                 COUNT(DISTINCT CASE WHEN b.variant IS NOT NULL THEN b.variant END) AS total_variants,
                 COUNT(DISTINCT CASE WHEN b.runtime_version IS NOT NULL THEN b.runtime_version END) AS total_runtimes,
                 COUNT(DISTINCT CASE WHEN b.repo_id IS NULL OR b.tool IS NULL THEN hr.repo_id END) AS no_tool,
-                
+
                 COUNT(DISTINCT CASE 
-                    WHEN LOWER(hr.main_language) IN (
-                        'java', 'python', 'javascript', 'typescript', 'tsx',
-                        'asp.net', 'c#', 'f#', 'visual basic.net', 'visual basic', 'visual basic 6.0',
-                        'go', 'golang'
-                    ) THEN hr.repo_id
+                    WHEN l.type = 'programming' THEN hr.repo_id
                 END) AS code_repos,
 
                 COUNT(DISTINCT CASE 
-                    WHEN LOWER(hr.main_language) = 'no markup_or_data' OR hr.main_language IS NULL THEN hr.repo_id
+                    WHEN LOWER(hr.main_language) = 'no language' THEN hr.repo_id
                 END) AS no_language_repos,
 
                 COUNT(DISTINCT CASE 

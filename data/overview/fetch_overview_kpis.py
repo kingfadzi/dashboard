@@ -43,14 +43,9 @@ def fetch_overview_kpis(filters=None):
                 SELECT
                     hr.repo_id,
                     CASE
-                        WHEN LOWER(hr.main_language) IN (
-                            'java', 'python', 'javascript', 'typescript', 'tsx',
-                            'asp.net', 'c#', 'f#', 'visual basic.net', 'visual basic', 'visual basic 6.0',
-                            'go', 'golang'
-                        ) THEN 'code'
-                        WHEN LOWER(hr.main_language) = 'no markup_or_data' OR hr.main_language IS NULL THEN 'no_language'
+                        WHEN l.type = 'programming' THEN 'code'
+                        WHEN LOWER(hr.main_language) = 'no language' THEN 'no_language'
                         WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
-                        WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
                         ELSE 'unknown'
                     END AS lang_group
                 FROM base hr
@@ -61,14 +56,9 @@ def fetch_overview_kpis(filters=None):
                 SELECT
                     hr.repo_id,
                     CASE
-                        WHEN LOWER(hr.main_language) IN (
-                            'java', 'python', 'javascript', 'typescript', 'tsx',
-                            'asp.net', 'c#', 'f#', 'visual basic.net', 'visual basic', 'visual basic 6.0',
-                            'go', 'golang'
-                        ) THEN 'code'
-                        WHEN LOWER(hr.main_language) = 'no markup_or_data' OR hr.main_language IS NULL THEN 'no_language'
-                        WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
-                        WHEN LOWER(l.type) = 'programming' THEN 'other_programming'
+                        WHEN l.type = 'programming' THEN 'code'
+                        WHEN LOWER(hr.main_language) = 'no language' THEN 'no_language'
+                        WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'                        
                         ELSE 'unknown'
                     END AS lang_group
                 FROM base hr
@@ -83,7 +73,6 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'code') AS lang_group_code,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'markup_or_data') AS lang_group_markup_or_data,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'no_language') AS lang_group_no_language,
-                (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'other_programming') AS lang_group_other_programming,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'unknown') AS lang_group_unknown,
 
                 -- Activity

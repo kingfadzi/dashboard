@@ -11,15 +11,11 @@ def fetch_code_insights_kpis(filters=None):
         sql = f"""
             SELECT
                 COUNT(DISTINCT hr.repo_id) FILTER (
-                    WHERE LOWER(hr.main_language) IN (
-                        'java', 'python', 'javascript', 'typescript', 'tsx',
-                        'asp.net', 'c#', 'f#', 'visual basic.net', 'visual basic', 'visual basic 6.0',
-                        'go', 'golang'
-                    )
+                    WHERE lang.type = 'programming'
                 ) AS code_repos,
 
                 COUNT(DISTINCT hr.repo_id) FILTER (
-                    WHERE LOWER(hr.main_language) = 'no markup_or_data' OR hr.main_language IS NULL
+                    WHERE LOWER(hr.main_language) = 'no language'
                 ) AS no_language_repos,
 
                 COUNT(DISTINCT hr.repo_id) FILTER (
