@@ -46,7 +46,7 @@ def fetch_overview_kpis(filters=None):
                         WHEN l.type = 'programming' THEN 'code'
                         WHEN LOWER(hr.main_language) = 'no language' THEN 'no_language'
                         WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'
-                        ELSE 'unknown'
+                        ELSE 'no_language'
                     END AS lang_group
                 FROM base hr
                 LEFT JOIN languages l ON LOWER(hr.main_language) = LOWER(l.name)
@@ -59,7 +59,7 @@ def fetch_overview_kpis(filters=None):
                         WHEN l.type = 'programming' THEN 'code'
                         WHEN LOWER(hr.main_language) = 'no language' THEN 'no_language'
                         WHEN LOWER(l.type) IN ('markup', 'data') THEN 'markup_or_data'                        
-                        ELSE 'unknown'
+                        ELSE 'no_language'
                     END AS lang_group
                 FROM base hr
                 LEFT JOIN languages l ON LOWER(hr.main_language) = LOWER(l.name)
@@ -73,8 +73,7 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'code') AS lang_group_code,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'markup_or_data') AS lang_group_markup_or_data,
                 (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'no_language') AS lang_group_no_language,
-                (SELECT COUNT(DISTINCT repo_id) FROM all_lang_groups WHERE lang_group = 'unknown') AS lang_group_unknown,
-
+                
                 -- Activity
                 (SELECT COUNT(*) FROM base WHERE last_commit_date >= NOW() - INTERVAL '30 days') AS recently_updated,
                 (SELECT COUNT(*) FROM base WHERE repo_age_days <= 30) AS new_repos,
