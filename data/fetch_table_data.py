@@ -30,6 +30,7 @@ def build_count_query(base_table: str, joins: dict, filters: dict, field_alias_m
     return query
 
 
+
 def fetch_table_data(filters=None, page_current=0, page_size=10):
     # map filter fields to their table aliases
     field_alias_map = {
@@ -65,11 +66,9 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
                 rm.repo_age_days,
                 rm.number_of_contributors,
                 rm.last_commit_date,
-                (
-                  SELECT MAX(ael.execution_time)
-                  FROM analysis_execution_log ael
-                  WHERE ael.repo_id = hr.repo_id
-                ) AS last_analysis_date
+                hr.last_analysis_date,
+                hr.last_analysis_stage,
+                hr.last_analysis_status
             FROM harvested_repositories hr
             LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
         """
@@ -82,8 +81,8 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
         )
 
         if condition_string:
-            base_query   += f" WHERE {condition_string}"
-            count_query  += f" WHERE {condition_string}"
+            base_query  += f" WHERE {condition_string}"
+            count_query += f" WHERE {condition_string}"
 
         order_clause = """
             ORDER BY
@@ -102,10 +101,12 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
             base_query += order_clause
             params = param_dict.copy()
 
+        # fetch the page of data
         df = pd.read_sql(text(base_query), engine, params=params)
+        # get total matching rows
         total_count = pd.read_sql(text(count_query), engine, params=param_dict).iloc[0, 0]
 
-        # normalize integers
+        # normalize integer columns
         for col in ("total_commits", "number_of_contributors"):
             if col in df:
                 df[col] = (
@@ -114,18 +115,18 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
                     .astype(int)
                 )
 
-        # ISO‐style timestamps for sorting & JS Date parsing
+        # format last_commit_date for JS Date parsing
         if "last_commit_date" in df:
             df["last_commit_date"] = (
                 pd.to_datetime(df["last_commit_date"], errors="coerce")
                 .dt.strftime("%Y-%m-%dT%H:%M:%S")
             )
 
-        # human‐friendly age buckets
+        # human-friendly age buckets
         if "repo_age_days" in df:
             df["repo_age_days"] = df["repo_age_days"].apply(format_repo_age)
 
-        # more readable last‐analysis timestamps
+        # format the repository’s last_analysis_date
         if "last_analysis_date" in df:
             df["last_analysis_date"] = (
                 pd.to_datetime(df["last_analysis_date"], errors="coerce")
@@ -134,6 +135,7 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
 
         return df, total_count
 
-    # build WHERE clause + bind parameters
+    # build WHERE clause + bind params
     condition_string, param_dict = build_filter_conditions(filters, field_alias_map=field_alias_map)
     return query_data(condition_string, param_dict, page_current, page_size)
+

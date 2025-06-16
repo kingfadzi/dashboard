@@ -57,7 +57,6 @@ def get_table_outputs_from_store(store_data, table_id=None):
         {"headerName": "Size", "field": "classification_label"},
         {"headerName": "Age", "field": "repo_age_days", "type": "numericColumn"},
         {"headerName": "Language", "field": "main_language"},
-        {"headerName": "Scope", "field": "scope"},
         {"headerName": "Commits", "field": "total_commits", "type": "numericColumn"},
         {"headerName": "Contributors", "field": "number_of_contributors", "type": "numericColumn"},
         {
