@@ -9,7 +9,7 @@ from data.fetch_table_data import fetch_table_data
 
 def get_table_outputs_from_store(store_data, table_id=None):
     filters = { k: v for k, v in (store_data or {}).items() if v not in (None, "") }
-    df, _ = fetch_table_data(filters, 0, 1000)
+    df, _ = fetch_table_data(filters, page_current=0, page_size=None)
     table_data = df.to_dict("records")
 
     # Build a “returnUrl” for any link in the table (optional)
