@@ -437,24 +437,28 @@ def fetch_language_distribution(filters=None):
     def query_data(condition_string, param_dict):
         base_query = f"""
             WITH top_languages AS (
-                SELECT hr.main_language
+                SELECT
+                    hr.main_language AS top_language
                 FROM harvested_repositories hr
-                JOIN languages l ON hr.main_language = l.name
+                JOIN languages l
+                  ON hr.main_language = l.name
                 WHERE l.type = 'programming'
-                {f"AND {condition_string}" if condition_string else ""}
+                  {f"AND {condition_string}" if condition_string else ""}
                 GROUP BY hr.main_language
                 ORDER BY COUNT(*) DESC
                 LIMIT 10
             )
-            SELECT 
-                hr.main_language, 
+            SELECT
+                hr.main_language,
                 hr.classification_label,
                 COUNT(*) AS repo_count
             FROM harvested_repositories hr
-            JOIN languages l ON hr.main_language = l.name
-            JOIN top_languages tl ON hr.main_language = tl.main_language
+            JOIN languages l
+              ON hr.main_language = l.name
+            JOIN top_languages tl
+              ON hr.main_language = tl.top_language
             WHERE l.type = 'programming'
-            {f"AND {condition_string}" if condition_string else ""}
+              {f"AND {condition_string}" if condition_string else ""}
             GROUP BY hr.main_language, hr.classification_label
         """
 
@@ -468,6 +472,7 @@ def fetch_language_distribution(filters=None):
 
     condition_string, param_dict = build_filter_conditions(filters)
     return query_data(condition_string, param_dict)
+
 
 
 
