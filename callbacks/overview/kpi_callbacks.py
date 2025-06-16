@@ -126,7 +126,7 @@ def register_kpi_callbacks(app):
 
             # CI/CD
             format_with_commas(kpi.get("cicd_total")),
-            f"GL: {format_number_si(kpi.get('gitlab_ci'))} · Jenkins: {format_number_si(kpi.get('jenkins'))}",
+            f"GitLab: {format_number_si(kpi.get('gitlab_ci'))} · Jenkins: {format_number_si(kpi.get('jenkins'))}",
 
             # Containers
             format_with_commas(kpi.get("dockerfiles")),
