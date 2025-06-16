@@ -1,9 +1,8 @@
 # callbacks/repo_profile_callbacks.py
 
 import urllib.parse
-from dash import Input, Output, callback, html
+from dash import Input, Output, html
 from dash.exceptions import PreventUpdate
-from data.fetch_repo_profile import fetch_repo_profile
 
 # Sections
 import profile.sections.section_bio as bio
@@ -15,8 +14,9 @@ import profile.sections.section_git_activity_hygiene as section_git_activity_hyg
 import profile.sections.section_dependency_risk_summary as section_dependency_risk_summary
 import profile.sections.section_eol_risks as section_eol_risks
 
-from data.fetch_repo_profile import fetch_repo_profile, fetch_harvested_repo, classify_language_from_db
-from profile.sections import section_non_code
+from data.profile.fetch_repo_profile import fetch_repo_profile, fetch_harvested_repo, classify_language_from_db, \
+    fetch_last_analysis_log
+from profile.sections import section_non_code, section_last_analysis_log
 
 
 def register_repo_profile_callbacks(app):
@@ -38,15 +38,16 @@ def register_repo_profile_callbacks(app):
             ])
 
         try:
-            profile_data = fetch_repo_profile(repo_id)
-            harvested_repo = fetch_harvested_repo(repo_id)
-            app_id = harvested_repo.get("app_id")
-            main_language = harvested_repo.get("main_language")
-            language_group = classify_language_from_db(main_language)
+            profile_data      = fetch_repo_profile(repo_id)
+            harvested_repo    = fetch_harvested_repo(repo_id)
+            app_id            = harvested_repo.get("app_id")
+            main_language     = harvested_repo.get("main_language")
+            language_group    = classify_language_from_db(main_language)
+            last_analysis_log = fetch_last_analysis_log(repo_id)
         except Exception as e:
             return html.Div([
                 html.H3("Error loading profile"),
-                html.Pre(str(e))
+                html.Pre(str(e)),
             ])
 
         children = []
@@ -74,5 +75,8 @@ def register_repo_profile_callbacks(app):
                 section_eol_risks.render(profile_data),
             ])
 
+        children.append(
+            section_last_analysis_log.render(last_analysis_log)
+        )
 
         return html.Div(children, style={"padding": "20px"})

@@ -53,3 +53,32 @@ def classify_language_from_db(language: str) -> str:
     """)
     df = pd.read_sql(sql, engine, params={"language": language})
     return df["language_group"].iloc[0] if not df.empty else "unknown"
+
+def fetch_last_analysis_log(repo_id: str) -> pd.DataFrame:
+
+    @cache.memoize()
+    def query_data(repo_id: str) -> pd.DataFrame:
+        base_query = """
+            SELECT
+                method_name,
+                stage,
+                run_id,
+                status,
+                message,
+                execution_time,
+                duration
+            FROM analysis_execution_log
+            WHERE repo_id = :repo_id
+              AND run_id = (
+                  SELECT run_id
+                  FROM analysis_execution_log
+                  WHERE repo_id = :repo_id
+                  ORDER BY execution_time DESC
+                  LIMIT 1
+              )
+            ORDER BY execution_time 
+        """
+        stmt = text(base_query)
+        return pd.read_sql(stmt, engine, params={"repo_id": repo_id})
+
+    return query_data(repo_id)

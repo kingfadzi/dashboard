@@ -47,7 +47,13 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
                 rm.activity_status,
                 rm.repo_age_days,
                 rm.number_of_contributors,
-                rm.last_commit_date
+                rm.last_commit_date,
+                -- Subquery to fetch the latest execution_time for this repo
+                (
+                  SELECT MAX(ael.execution_time)
+                  FROM analysis_execution_log ael
+                  WHERE ael.repo_id = hr.repo_id
+                ) AS last_analysis_date
             FROM harvested_repositories hr
             LEFT JOIN repo_metrics rm ON hr.repo_id = rm.repo_id
         """
@@ -83,35 +89,44 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
             count_query += f" WHERE {condition_string}"
 
         base_query += """
-            ORDER BY 
+            ORDER BY
                 rm.last_commit_date DESC NULLS LAST,
                 rm.number_of_contributors DESC
             LIMIT :limit
             OFFSET :offset
         """
 
-        param_dict = param_dict.copy()
-        param_dict.update({
-            "limit": page_size,
+        # bind paging params
+        params = param_dict.copy()
+        params.update({
+            "limit":  page_size,
             "offset": page_current * page_size
         })
 
-        stmt = text(base_query)
-        df = pd.read_sql(stmt, engine, params=param_dict)
+        # read data
+        df = pd.read_sql(text(base_query), engine, params=params)
 
-        count_stmt = text(count_query)
-        total_count = pd.read_sql(count_stmt, engine, params=param_dict).iloc[0, 0]
+        # get total count
+        total_count = pd.read_sql(text(count_query), engine, params=params).iloc[0, 0]
 
-        numeric_columns = ["total_commits", "number_of_contributors"]
-        for col in numeric_columns:
-            if col in df.columns:
+        # normalize numeric cols
+        for col in ("total_commits", "number_of_contributors"):
+            if col in df:
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
 
-        if "last_commit_date" in df.columns:
-            df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce").dt.strftime("%Y-%m-%dT%H:%M:%S")
+        # format existing date cols
+        if "last_commit_date" in df:
+            df["last_commit_date"] = pd.to_datetime(df["last_commit_date"], errors="coerce") \
+                .dt.strftime("%Y-%m-%dT%H:%M:%S")
 
-        if "repo_age_days" in df.columns:
+        # format repo_age_days
+        if "repo_age_days" in df:
             df["repo_age_days"] = df["repo_age_days"].apply(format_repo_age)
+
+        # format our new last_analysis_date
+        if "last_analysis_date" in df:
+            df["last_analysis_date"] = pd.to_datetime(df["last_analysis_date"], errors="coerce") \
+                .dt.strftime("%B %d, %Y %I:%M %p")
 
         return df, total_count
 

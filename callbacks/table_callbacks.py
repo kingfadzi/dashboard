@@ -67,6 +67,23 @@ def get_table_outputs_from_store(store_data, table_id=None):
                 "function": "params.value ? new Date(params.value).toLocaleDateString() : ''"
             },
         },
+        {
+            "headerName": "Last Analysis",
+            "field": "last_analysis_date",
+            "valueFormatter": {
+                "function": """
+                    params.value 
+                      ? new Date(params.value).toLocaleString('en-US', {
+                          month: 'short', day: 'numeric', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        }) 
+                      : ''
+                """
+            },
+            "cellStyle": {
+                "whiteSpace": "nowrap"
+            }
+        },
     ]
 
     return table_data, column_defs
