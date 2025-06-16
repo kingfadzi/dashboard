@@ -14,7 +14,6 @@ from callbacks.dependencies.dependency_insights import register_dependency_insig
 
 
 def register_all_callbacks(app):
-    #register_filter_callbacks(app)
     register_code_insights_callbacks(app)
     register_code_insights_gitlog_callbacks(app)
     register_code_insights_cloc_callbacks(app)
@@ -22,14 +21,10 @@ def register_all_callbacks(app):
     register_build_info_callbacks(app)
     register_dependencies_callbacks(app)
     register_table_callbacks(app)
-    #register_filter_value_callbacks(app)
     register_kpi_callbacks(app)
     register_overview_callbacks(app)
     register_repo_profile_callbacks(app)
     register_dependency_insights_callbacks(app)
-    #register_dropdown_callbacks(app)
-
     register_filter_tags_callbacks(app)
-
     register_modal_callbacks(app)
 

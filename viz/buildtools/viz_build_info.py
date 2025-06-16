@@ -1,11 +1,8 @@
 import plotly.express as px
 import plotly.graph_objects as go
-import plotly.graph_objects as go
 import numpy as np
-from sqlalchemy.dialects.mssql.information_schema import columns
 
 from components.chart_style import standard_chart_style, status_chart_style, stacked_bar_chart_style
-from components.colors import NEUTRAL_COLOR_SEQUENCE
 import pandas as pd
 
 

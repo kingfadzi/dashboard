@@ -1,6 +1,8 @@
 import pandas as pd
 import plotly.express as px
 from dash import dcc
+from dash import dcc
+import plotly.graph_objects as go
 
 from components.chart_style import stacked_bar_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE
@@ -28,11 +30,6 @@ def render_role_distribution_chart(df: pd.DataFrame):
         },
     )
     return fig, df
-
-
-
-from dash import dcc
-import plotly.graph_objects as go
 
 def render_language_metrics_heatmap(df):
     metric_rows = [

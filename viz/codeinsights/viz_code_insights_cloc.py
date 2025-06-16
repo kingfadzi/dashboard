@@ -1,6 +1,5 @@
 import plotly.express as px
 import pandas as pd
-from dash import dcc
 
 from components.chart_style import stacked_bar_chart_style
 from components.colors import NEUTRAL_COLOR_SEQUENCE

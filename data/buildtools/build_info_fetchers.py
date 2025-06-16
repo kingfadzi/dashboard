@@ -83,7 +83,7 @@ def fetch_module_counts_per_repo(filters=None):
     return query_data(condition_string, param_dict)
 
 
-# 3. Runtime Versions by Tool (fixed: includes variant)
+# 3. Runtime Versions by Tool
 @cache.memoize()
 def fetch_runtime_versions_by_tool(filters=None):
     def query_data(condition_string, param_dict):
@@ -288,27 +288,8 @@ def fetch_no_buildtool_repo_scatter(filters=None):
         """
         return pd.read_sql(text(sql), engine, params=param_dict)
 
-    # Get filter conditions and execute query
     condition_string, param_dict = build_repo_filter_conditions(filters)
     df = execute_query(condition_string, param_dict)
-
-    # Early return for empty or small datasets
-    # if len(df) < MIN_ROWS_TO_FILTER:
-    #     return df.copy()
-
-    # Apply percentile-based outlier removal (on chart axes)
-    # df_filtered = df.copy()
-    # numeric_cols = ["contributor_count", "total_commits"]
-
-    # for col in numeric_cols:
-    #     lower_bound = np.percentile(df[col], LOWER_PERCENTILE)
-    #     upper_bound = np.percentile(df[col], UPPER_PERCENTILE)
-    #     df_filtered = df_filtered[
-    #         (df_filtered[col] >= lower_bound) &
-    #         (df_filtered[col] <= upper_bound)
-    #     ]
-
-    # return df_filtered.reset_index(drop=True)
 
     return df.reset_index(drop=True)
 

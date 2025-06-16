@@ -31,7 +31,6 @@ def fetch_classification_data(filters=None):
 
         df = df.groupby('classification_value', as_index=False)['repo_count'].sum()
 
-        # Rename back to classification_label for consistency
         df.rename(columns={'classification_value': 'classification_label'}, inplace=True)
 
         return df
