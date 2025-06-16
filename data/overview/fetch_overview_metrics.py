@@ -7,6 +7,7 @@ from utils.sql_filter_utils import build_repo_filter_conditions, LANGUAGE_GROUP_
 from utils.formattting import deduplicate_comma_separated_values
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 def fetch_repo_status(filters=None):
     @cache.memoize()
@@ -462,15 +463,17 @@ def fetch_language_distribution(filters=None):
             GROUP BY hr.main_language, hr.classification_label
         """
 
-        logger.debug("Executing top 10 language distribution query:")
-        logger.debug(base_query)
-        logger.debug("With parameters:")
-        logger.debug(param_dict)
+        # new debug: show the exact SQL string sent to the database
+        logger.info("Generated SQL for language distribution:")
+        logger.info(base_query)
+
+        logger.info("With parameters:")
+        logger.info(param_dict)
 
         stmt = text(base_query)
         return pd.read_sql(stmt, engine, params=param_dict)
 
-    condition_string, param_dict = build_filter_conditions(filters)
+    condition_string, param_dict = build_filter_conditions(filters, "hr")
     return query_data(condition_string, param_dict)
 
 
