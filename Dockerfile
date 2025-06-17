@@ -8,7 +8,7 @@ ARG HOST_UID=1000
 ARG HOST_GID=1000
 
 # -----------------------------
-# Environment & Proxy Setup
+# Environment & Proxy Setu
 # -----------------------------
 ENV PIP_INDEX_URL=${GLOBAL_INDEX_URL}
 ENV http_proxy=${HTTP_PROXY}

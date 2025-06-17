@@ -7,12 +7,7 @@ import dash_bootstrap_components as dbc
 
 
 def render(log_df: pd.DataFrame) -> html.Div:
-    """
-    Renders the last analysis execution log in a styled table with human-friendly, local dates.
-    The message column is scrollable to handle long text without breaking layout.
-    If the message is valid JSON, it will be pretty-printed.
-    """
-    # If there's no data, show a placeholder message
+
     if log_df is None or log_df.empty:
         return dbc.Card(
             dbc.CardBody(
@@ -21,18 +16,16 @@ def render(log_df: pd.DataFrame) -> html.Div:
             className="mb-4 shadow-sm",
         )
 
-    # Define table header in the desired column order
     header = html.Thead(html.Tr([
         html.Th("Executed At"),
         html.Th("Stage"),
         html.Th("Status"),
         html.Th("Duration (s)"),
         html.Th("Run ID"),
-        html.Th("Message"),
+        html.Th("Result"),
     ]))
 
-    def format_message(msg: str) -> html.Div:
-        # Attempt to pretty-print JSON, fallback to raw text
+    def format_result(msg: str) -> html.Div:
         if not msg:
             display_text = "-"
         else:
@@ -54,10 +47,8 @@ def render(log_df: pd.DataFrame) -> html.Div:
             }
         )
 
-    # Build table body rows with non-wrapping cells except message
     body = html.Tbody([
         html.Tr([
-            # Convert UTC timestamp to local timezone before formatting
             html.Td(
                 row.execution_time.replace(tzinfo=timezone.utc)
                 .astimezone(ZoneInfo("America/New_York"))
@@ -65,12 +56,17 @@ def render(log_df: pd.DataFrame) -> html.Div:
                 style={"whiteSpace": "nowrap"}
             ),
             html.Td(row.stage or "-", style={"whiteSpace": "nowrap"}),
-            html.Td(row.status, style={"whiteSpace": "nowrap"}),
+            html.Td(
+                row.status,
+                style={
+                    "whiteSpace": "nowrap",
+                    **({"color": "red"} if row.status == "FAILURE" else {})
+                }
+            ),
             html.Td(f"{row.duration:.2f}", style={"whiteSpace": "nowrap"}),
             html.Td(row.run_id or "-", style={"whiteSpace": "nowrap"}),
-            # Pretty-printed or raw message cell
             html.Td(
-                format_message(getattr(row, 'message', None) or ""),
+                format_result(getattr(row, 'message', None) or ""),
                 style={"whiteSpace": "normal"}
             ),
         ])
