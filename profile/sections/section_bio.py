@@ -7,9 +7,10 @@ def render(profile_data):
         return f"{name} ({uid})" if name and uid and uid != "Unknown" else name or uid or "Unknown"
 
     def combine_app_id_name(app_id, name):
-        if app_id and name and name != "Unknown":
-            return f"{app_id} ({name})"
-        return app_id or name or "Unknown"
+        # Display application name with App ID in parentheses if both are available
+        if name and app_id and name != "Unknown":
+            return f"{name} ({app_id})"
+        return name or app_id or "Unknown"
 
     repo_name = profile_data.get("Repo ID", "Unknown")
     vcs_hostname = profile_data.get("VCS Hostname", "Unknown")
@@ -44,30 +45,52 @@ def render(profile_data):
             className="h-100 shadow-sm p-2"
         )
 
-    # Build cards
+    # Build cards with App ID included in the application name
     cards = [
         info_card("Application", {
-            "VCS": html.A(vcs_hostname, href=browse_url, target="_blank", style={"textDecoration": "none", "fontSize": "0.75rem"}),
-            "Name": profile_data.get("Business Application Name", "Unknown"),
+            "VCS": html.A(
+                vcs_hostname,
+                href=browse_url,
+                target="_blank",
+                style={"textDecoration": "none", "fontSize": "0.75rem"}
+            ),
+            "Name": combine_app_id_name(
+                profile_data.get("App ID"),
+                profile_data.get("Business Application Name")
+            ),
             "App Type": profile_data.get("Application Type", "Unknown"),
             "Architecture": profile_data.get("Architecture Type", "Unknown"),
             "Hosting": profile_data.get("Architecture Hosting", "Unknown"),
         }),
         info_card("Business", {
             "Application": combine_app_id_name(
-                profile_data.get("App ID", None),
-                profile_data.get("Business Application Name", None)
+                profile_data.get("App ID"),
+                profile_data.get("Business Application Name")
             ),
             "TC": profile_data.get("Owning Transaction Cycle", "Unknown"),
             "Resilience": profile_data.get("Resilience Category", "Unknown"),
             "Tier": profile_data.get("Application Tier", "Unknown"),
-            "Investment": dbc.Badge(investment_status, color=investment_color, className="p-1", style={"fontSize": "0.65rem"}),
+            "Investment": dbc.Badge(
+                investment_status,
+                color=investment_color,
+                className="p-1",
+                style={"fontSize": "0.65rem"}
+            ),
         }),
         info_card("People / Tech", {
-            "Product Owner": combine_name_id(profile_data.get("Product Owner"), profile_data.get("Product Owner ID")),
-            "System Architect": combine_name_id(profile_data.get("System Architect"), profile_data.get("System Architect ID")),
+            "Product Owner": combine_name_id(
+                profile_data.get("Product Owner"),
+                profile_data.get("Product Owner ID")
+            ),
+            "System Architect": combine_name_id(
+                profile_data.get("System Architect"),
+                profile_data.get("System Architect ID")
+            ),
             "CTO": profile_data.get("CTO", "Unknown"),
-            "Business Owner": combine_name_id(profile_data.get("Business Owner"), profile_data.get("Business Owner ID")),
+            "Business Owner": combine_name_id(
+                profile_data.get("Business Owner"),
+                profile_data.get("Business Owner ID")
+            ),
         })
     ]
 
