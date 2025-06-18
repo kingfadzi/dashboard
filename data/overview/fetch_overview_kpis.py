@@ -56,15 +56,9 @@ def fetch_overview_kpis(filters=None):
             )
             SELECT
                 -- Total repos
-                (SELECT COUNT(*) FROM base) AS total_repos,
-                (SELECT COUNT(*) FROM base
-                   WHERE app_id IS NOT NULL
-                     AND TRIM(app_id) <> ''
-                ) AS repos_with_appid,
-                (SELECT COUNT(*) FROM base
-                   WHERE app_id IS NULL
-                      OR TRIM(app_id) = ''
-                ) AS repos_without_appid,
+                (SELECT COUNT(*)            FROM base)               AS total_repos,
+                (SELECT COUNT(app_id)       FROM base)               AS repos_with_appid,
+                (SELECT COUNT(*) - COUNT(app_id) FROM base)         AS repos_without_appid,
 
                 -- Activity
                 (SELECT COUNT(*) FROM base
@@ -83,15 +77,9 @@ def fetch_overview_kpis(filters=None):
                 (SELECT COUNT(*) FROM base
                    WHERE classification_label = 'Massive'
                 ) AS massive_repos,
-                (SELECT COUNT(*) FROM massive_lang_groups
-                   WHERE lang_group = 'code'
-                ) AS massive_code,
-                (SELECT COUNT(*) FROM massive_lang_groups
-                   WHERE lang_group = 'data'
-                ) AS massive_data,
-                (SELECT COUNT(*) FROM massive_lang_groups
-                   WHERE lang_group = 'none'
-                ) AS massive_none,
+                (SELECT COUNT(*) FROM massive_lang_groups WHERE lang_group = 'code') AS massive_code,
+                (SELECT COUNT(*) FROM massive_lang_groups WHERE lang_group = 'data') AS massive_data,
+                (SELECT COUNT(*) FROM massive_lang_groups WHERE lang_group = 'none') AS massive_none,
 
                 -- Build tool / runtime
                 (SELECT COUNT(DISTINCT bcc.repo_id)
@@ -99,9 +87,7 @@ def fetch_overview_kpis(filters=None):
                    JOIN base USING (repo_id)
                    WHERE tool IS NOT NULL
                 ) AS build_tool_detected,
-                (SELECT COUNT(*) FROM build_config_cache bcc
-                   JOIN base USING (repo_id)
-                ) AS modules,
+                (SELECT COUNT(*) FROM build_config_cache bcc JOIN base USING (repo_id)) AS modules,
                 (SELECT COUNT(*) FROM build_config_cache bcc
                    JOIN base USING (repo_id)
                    WHERE tool IS NULL
@@ -111,8 +97,7 @@ def fetch_overview_kpis(filters=None):
                    JOIN base USING (repo_id)
                    WHERE runtime_version IS NOT NULL
                 ) AS runtime_detected,
-
-                -- (rest of your metrics unchanged…)
+              
                 (SELECT COUNT(*) FROM iac_components iac JOIN base USING (repo_id) WHERE framework = 'Helm Charts') AS helm_charts,
                 (SELECT COUNT(DISTINCT host_name) FROM base) AS sources_total,
                 (SELECT COUNT(*) FROM base WHERE host_name ILIKE :gitlab_host) AS gitlab,
@@ -136,9 +121,9 @@ def fetch_overview_kpis(filters=None):
         # append the shared LOC / file / function KPIs
         shared_kpis = fetch_kpi_totals(condition_string, param_dict)
         results.update({
-            "loc":          int(shared_kpis["total_loc"]       or 0),
-            "source_files": int(shared_kpis["total_files"]     or 0),
-            "functions":    int(shared_kpis["total_functions"] or 0),
+            "loc":              int(shared_kpis["total_loc"]       or 0),
+            "source_files":     int(shared_kpis["total_files"]     or 0),
+            "functions":        int(shared_kpis["total_functions"] or 0),
             "code_repos":            int(shared_kpis["code_repos"]            or 0),
             "markup_data_repos":     int(shared_kpis["markup_data_repos"]     or 0),
             "no_language_repos":     int(shared_kpis["no_language_repos"]     or 0),
