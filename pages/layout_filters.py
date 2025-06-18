@@ -55,10 +55,10 @@ def filter_layout():
         dbc.Card(
             dbc.CardBody(
                 dbc.Row([
-                    dbc.Col(make_multiselect("host_name", "Select Host Name(s)"), width=2),
-                    dbc.Col(make_multiselect("activity_status", "Select Activity Status"), width=2),
                     dbc.Col(make_multiselect("transaction_cycle", "Select TC(s)"), width=2),
                     dbc.Col(make_multiselect("main_language", "Select Language(s)"), width=2),
+                    dbc.Col(make_multiselect("host_name", "Select Host Name(s)"), width=2),
+                    dbc.Col(make_multiselect("activity_status", "Select Activity Status"), width=2),
                     dbc.Col(make_multiselect("classification_label", "Select Classification(s)"), width=2),
                     #dbc.Col(make_textinput("app_id", "Enter App ID or Repo Slug"), width=2),
                 ], className="g-3", align="center")
