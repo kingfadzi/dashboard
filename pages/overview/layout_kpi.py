@@ -30,6 +30,7 @@ def kpi_layout():
             ]
         )
 
+
     return dbc.Row(
         [
             # Total Repos: default subtext updated
