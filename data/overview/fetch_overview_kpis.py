@@ -57,11 +57,17 @@ def fetch_overview_kpis(filters=None):
             )
             SELECT
                 -- Total repos
-                COUNT(*)                                            AS total_repos,
-                COUNT(*) FILTER (WHERE app_id IS NOT NULL
-                                 AND TRIM(app_id) <> '')           AS repos_with_appid,
-                COUNT(*) FILTER (WHERE app_id IS NULL
-                                 OR TRIM(app_id) = '')             AS repos_without_appid,
+                COUNT(*)                                              AS total_repos,
+                COUNT(*) FILTER (
+                  WHERE app_id IS NOT NULL
+                    AND TRIM(app_id) <> ''
+                    AND TRIM(app_id) <> '-none-'
+                )                                                      AS repos_with_appid,
+                COUNT(*) FILTER (
+                  WHERE app_id IS NULL
+                    OR TRIM(app_id) = ''
+                    OR TRIM(app_id) = '-none-'
+                )                                                      AS repos_without_appid,
 
                 -- Activity
                 COUNT(*) FILTER (
@@ -72,12 +78,12 @@ def fetch_overview_kpis(filters=None):
                 ) AS new_repos,
 
                 -- Age buckets
-                COUNT(*) FILTER (WHERE repo_age_days > 1095)        AS repos_3y,
-                COUNT(*) FILTER (WHERE repo_age_days > 1825)        AS repos_5y,
-                COUNT(*) FILTER (WHERE repo_age_days > 3650)        AS repos_10y,
+                COUNT(*) FILTER (WHERE repo_age_days > 1095)           AS repos_3y,
+                COUNT(*) FILTER (WHERE repo_age_days > 1825)           AS repos_5y,
+                COUNT(*) FILTER (WHERE repo_age_days > 3650)           AS repos_10y,
 
                 -- Massive classification with breakdown
-                COUNT(*) FILTER (WHERE classification_label = 'Massive')                             AS massive_repos,
+                COUNT(*) FILTER (WHERE classification_label = 'Massive')                        AS massive_repos,
                 COUNT(*) FILTER (
                   WHERE classification_label = 'Massive'
                     AND lang_group = 'code'
@@ -164,7 +170,7 @@ def fetch_overview_kpis(filters=None):
                 ) AS helm_charts,
 
                 -- Source hosts
-                COUNT(DISTINCT host_name)                           AS sources_total,
+                COUNT(DISTINCT host_name)                             AS sources_total,
                 COUNT(*) FILTER (WHERE host_name ILIKE :gitlab_host)    AS gitlab,
                 COUNT(*) FILTER (WHERE host_name ILIKE :bitbucket_host) AS bitbucket,
 
@@ -202,7 +208,7 @@ def fetch_overview_kpis(filters=None):
             "no_language_repos":     int(shared_kpis["no_language_repos"]     or 0),
         })
 
-        # ensure all our new/returned metrics are integers
+        # ensure all our metrics are integers
         for key in (
                 "total_repos", "repos_with_appid", "repos_without_appid",
                 "recently_updated", "new_repos",
