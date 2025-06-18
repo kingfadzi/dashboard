@@ -34,7 +34,7 @@ def build_count_query(base_table: str, joins: dict, filters: dict, field_alias_m
 def fetch_table_data(filters=None, page_current=0, page_size=10):
     # map filter fields to their table aliases
     field_alias_map = {
-        "activity_status":         "rm",
+        "activity_status":         "hr",
         "total_commits":           "rm",
         "repo_age_days":           "rm",
         "number_of_contributors":  "rm",

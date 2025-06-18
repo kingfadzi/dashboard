@@ -14,8 +14,16 @@ def render(profile_data):
     repo_name = profile_data.get("Repo ID", "Unknown")
     vcs_hostname = profile_data.get("VCS Hostname", "Unknown")
     browse_url = profile_data.get("Browse URL", "#")
-    investment_status = profile_data.get("Investment Status", "Unknown")
-    investment_color = "success" if investment_status.lower() == "invest" else "warning"
+    investment_status = profile_data.get("House Position", "Unknown")
+
+    status = investment_status.lower()
+    investment_color = {
+        "invest":  "success",
+        "maintain":"info",
+        "divest":  "warning",
+        "cease":   "danger"
+    }.get(status, "secondary")
+
     short_description = profile_data.get("Short Description", "")
 
     def info_card(title, fields_dict):

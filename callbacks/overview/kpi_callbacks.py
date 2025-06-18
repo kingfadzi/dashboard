@@ -73,24 +73,23 @@ def register_kpi_callbacks(app):
         filters = extract_filter_dict_from_store(store_data)
         kpi = fetch_overview_kpis(filters)
 
+        # Total repos breakdown subtext
+        total_repos_subtext = (
+            f"With AppID: {format_number_si(kpi.get('repos_with_appid'))} · "
+            f"Without: {format_number_si(kpi.get('repos_without_appid'))}"
+        )
+
         # Massive repo breakdown subtext
         massive_subtext = (
             f"Code: {format_number_si(kpi.get('massive_code'))} · "
-            f"Data: {format_number_si(kpi.get('massive_markup_or_data'))} · "
-            f"None: {format_number_si(kpi.get('massive_no_language'))}"
-        )
-
-        # Lang group subtext
-        lang_group_subtext = (
-            f"Code: {format_number_si(kpi.get('lang_group_code'))} · "
-            f"Data: {format_number_si(kpi.get('lang_group_markup_or_data'))} · "
-            f"None: {format_number_si(kpi.get('lang_group_no_language'))}"
+            f"Data: {format_number_si(kpi.get('massive_data'))} · "
+            f"None: {format_number_si(kpi.get('massive_none'))}"
         )
 
         return (
             # Total Repos
             format_with_commas(kpi.get("total_repos")),
-            lang_group_subtext,
+            total_repos_subtext,
 
             # Updates
             format_with_commas(kpi.get("new_repos")),
