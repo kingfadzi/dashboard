@@ -6,7 +6,7 @@ from data.buildtools.build_filter_conditions import build_filter_conditions
 from data.shared_kpi_query import fetch_kpi_totals
 from data.db_connection import engine
 
-@cache.memoize()
+#@cache.memoize()
 def fetch_status_kpis(filters=None):
     """
     Fetch overview KPIs including analysis status counts.
@@ -24,7 +24,7 @@ def fetch_status_kpis(filters=None):
             hr.host_name,
             hr.main_language,
             hr.classification_label,
-            hr.status AS analysis_status,
+            hr.status,
             rm.last_commit_date,
             rm.repo_age_days
         FROM harvested_repositories hr
@@ -32,10 +32,10 @@ def fetch_status_kpis(filters=None):
         WHERE 1=1 {f'AND {condition_string}' if condition_string else ''}
     )
     SELECT
-        COUNT(*) FILTER (WHERE analysis_status = 'FETCHED')     AS waiting,
-        COUNT(*) FILTER (WHERE analysis_status = 'in_progress') AS in_progress,
-        COUNT(*) FILTER (WHERE analysis_status = 'SUCCESS')     AS completed,
-        COUNT(*) FILTER (WHERE analysis_status = 'FAILURE')     AS failed
+        COUNT(*) FILTER (WHERE status = 'FETCHED' and activity_status = 'ACTIVE')     AS waiting,
+        COUNT(*) FILTER (WHERE status = 'in_progress') AS in_progress,
+        COUNT(*) FILTER (WHERE status = 'SUCCESS')     AS completed,
+        COUNT(*) FILTER (WHERE status = 'FAILURE')     AS failed
     FROM base;
     """
     results = pd.read_sql(text(query), engine, params=param_dict).iloc[0].to_dict()
