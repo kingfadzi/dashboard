@@ -1,8 +1,7 @@
 import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
-from data.cache_instance import cache
-from data.build_filter_conditions import build_filter_conditions
+from data.buildtools.build_filter_conditions import build_filter_conditions
 
 
 def fetch_modal_rows(chart_id: str, click_data: dict, filters: dict | None = None):
@@ -56,10 +55,11 @@ def _fetch_spring_modal_rows(version_prefix: str, filters: dict | None):
 
     sql = text(f"""
         SELECT DISTINCT
-            sd.normalized_version AS version,
-            hr.host_name,
             hr.repo_id,
-            hr.repo_name
+            hr.transaction_cycle,
+            hr.app_id,
+            sd.normalized_version AS version,
+            hr.host_name    
         FROM syft_dependencies sd
         JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
         WHERE sd.normalized_version LIKE :version_prefix || '%'
@@ -101,11 +101,12 @@ def _fetch_ee_usage_modal_rows(click_data: dict, filters: dict | None = None):
 
     sql = text(f"""
         SELECT DISTINCT
+            hr.repo_id,
+            hr.transaction_cycle,
+            hr.app_id,
             sd.package_name AS dependency,
             sd.normalized_version AS version,
-            hr.repo_id,
-            hr.repo_name,
-            hr.host_name
+          hr.host_name
         FROM syft_dependencies sd
         JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
         WHERE {prefix_condition}

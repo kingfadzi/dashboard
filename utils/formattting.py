@@ -20,6 +20,19 @@ def human_readable_size(size_in_bytes):
     else:
         return f"{size_in_bytes / 1024**4:.2f} TB"
 
+def human_readable_counts(value):
+    if value is None:
+        return "0"
+    value = int(value)
+    if value < 1_000:
+        return f"{value}"
+    elif value < 1_000_000:
+        return f"{value / 1_000:.1f}K"
+    elif value < 1_000_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    else:
+        return f"{value / 1_000_000_000:.1f}B"
+
 
 def deduplicate_comma_separated_values(values):
     if not values:

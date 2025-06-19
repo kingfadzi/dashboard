@@ -1,6 +1,6 @@
 import pandas as pd
 from data.db_connection import engine
-from data.build_filter_conditions import build_filter_conditions
+
 
 def fetch_dropdown_options():
     query = """

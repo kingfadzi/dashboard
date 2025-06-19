@@ -8,7 +8,7 @@ ARG HOST_UID=1000
 ARG HOST_GID=1000
 
 # -----------------------------
-# Environment & Proxy Setup
+# Environment & Proxy Setu
 # -----------------------------
 ENV PIP_INDEX_URL=${GLOBAL_INDEX_URL}
 ENV http_proxy=${HTTP_PROXY}
@@ -16,6 +16,7 @@ ENV https_proxy=${HTTPS_PROXY}
 ENV PYTHONIOENCODING=utf-8
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
+ENV PYTHONPATH=/app
 
 # -----------------------------
 # Base System Setup

@@ -9,7 +9,7 @@ from data.fetch_table_data import fetch_table_data
 
 def get_table_outputs_from_store(store_data, table_id=None):
     filters = { k: v for k, v in (store_data or {}).items() if v not in (None, "") }
-    df, _ = fetch_table_data(filters, 0, 1000)
+    df, _ = fetch_table_data(filters, page_current=0, page_size=None)
     table_data = df.to_dict("records")
 
     # Build a “returnUrl” for any link in the table (optional)
@@ -57,7 +57,6 @@ def get_table_outputs_from_store(store_data, table_id=None):
         {"headerName": "Size", "field": "classification_label"},
         {"headerName": "Age", "field": "repo_age_days", "type": "numericColumn"},
         {"headerName": "Language", "field": "main_language"},
-        {"headerName": "Scope", "field": "scope"},
         {"headerName": "Commits", "field": "total_commits", "type": "numericColumn"},
         {"headerName": "Contributors", "field": "number_of_contributors", "type": "numericColumn"},
         {
@@ -66,6 +65,23 @@ def get_table_outputs_from_store(store_data, table_id=None):
             "valueFormatter": {
                 "function": "params.value ? new Date(params.value).toLocaleDateString() : ''"
             },
+        },
+        {
+            "headerName": "Last Analysis",
+            "field": "last_analysis_date",
+            "valueFormatter": {
+                "function": """
+                    params.value 
+                      ? new Date(params.value).toLocaleString('en-US', {
+                          month: 'short', day: 'numeric', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        }) 
+                      : ''
+                """
+            },
+            "cellStyle": {
+                "whiteSpace": "nowrap"
+            }
         },
     ]
 

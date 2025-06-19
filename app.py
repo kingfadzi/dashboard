@@ -11,7 +11,7 @@ from dash.dependencies import Input, Output, State
 
 from data.cache_instance import cache
 from callbacks.register_all_callbacks import register_all_callbacks
-from filters.layout_filters import filter_layout
+from pages.layout_filters import filter_layout
 
 
 
@@ -103,7 +103,7 @@ def highlight_active_tab(pathname):
     State("filter-collapse", "is_open"),
 )
 def toggle_filter_visibility(pathname, n_clicks, is_open):
-    pages_without_filter = ["/repo"]
+    pages_without_filter = ["/repo", "/status"]
     if pathname in pages_without_filter:
         return False
     if n_clicks:
