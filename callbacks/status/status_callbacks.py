@@ -1,4 +1,3 @@
-# File: callbacks/status/status_callbacks.py
 import logging
 from dash import Input, Output
 from dash.exceptions import PreventUpdate
@@ -25,8 +24,8 @@ def register_status_callbacks(app):
         logger.info(f"Fetched status metrics with filters {filters}: {metrics}")
 
         return (
-            metrics.get("waiting",      0),
-            metrics.get("in_progress",  0),
-            metrics.get("completed",    0),
-            metrics.get("failed",       0),
+            "{:,}".format(metrics.get("waiting", 0)),
+            "{:,}".format(metrics.get("in_progress", 0)),
+            "{:,}".format(metrics.get("completed", 0)),
+            "{:,}".format(metrics.get("failed", 0)),
         )
