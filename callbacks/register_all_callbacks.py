@@ -8,6 +8,7 @@ from callbacks.dependencies.dependencies_callbacks import register_dependencies_
 from callbacks.overview.overview_callbacks import register_overview_callbacks
 from callbacks.profile.repo_profile_callback import register_repo_profile_callbacks
 from .shared_modal_callbacks import register_modal_callbacks
+from .status.status_callbacks import register_status_callbacks
 from .table_callbacks import register_table_callbacks
 from callbacks.overview.kpi_callbacks import register_kpi_callbacks
 from callbacks.dependencies.dependency_insights import register_dependency_insights_callbacks
@@ -27,4 +28,5 @@ def register_all_callbacks(app):
     register_dependency_insights_callbacks(app)
     register_filter_tags_callbacks(app)
     register_modal_callbacks(app)
+    register_status_callbacks(app)
 
