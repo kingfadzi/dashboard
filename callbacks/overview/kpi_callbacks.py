@@ -75,7 +75,7 @@ def register_kpi_callbacks(app):
 
         # Total repos breakdown subtext
         total_repos_subtext = (
-            f"With AppID: {format_number_si(kpi.get('repos_with_appid'))} · "
+            f"With ITBA: {format_number_si(kpi.get('repos_with_appid'))} · "
             f"Without: {format_number_si(kpi.get('repos_without_appid'))}"
         )
 
