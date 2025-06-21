@@ -14,8 +14,7 @@ variables:
     git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
     scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/ &&
     ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "
-      cd ${DEPLOY_PATH} &&
-      tar xzf code.tar.gz && rm code.tar.gz
+      cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz
     "
 
   BACKUP_CMD: |
@@ -55,36 +54,52 @@ stages:
 
 pre_deploy_checks:
   extends: .pre_deploy
+  variables:
+    JOB_CMD: "df -h; uname -a"
 
 transfer_code:
   extends: .transfer
+  variables:
+    JOB_CMD: "$TRANSFER_CMD"
 
 backup_current:
   extends: .backup
+  variables:
+    JOB_CMD: "$BACKUP_CMD"
   needs:
     - transfer_code
 
 stop_application:
   extends: .stop
+  variables:
+    JOB_CMD: "$STOP_CMD"
   needs:
     - backup_current
 
 start_application:
   extends: .start
+  variables:
+    JOB_CMD: "$START_CMD"
   needs:
     - stop_application
 
 verify_health:
   extends: .verify
+  variables:
+    JOB_CMD: "$HEALTH_CMD"
   needs:
     - start_application
 
 run_smoke_tests:
   extends: .smoke
+  variables:
+    JOB_CMD: "$SMOKE_CMD"
   needs:
     - verify_health
 
 cleanup:
   extends: .cleanup
+  variables:
+    JOB_CMD: "$CLEANUP_CMD"
   needs:
     - run_smoke_tests
