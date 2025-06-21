@@ -4,17 +4,18 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
+  APP_NAME: "dashboard"  # 👈 change per app
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
-  DEPLOY_PATH: "/apps/data"
   ENV_NAME: "mars"
+  DEPLOY_PATH: "/apps/data/${APP_NAME}"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
   BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
-  STOP_CMD: "bash ${DEPLOY_PATH}/scripts/stop.sh"
-  START_CMD: "bash ${DEPLOY_PATH}/scripts/start.sh"
-  VERIFY_CMD: "curl -sSf http://localhost:8080/health"
-  SMOKE_CMD: "bash ${DEPLOY_PATH}/scripts/smoke_test.sh"
+  STOP_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh stop ${ENV_NAME}"
+  START_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh start ${ENV_NAME}"
+  VERIFY_CMD: "curl -sSf http://localhost:8050/health"
+  SMOKE_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh smoke ${ENV_NAME}"
   CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
 
 stages:
@@ -22,15 +23,14 @@ stages:
   - deploy
   - post_deploy
 
-# Anchored reusable SSH script template
+# SSH job template
 .ssh_script_template: &ssh_script
   extends: .base_deploy
   script:
     - 'echo "Running command: $COMMAND"'
     - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "$COMMAND"'
 
-# Command execution jobs using overridden COMMAND per job
-
+# Jobs
 pre_deploy:
   <<: *ssh_script
   stage: pre_deploy
@@ -41,9 +41,9 @@ transfer_code:
   extends: .base_deploy
   stage: deploy
   script:
-    - 'echo "Transferring code to ${DEPLOY_SERVER}"'
+    - 'echo "Transferring code to ${DEPLOY_SERVER}:${DEPLOY_PATH}"'
     - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "set -e; set -x; mkdir -p ${DEPLOY_PATH}"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${DEPLOY_PATH}"'
     - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
     - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
 
