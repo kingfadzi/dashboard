@@ -68,3 +68,4 @@ cleanup:
   variables:
     SSH_COMMAND: "${CLEANUP_CMD}"
   needs: [smoke_tests]
+  
