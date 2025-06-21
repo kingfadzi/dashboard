@@ -5,8 +5,8 @@ variables:
   ENV_NAME: "mars"
   SSH_PASSWORD: "$SSH_PASSWORD"
 
-  # Single-line commands for each step
-  CMD_TRANSFER: 'git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz && scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" && ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+  # Single-line commands
+  CMD_TRANSFER: 'git archive --format=tar.gz $CI_COMMIT_SSHA -o code.tar.gz && scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" && ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
   CMD_BACKUP: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"'
   CMD_STOP: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"'
   CMD_START: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"'
