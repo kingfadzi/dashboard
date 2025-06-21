@@ -6,8 +6,8 @@ include:
 variables:
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
-  DEPLOY_PATH: "/apps/myapp"
-  ENV_NAME: "production"
+  DEPLOY_PATH: "/apps/data"
+  ENV_NAME: "mars"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
   BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
