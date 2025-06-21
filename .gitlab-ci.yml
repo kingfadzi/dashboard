@@ -2,11 +2,12 @@
 
 variables:
   DEPLOY_USER: "deploy_sa"
-  DEPLOY_SERVERS: ["mars.butterflycluster.com"]
+  DEPLOY_SERVERS: "mars.butterflycluster.com"  # String format
   SSH_PASSWORD: "$SSH_PASSWORD"
   DEPLOY_PATH: "/apps/data"
   ENV_NAME: "mars"
 
+  # Single-quoted commands for delayed expansion
   TRANSFER_CMD: '
     git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
     scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" &&
@@ -48,6 +49,12 @@ include:
   - project: 'experiments/ci-templates'
     ref: 'development'
     file: 'templates/cd-templates.yml'
+
+# Override matrix to use string variable
+.script_job:
+  parallel:
+    matrix:
+      - DEPLOY_SERVER: [$DEPLOY_SERVERS]  # Array-wrap the string
 
 stages:
   - pre_deploy
