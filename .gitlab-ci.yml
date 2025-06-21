@@ -43,9 +43,9 @@ transfer_code:
   script:
     - 'echo "Transferring code to ${DEPLOY_SERVER}"'
     - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
-    - 'sshpass -e ssh ${DEPLOY_USER}@${DEPLOY_SERVER} "set -e; set -x; mkdir -p ${DEPLOY_PATH}"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "set -e; set -x; mkdir -p ${DEPLOY_PATH}"'
     - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
-    - 'sshpass -e ssh ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
 
 backup_current:
   <<: *ssh_script
