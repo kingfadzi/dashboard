@@ -4,10 +4,12 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
+  APP_NAME: "dashboard"  # Change this per project
+  DEPLOY_PATH: "/app/data/${APP_NAME}"
+  ENV_NAME: "mars"
+
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
-  DEPLOY_PATH: "/apps/myapp"
-  ENV_NAME: "mars"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
   BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
@@ -38,10 +40,11 @@ transfer_code:
   extends: .base_deploy
   stage: deploy
   script:
-    - 'echo "Transferring code to ${DEPLOY_SERVER}"'
+    - 'echo "Transferring code to ${DEPLOY_SERVER}:${DEPLOY_PATH}"'
     - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
+    - 'sshpass -e ssh ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${DEPLOY_PATH} && chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${DEPLOY_PATH}"'
     - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+    - 'sshpass -e ssh ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
 
 backup_current:
   <<: *ssh_script
