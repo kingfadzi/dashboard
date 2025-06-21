@@ -10,14 +10,14 @@ variables:
   ENV_NAME: "mars"
   SSH_PASSWORD: "$SSH_PASSWORD"  # Must be set in GitLab CI/CD variables
 
-  # Fixed commands with sshpass and proper variable expansion
-  CMD_TRANSFER: 'git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz && sshpass -e scp $SSH_OPTS code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" && sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
-  CMD_BACKUP: 'sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"'
-  CMD_STOP: 'sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"'
-  CMD_START: 'sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"'
-  CMD_HEALTH: 'sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc "curl -sf http://localhost:8050/health || exit 1"'
-  CMD_SMOKE: 'sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"'
-  CMD_CLEANUP: 'sshpass -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"'
+  # Fixed: Explicitly include $SSH_OPTS in commands
+  CMD_TRANSFER: 'git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz && sshpass -v -e scp $SSH_OPTS code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" && sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+  CMD_BACKUP: 'sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"'
+  CMD_STOP: 'sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"'
+  CMD_START: 'sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"'
+  CMD_HEALTH: 'sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc "curl -sf http://localhost:8050/health || exit 1"'
+  CMD_SMOKE: 'sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"'
+  CMD_CLEANUP: 'sshpass -v -e ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_SERVER}" "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"'
 
 stages:
   - pre_deploy
