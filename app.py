@@ -24,6 +24,11 @@ app = Dash(
 )
 server = app.server
 
+# Health endpoint
+@server.route('/health')
+def health():
+    return {'status': 'ok'}, 200
+
 # Set Plotly theme
 pio.templates.default = "plotly_white"
 
