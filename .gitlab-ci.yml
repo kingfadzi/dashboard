@@ -1,8 +1,3 @@
-include:
-  - project: 'experiments/ci-templates'
-    ref: 'development'
-    file: 'templates/cd-templates.yml'
-
 variables:
   DEPLOY_USER: "deploy_sa"
   DEPLOY_SERVERS: "mars.butterflycluster.com"
@@ -10,51 +5,19 @@ variables:
   ENV_NAME: "mars"
   SSH_PASSWORD: "$SSH_PASSWORD"  # Set as protected variable in GitLab
 
-  # Commands wrapped in functions for runtime evaluation
-  CMD_TRANSFER: |
-    function _transfer() {
-      git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
-      scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" &&
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-        "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"
-    }; _transfer
+  # Commands with delayed expansion
+  CMD_TRANSFER: 'git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz && scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" && ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+  CMD_BACKUP: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"'
+  CMD_STOP: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"'
+  CMD_START: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"'
+  CMD_HEALTH: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc "curl -sf http://localhost:8050/health || exit 1"'
+  CMD_SMOKE: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"'
+  CMD_CLEANUP: 'ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"'
 
-  CMD_BACKUP: |
-    function _backup() {
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-        "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"
-    }; _backup
-
-  CMD_STOP: |
-    function _stop() {
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-        "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"
-    }; _stop
-
-  CMD_START: |
-    function _start() {
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-        "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"
-    }; _start
-
-  CMD_HEALTH: |
-    function _health() {
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
-        "curl -sf http://localhost:8050/health || exit 1"
-    }; _health
-
-  CMD_SMOKE: |
-    function _smoke() {
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
-        "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"
-    }; _smoke
-
-  CMD_CLEANUP: |
-    function _cleanup() {
-      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-        "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"
-    }; _cleanup
-
+include:
+  - project: 'experiments/ci-templates'
+    ref: 'development'
+    file: 'templates/cd-templates.yml'
 
 # Ensure matrix uses array syntax
 .script_job:
