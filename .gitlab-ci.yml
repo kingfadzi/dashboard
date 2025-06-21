@@ -8,7 +8,7 @@ include:
 variables:
   # SSH & targets
   DEPLOY_USER:    "fadzi"
-  DEPLOY_SERVERS: "mars.butterlcluster.com"
+  DEPLOY_SERVERS: "mars.butterflycluster.com"
   SSH_PASSWORD:   "$SSH_PASSWORD"
   DEPLOY_PATH:    "/home/fadzi/tools/dashboard"
 
