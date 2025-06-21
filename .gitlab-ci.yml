@@ -7,10 +7,10 @@ include:
 
 variables:
   # SSH & targets
-  DEPLOY_USER:    "fadzi"
+  DEPLOY_USER:    "deploy"
   DEPLOY_SERVERS: "mars.butterlcluster.com"
   SSH_PASSWORD:   "$SSH_PASSWORD"
-  DEPLOY_PATH:    "/home/fadzi/tools/dashboard"
+  DEPLOY_PATH:    "/apps/data"
 
   # Which environment to pass into manage.sh
   ENV_NAME:       "mars"
