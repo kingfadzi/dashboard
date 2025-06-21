@@ -1,3 +1,8 @@
+include:
+  - project: 'experiments/ci-templates'
+    ref: 'development'
+    file: 'templates/cd-templates.yml'
+
 variables:
   DEPLOY_USER: "deploy_sa"
   DEPLOY_SERVERS: "mars.butterflycluster.com"
@@ -50,10 +55,6 @@ variables:
         "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"
     }; _cleanup
 
-include:
-  - project: 'experiments/ci-templates'
-    ref: 'development'
-    file: 'templates/cd-templates.yml'
 
 # Ensure matrix uses array syntax
 .script_job:
