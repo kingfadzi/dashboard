@@ -69,3 +69,4 @@ cleanup:
   variables:
     JOB_CMD: "$CMD_CLEANUP"
   needs: [run_smoke_tests]
+
