@@ -4,14 +4,14 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
-  APP_NAME: "dashboard"  # 👈 change per app
+  APP_NAME: "dashboard"  
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
   ENV_NAME: "mars"
   DEPLOY_PATH: "/apps/data/${APP_NAME}"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
-  BACKUP_CMD: "tar --ignore-failed-read -czf ${DEPLOY_PATH}/backup-$(date +%s).tgz -C ${DEPLOY_PATH} . || [ $? -eq 1 ]"
+  BACKUP_CMD: "mkdir -p /apps/data/backups && tar --ignore-failed-read -czf /apps/data/backups/${APP_NAME}-snapshot-$(date +%s).tgz -C ${DEPLOY_PATH} ."
   STOP_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh stop ${ENV_NAME}"
   START_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh start ${ENV_NAME}"
   VERIFY_CMD: "curl -sSf http://localhost:8050/health"
