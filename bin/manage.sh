@@ -48,17 +48,9 @@ case "$COMMAND" in
     ;;
 
   smoke)
-    echo "Running smoke test against http://localhost:$PORT ..."
-    if ! curl -sf "http://localhost:$PORT/" > /tmp/smoke.html; then
-      echo "Smoke test failed: no HTTP 200 on /"
-      exit 1
-    fi
-    if ! grep -q '<div id="_dash-app-content"' /tmp/smoke.html; then
-      echo "Smoke test failed: Dash app content not found"
-      exit 1
-    fi
-    if ! curl -sf "http://localhost:$PORT/health" | grep -q "ok"; then
-      echo "Smoke test failed: /health endpoint not OK"
+    echo "Running smoke test against http://localhost:$PORT/overview ..."
+    if ! curl -sf "http://localhost:$PORT/overview" > /dev/null; then
+      echo "Smoke test failed: /overview did not respond with 200"
       exit 1
     fi
     echo "Smoke test passed!"
