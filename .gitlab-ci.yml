@@ -6,15 +6,15 @@ include:
 variables:
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
-  DEPLOY_PATH: "/apps/data"
+  DEPLOY_PATH: "/apps/myapp"
   ENV_NAME: "mars"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
   BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
-  STOP_CMD: "bash ${DEPLOY_PATH}/scripts/stop.sh"
-  START_CMD: "bash ${DEPLOY_PATH}/scripts/start.sh"
-  VERIFY_CMD: "curl -sSf http://localhost:8080/health"
-  SMOKE_CMD: "bash ${DEPLOY_PATH}/scripts/smoke_test.sh"
+  STOP_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh stop ${ENV_NAME}"
+  START_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh start ${ENV_NAME}"
+  VERIFY_CMD: "curl -sSf http://localhost:8050/health"
+  SMOKE_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh smoke ${ENV_NAME}"
   CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
 
 stages:
@@ -22,14 +22,11 @@ stages:
   - deploy
   - post_deploy
 
-# Anchored reusable SSH script template
 .ssh_script_template: &ssh_script
   extends: .base_deploy
   script:
     - 'echo "Running command: $COMMAND"'
     - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "$COMMAND"'
-
-# Command execution jobs using overridden COMMAND per job
 
 pre_deploy:
   <<: *ssh_script
@@ -87,6 +84,3 @@ cleanup:
   variables:
     COMMAND: "${CLEANUP_CMD}"
   needs: [smoke_tests]
-  
-  
-  
