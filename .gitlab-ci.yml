@@ -7,18 +7,18 @@ include:
 
 variables:
   # SSH & targets
-  DEPLOY_USER:    "deploy"
+  DEPLOY_USER:    "fadzi"
   DEPLOY_SERVERS: "mars.butterlcluster.com"
   SSH_PASSWORD:   "$SSH_PASSWORD"
-  DEPLOY_PATH:    "/apps/data"
+  DEPLOY_PATH:    "/home/fadzi/tools/dashboard"
 
   # Which environment to pass into manage.sh
   ENV_NAME:       "mars"
 
-  # Code transfer
-  TRANSFER_CMD: >
-    tar czf code.tar.gz . &&
-    scp code.tar.gz $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH &&
+  # Code transfer: use git archive for a stable snapshot
+  TRANSFER_CMD: |
+    git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
+    scp code.tar.gz $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH/ &&
     ssh $DEPLOY_USER@$DEPLOY_SERVER "
       cd $DEPLOY_PATH &&
       tar xzf code.tar.gz &&
@@ -40,7 +40,7 @@ variables:
       curl -sf http://localhost:8050/health || { echo 'Health check failed' >&2; exit 1; }
     "
 
-  # Smoke = exercise manage.sh smoke (which hits / and title)
+  # Smoke = manage.sh smoke
   SMOKE_CMD: >
     ssh $DEPLOY_USER@$DEPLOY_SERVER bash -lc "
       bash $DEPLOY_PATH/manage.sh smoke $ENV_NAME
@@ -85,4 +85,3 @@ run_smoke_tests:
 cleanup:
   extends: .cleanup
   needs: [run_smoke_tests]
-
