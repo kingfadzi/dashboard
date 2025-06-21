@@ -1,3 +1,5 @@
+import urllib
+
 import pandas as pd
 from sqlalchemy import text
 from data.db_connection import engine
@@ -132,6 +134,13 @@ def fetch_table_data(filters=None, page_current=0, page_size=10):
                 pd.to_datetime(df["last_analysis_date"], errors="coerce")
                 .dt.strftime("%B %d, %Y %I:%M %p")
             )
+
+
+        if "repo_id" in df:
+            df["repo_id"] = df["repo_id"].apply(
+                lambda rid: urllib.parse.quote(rid) if pd.notna(rid) else rid
+            )
+
 
         return df, total_count
 
