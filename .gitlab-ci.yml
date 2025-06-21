@@ -6,16 +6,12 @@ include:
     file:    'templates/cd-templates.yml'
 
 variables:
-  # SSH & targets
   DEPLOY_USER:    "fadzi"
   DEPLOY_SERVERS: "mars.butterflycluster.com"
   SSH_PASSWORD:   "$SSH_PASSWORD"
   DEPLOY_PATH:    "/home/fadzi/tools/dashboard"
-
-  # Which environment to pass into manage.sh
   ENV_NAME:       "mars"
 
-  # Code transfer: use git archive for a stable snapshot
   TRANSFER_CMD: |
     git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
     scp $SSH_OPTS code.tar.gz $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH/ &&
@@ -25,29 +21,26 @@ variables:
       rm code.tar.gz
     "
 
-  BACKUP_CMD: >
-    ssh $DEPLOY_USER@$DEPLOY_SERVER "
+  BACKUP_CMD: |
+    ssh $SSH_OPTS $DEPLOY_USER@$DEPLOY_SERVER "
       tar czf $DEPLOY_PATH/backup-$(date +%F).tgz $DEPLOY_PATH
     "
 
-  # Invoke manage.sh with COMMAND and ENV_NAME
-  STOP_CMD:    "ssh $DEPLOY_USER@$DEPLOY_SERVER 'bash $DEPLOY_PATH/manage.sh stop $ENV_NAME'"
-  START_CMD:   "ssh $DEPLOY_USER@$DEPLOY_SERVER 'bash $DEPLOY_PATH/manage.sh start $ENV_NAME'"
+  STOP_CMD:  "ssh $SSH_OPTS $DEPLOY_USER@$DEPLOY_SERVER 'bash $DEPLOY_PATH/manage.sh stop $ENV_NAME'"
+  START_CMD: "ssh $SSH_OPTS $DEPLOY_USER@$DEPLOY_SERVER 'bash $DEPLOY_PATH/manage.sh start $ENV_NAME'"
 
-  # Health = true /health endpoint on port 8050
-  HEALTH_CMD: >
-    ssh $DEPLOY_USER@$DEPLOY_SERVER bash -lc "
+  HEALTH_CMD: |
+    ssh $SSH_OPTS $DEPLOY_USER@$DEPLOY_SERVER bash -lc "
       curl -sf http://localhost:8050/health || { echo 'Health check failed' >&2; exit 1; }
     "
 
-  # Smoke = manage.sh smoke
-  SMOKE_CMD: >
-    ssh $DEPLOY_USER@$DEPLOY_SERVER bash -lc "
+  SMOKE_CMD: |
+    ssh $SSH_OPTS $DEPLOY_USER@$DEPLOY_SERVER bash -lc "
       bash $DEPLOY_PATH/manage.sh smoke $ENV_NAME
     "
 
-  CLEANUP_CMD: >
-    ssh $DEPLOY_USER@$DEPLOY_SERVER "
+  CLEANUP_CMD: |
+    ssh $SSH_OPTS $DEPLOY_USER@$DEPLOY_SERVER "
       rm -rf $DEPLOY_PATH/*.tmp $DEPLOY_PATH/backup-*
     "
 
@@ -85,4 +78,3 @@ run_smoke_tests:
 cleanup:
   extends: .cleanup
   needs: [run_smoke_tests]
-
