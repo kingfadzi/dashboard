@@ -2,59 +2,66 @@
 
 variables:
   DEPLOY_USER: "deploy_sa"
-  DEPLOY_SERVERS: "mars.butterflycluster.com"  # String format
+  DEPLOY_SERVERS: "mars.butterflycluster.com"
   SSH_PASSWORD: "$SSH_PASSWORD"
   DEPLOY_PATH: "/apps/data"
   ENV_NAME: "mars"
 
-  # Single-quoted commands for delayed expansion
-  TRANSFER_CMD: '
-    git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
-    scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" &&
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-      "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"
-  '
+  # Use function-style commands to ensure runtime evaluation
+  TRANSFER_CMD: |
+    function _transfer() {
+      git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
+      scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" &&
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
+        "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"
+    }; _transfer
 
-  BACKUP_CMD: '
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-      "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"
-  '
+  BACKUP_CMD: |
+    function _backup() {
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
+        "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"
+    }; _backup
 
-  STOP_CMD: '
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-      "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"
-  '
+  STOP_CMD: |
+    function _stop() {
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
+        "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"
+    }; _stop
 
-  START_CMD: '
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-      "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"
-  '
+  START_CMD: |
+    function _start() {
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
+        "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"
+    }; _start
 
-  HEALTH_CMD: '
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
-      "curl -sf http://localhost:8050/health || exit 1"
-  '
+  HEALTH_CMD: |
+    function _health() {
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
+        "curl -sf http://localhost:8050/health || exit 1"
+    }; _health
 
-  SMOKE_CMD: '
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
-      "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"
-  '
+  SMOKE_CMD: |
+    function _smoke() {
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
+        "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"
+    }; _smoke
 
-  CLEANUP_CMD: '
-    ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
-      "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"
-  '
+  CLEANUP_CMD: |
+    function _cleanup() {
+      ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
+        "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"
+    }; _cleanup
 
 include:
   - project: 'experiments/ci-templates'
     ref: 'development'
     file: 'templates/cd-templates.yml'
 
-# Override matrix to use string variable
+# Ensure matrix uses array format
 .script_job:
   parallel:
     matrix:
-      - DEPLOY_SERVER: [$DEPLOY_SERVERS]  # Array-wrap the string
+      - DEPLOY_SERVER: [$DEPLOY_SERVERS]
 
 stages:
   - pre_deploy
