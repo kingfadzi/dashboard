@@ -4,28 +4,33 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
-  APP_NAME: "dashboard"  # 👈 change per app
+  APP_NAME: "dashboard"
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
   ENV_NAME: "mars"
   DEPLOY_PATH: "/apps/data/${APP_NAME}"
 
+  # Fixed commands
   PRE_DEPLOY_CMD: "df -h; free -m"
-  BACKUP_CMD: "tar --ignore-failed-read -czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
+  BACKUP_CMD: "tar --ignore-failed-read -czf ${DEPLOY_PATH}/backup-$(date +%s).tgz -C ${DEPLOY_PATH} ."
   STOP_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh stop ${ENV_NAME}"
   START_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh start ${ENV_NAME}"
   VERIFY_CMD: "curl -sSf http://localhost:8050/health"
   SMOKE_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh smoke ${ENV_NAME}"
-  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
+  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -type f -mtime +7 -delete"
 
 stages:
   - pre_deploy
   - deploy
   - post_deploy
 
-# SSH job template
+# SSH job template with fixed SSH options
 .ssh_script_template: &ssh_script
   extends: .base_deploy
+  before_script:
+    - mkdir -p "${CI_PROJECT_DIR}/.ssh"
+    - chmod 700 "${CI_PROJECT_DIR}/.ssh"
+    - export SSH_OPTS="-o UserKnownHostsFile=${CI_PROJECT_DIR}/.ssh/known_hosts -o StrictHostKeyChecking=no"
   script:
     - 'echo "Running command: $COMMAND"'
     - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "$COMMAND"'
@@ -37,22 +42,12 @@ pre_deploy:
   variables:
     COMMAND: "${PRE_DEPLOY_CMD}"
 
-transfer_code:
-  extends: .base_deploy
-  stage: deploy
-  script:
-    - 'echo "Transferring code to ${DEPLOY_SERVER}:${DEPLOY_PATH}"'
-    - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${DEPLOY_PATH}"'
-    - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
-
+# Fixed job order and backup command
 backup_current:
   <<: *ssh_script
   stage: deploy
   variables:
     COMMAND: "${BACKUP_CMD}"
-  needs: [transfer_code]
 
 stop_app:
   <<: *ssh_script
@@ -61,12 +56,27 @@ stop_app:
     COMMAND: "${STOP_CMD}"
   needs: [backup_current]
 
+transfer_code:
+  extends: .base_deploy
+  stage: deploy
+  before_script:
+    - mkdir -p "${CI_PROJECT_DIR}/.ssh"
+    - chmod 700 "${CI_PROJECT_DIR}/.ssh"
+    - export SSH_OPTS="-o UserKnownHostsFile=${CI_PROJECT_DIR}/.ssh/known_hosts -o StrictHostKeyChecking=no"
+  script:
+    - 'echo "Transferring code to ${DEPLOY_SERVER}:${DEPLOY_PATH}"'
+    - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${DEPLOY_PATH}"'
+    - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+  needs: [stop_app]
+
 start_app:
   <<: *ssh_script
   stage: deploy
   variables:
     COMMAND: "${START_CMD}"
-  needs: [stop_app]
+  needs: [transfer_code]
 
 verify_health:
   <<: *ssh_script
