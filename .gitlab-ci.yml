@@ -1,14 +1,12 @@
-# .gitlab-ci.yml
-
 variables:
   DEPLOY_USER: "deploy_sa"
   DEPLOY_SERVERS: "mars.butterflycluster.com"
-  SSH_PASSWORD: "$SSH_PASSWORD"
   DEPLOY_PATH: "/apps/data"
   ENV_NAME: "mars"
+  SSH_PASSWORD: "$SSH_PASSWORD"  # Set as protected variable in GitLab
 
-  # Use function-style commands to ensure runtime evaluation
-  TRANSFER_CMD: |
+  # Commands wrapped in functions for runtime evaluation
+  CMD_TRANSFER: |
     function _transfer() {
       git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
       scp "${SSH_OPTS}" code.tar.gz "${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/" &&
@@ -16,37 +14,37 @@ variables:
         "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"
     }; _transfer
 
-  BACKUP_CMD: |
+  CMD_BACKUP: |
     function _backup() {
       ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
         "tar czf ${DEPLOY_PATH}/backup-$(date +%F).tgz ${DEPLOY_PATH}"
     }; _backup
 
-  STOP_CMD: |
+  CMD_STOP: |
     function _stop() {
       ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
         "bash ${DEPLOY_PATH}/manage.sh stop ${ENV_NAME}"
     }; _stop
 
-  START_CMD: |
+  CMD_START: |
     function _start() {
       ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
         "bash ${DEPLOY_PATH}/manage.sh start ${ENV_NAME}"
     }; _start
 
-  HEALTH_CMD: |
+  CMD_HEALTH: |
     function _health() {
       ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
         "curl -sf http://localhost:8050/health || exit 1"
     }; _health
 
-  SMOKE_CMD: |
+  CMD_SMOKE: |
     function _smoke() {
       ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" bash -lc \
         "bash ${DEPLOY_PATH}/manage.sh smoke ${ENV_NAME}"
     }; _smoke
 
-  CLEANUP_CMD: |
+  CMD_CLEANUP: |
     function _cleanup() {
       ssh "${SSH_OPTS}" "${DEPLOY_USER}@${DEPLOY_SERVER}" \
         "rm -rf ${DEPLOY_PATH}/*.tmp ${DEPLOY_PATH}/backup-*"
@@ -57,7 +55,7 @@ include:
     ref: 'development'
     file: 'templates/cd-templates.yml'
 
-# Ensure matrix uses array format
+# Ensure matrix uses array syntax
 .script_job:
   parallel:
     matrix:
@@ -70,30 +68,46 @@ stages:
 
 pre_deploy_checks:
   extends: .pre_deploy
+  variables:
+    JOB_CMD: "df -h; uname -a"
 
 transfer_code:
   extends: .transfer
+  variables:
+    JOB_CMD: "$CMD_TRANSFER"
 
 backup_current:
   extends: .backup
+  variables:
+    JOB_CMD: "$CMD_BACKUP"
   needs: [transfer_code]
 
 stop_application:
   extends: .stop
+  variables:
+    JOB_CMD: "$CMD_STOP"
   needs: [backup_current]
 
 start_application:
   extends: .start
+  variables:
+    JOB_CMD: "$CMD_START"
   needs: [stop_application]
 
 verify_health:
   extends: .verify
+  variables:
+    JOB_CMD: "$CMD_HEALTH"
   needs: [start_application]
 
 run_smoke_tests:
   extends: .smoke
+  variables:
+    JOB_CMD: "$CMD_SMOKE"
   needs: [verify_health]
 
 cleanup:
   extends: .cleanup
+  variables:
+    JOB_CMD: "$CMD_CLEANUP"
   needs: [run_smoke_tests]
