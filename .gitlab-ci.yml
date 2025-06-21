@@ -4,88 +4,67 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
-  DEPLOY_USER:    "deploy_sa"
-  DEPLOY_SERVERS: "mars.butterflycluster.com"
-  SSH_PASSWORD:   "$SSH_PASSWORD"
-  DEPLOY_PATH:    "/apps/data"
-  ENV_NAME:       "mars"
-
-  TRANSFER_CMD: |
-    git archive --format=tar.gz $CI_COMMIT_SHA -o code.tar.gz &&
-    scp \$SSH_OPTS code.tar.gz \$DEPLOY_USER@\$DEPLOY_SERVER:\$DEPLOY_PATH/ &&
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER "cd \$DEPLOY_PATH && tar xzf code.tar.gz && rm code.tar.gz"
-
-  BACKUP_CMD: |
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER "tar czf \$DEPLOY_PATH/backup-$(date +%F).tgz \$DEPLOY_PATH"
-
-  STOP_CMD: |
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER "bash \$DEPLOY_PATH/manage.sh stop \$ENV_NAME"
-
-  START_CMD: |
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER "bash \$DEPLOY_PATH/manage.sh start \$ENV_NAME"
-
-  HEALTH_CMD: |
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER bash -lc "curl -sf http://localhost:8050/health || exit 1"
-
-  SMOKE_CMD: |
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER bash -lc "bash \$DEPLOY_PATH/manage.sh smoke \$ENV_NAME"
-
-  CLEANUP_CMD: |
-    ssh \$SSH_OPTS \$DEPLOY_USER@\$DEPLOY_SERVER "rm -rf \$DEPLOY_PATH/*.tmp \$DEPLOY_PATH/backup-*"
+  # Deployment target (single server)
+  DEPLOY_SERVER: "mars.butterflycluster.com"
+  DEPLOY_USER: "deploy_sa"
+  DEPLOY_PATH: "/apps/myapp"
+  ENV_NAME: "production"
+  
+  # Application commands (customize per project)
+  PRE_DEPLOY_CMD: "df -h; free -m"  # Basic system checks
+  BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"  # Unix timestamp backup
+  STOP_CMD: "${DEPLOY_PATH}/scripts/stop.sh"  # Custom stop script
+  START_CMD: "${DEPLOY_PATH}/scripts/start.sh"  # Custom start script
+  VERIFY_CMD: "curl -sSf http://localhost:8080/health"  # Health check
+  SMOKE_CMD: "${DEPLOY_PATH}/scripts/smoke_test.sh"  # Smoke tests
+  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"  # Log/temp cleanup
 
 stages:
   - pre_deploy
   - deploy
   - post_deploy
 
-pre_deploy_checks:
-  extends: .pre_deploy
+# Deployment Pipeline
+pre_deploy:
+  extends: .pre_deploy_job
   variables:
-    JOB_CMD: "df -h; uname -a"
+    SSH_COMMAND: "${PRE_DEPLOY_CMD}"
 
 transfer_code:
-  extends: .transfer
-  variables:
-    JOB_CMD: "$TRANSFER_CMD"
+  extends: .transfer_job
 
 backup_current:
-  extends: .backup
+  extends: .backup_job
   variables:
-    JOB_CMD: "$BACKUP_CMD"
-  needs:
-    - transfer_code
+    SSH_COMMAND: "${BACKUP_CMD}"
+  needs: [transfer_code]
 
-stop_application:
-  extends: .stop
+stop_app:
+  extends: .stop_job
   variables:
-    JOB_CMD: "$STOP_CMD"
-  needs:
-    - backup_current
+    SSH_COMMAND: "${STOP_CMD}"
+  needs: [backup_current]
 
-start_application:
-  extends: .start
+start_app:
+  extends: .start_job
   variables:
-    JOB_CMD: "$START_CMD"
-  needs:
-    - stop_application
+    SSH_COMMAND: "${START_CMD}"
+  needs: [stop_app]
 
 verify_health:
-  extends: .verify
+  extends: .verify_job
   variables:
-    JOB_CMD: "$HEALTH_CMD"
-  needs:
-    - start_application
+    SSH_COMMAND: "${VERIFY_CMD}"
+  needs: [start_app]
 
-run_smoke_tests:
-  extends: .smoke
+smoke_tests:
+  extends: .smoke_job
   variables:
-    JOB_CMD: "$SMOKE_CMD"
-  needs:
-    - verify_health
+    SSH_COMMAND: "${SMOKE_CMD}"
+  needs: [verify_health]
 
 cleanup:
-  extends: .cleanup
+  extends: .cleanup_job
   variables:
-    JOB_CMD: "$CLEANUP_CMD"
-  needs:
-    - run_smoke_tests
+    SSH_COMMAND: "${CLEANUP_CMD}"
+  needs: [smoke_tests]
