@@ -20,14 +20,12 @@ fi
 
 echo "Using environment: $ENV_FILE"
 
-# Export vars from env file and inject HOST_UID/GID
 set -a
 source "$ENV_FILE"
 export HOST_UID=$(id -u)
 export HOST_GID=$(id -g)
 set +a
 
-# Default Dash port if not defined in .env
 PORT="${DASH_PORT:-8050}"
 
 case "$COMMAND" in
@@ -51,14 +49,16 @@ case "$COMMAND" in
 
   smoke)
     echo "Running smoke test against http://localhost:$PORT ..."
-    # check HTTP 200
-    if ! curl -sf "http://localhost:$PORT/"; then
+    if ! curl -sf "http://localhost:$PORT/" > /tmp/smoke.html; then
       echo "Smoke test failed: no HTTP 200 on /"
       exit 1
     fi
-    # check for a known UI marker (customize to your app)
-    if ! curl -sf "http://localhost:$PORT/" | grep -q "<title>MyApp Dashboard</title>"; then
-      echo "Smoke test failed: dashboard title not found"
+    if ! grep -q '<div id="_dash-app-content"' /tmp/smoke.html; then
+      echo "Smoke test failed: Dash app content not found"
+      exit 1
+    fi
+    if ! curl -sf "http://localhost:$PORT/health" | grep -q "ok"; then
+      echo "Smoke test failed: /health endpoint not OK"
       exit 1
     fi
     echo "Smoke test passed!"
