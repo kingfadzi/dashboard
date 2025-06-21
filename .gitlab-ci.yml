@@ -4,20 +4,20 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
-  # Deployment target (single server)
+  # Deployment target
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
   DEPLOY_PATH: "/apps/myapp"
   ENV_NAME: "production"
   
-  # Application commands (customize per project)
-  PRE_DEPLOY_CMD: "df -h; free -m"  # Basic system checks
-  BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"  # Unix timestamp backup
-  STOP_CMD: "${DEPLOY_PATH}/scripts/stop.sh"  # Custom stop script
-  START_CMD: "${DEPLOY_PATH}/scripts/start.sh"  # Custom start script
-  VERIFY_CMD: "curl -sSf http://localhost:8080/health"  # Health check
-  SMOKE_CMD: "${DEPLOY_PATH}/scripts/smoke_test.sh"  # Smoke tests
-  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"  # Log/temp cleanup
+  # Application commands
+  PRE_DEPLOY_CMD: "df -h; free -m"
+  BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
+  STOP_CMD: "bash ${DEPLOY_PATH}/scripts/stop.sh"
+  START_CMD: "bash ${DEPLOY_PATH}/scripts/start.sh"
+  VERIFY_CMD: "curl -sSf http://localhost:8080/health"
+  SMOKE_CMD: "bash ${DEPLOY_PATH}/scripts/smoke_test.sh"
+  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
 
 stages:
   - pre_deploy
