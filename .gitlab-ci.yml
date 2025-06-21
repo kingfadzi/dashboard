@@ -11,7 +11,7 @@ variables:
   DEPLOY_PATH: "/apps/data/${APP_NAME}"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
-  BACKUP_CMD: "tar --ignore-failed-read -czf ${DEPLOY_PATH}/backup-$(date +%s).tgz -C ${DEPLOY_PATH} ."
+  BACKUP_CMD: "tar --ignore-failed-read -czf ${DEPLOY_PATH}/backup-$(date +%s).tgz -C ${DEPLOY_PATH} . || [ $? -eq 1 ]"
   STOP_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh stop ${ENV_NAME}"
   START_CMD: "bash ${DEPLOY_PATH}/bin/manage.sh start ${ENV_NAME}"
   VERIFY_CMD: "curl -sSf http://localhost:8050/health"
