@@ -4,13 +4,11 @@ include:
     file: 'templates/cd-templates.yml'
 
 variables:
-  # Deployment target
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
   DEPLOY_PATH: "/apps/myapp"
   ENV_NAME: "production"
-  
-  # Application commands
+
   PRE_DEPLOY_CMD: "df -h; free -m"
   BACKUP_CMD: "tar czf ${DEPLOY_PATH}/backup-$(date +%s).tgz ${DEPLOY_PATH}"
   STOP_CMD: "bash ${DEPLOY_PATH}/scripts/stop.sh"
@@ -24,47 +22,68 @@ stages:
   - deploy
   - post_deploy
 
-# Deployment Pipeline
+# Anchored reusable SSH script template
+.ssh_script_template: &ssh_script
+  extends: .base_deploy
+  script:
+    - 'echo "Running command: $COMMAND"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "$COMMAND"'
+
+# Command execution jobs using overridden COMMAND per job
+
 pre_deploy:
-  extends: .pre_deploy_job
+  <<: *ssh_script
+  stage: pre_deploy
   variables:
-    SSH_COMMAND: "${PRE_DEPLOY_CMD}"
+    COMMAND: "${PRE_DEPLOY_CMD}"
 
 transfer_code:
-  extends: .transfer_job
+  extends: .base_deploy
+  stage: deploy
+  script:
+    - 'echo "Transferring code to ${DEPLOY_SERVER}"'
+    - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
+    - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
 
 backup_current:
-  extends: .backup_job
+  <<: *ssh_script
+  stage: deploy
   variables:
-    SSH_COMMAND: "${BACKUP_CMD}"
+    COMMAND: "${BACKUP_CMD}"
   needs: [transfer_code]
 
 stop_app:
-  extends: .stop_job
+  <<: *ssh_script
+  stage: deploy
   variables:
-    SSH_COMMAND: "${STOP_CMD}"
+    COMMAND: "${STOP_CMD}"
   needs: [backup_current]
 
 start_app:
-  extends: .start_job
+  <<: *ssh_script
+  stage: deploy
   variables:
-    SSH_COMMAND: "${START_CMD}"
+    COMMAND: "${START_CMD}"
   needs: [stop_app]
 
 verify_health:
-  extends: .verify_job
+  <<: *ssh_script
+  stage: post_deploy
   variables:
-    SSH_COMMAND: "${VERIFY_CMD}"
+    COMMAND: "${VERIFY_CMD}"
   needs: [start_app]
 
 smoke_tests:
-  extends: .smoke_job
+  <<: *ssh_script
+  stage: post_deploy
   variables:
-    SSH_COMMAND: "${SMOKE_CMD}"
+    COMMAND: "${SMOKE_CMD}"
   needs: [verify_health]
 
 cleanup:
-  extends: .cleanup_job
+  <<: *ssh_script
+  stage: post_deploy
   variables:
-    SSH_COMMAND: "${CLEANUP_CMD}"
+    COMMAND: "${CLEANUP_CMD}"
   needs: [smoke_tests]
