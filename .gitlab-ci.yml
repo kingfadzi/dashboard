@@ -27,20 +27,12 @@ stages:
   - deploy
   - post_deploy
 
-# SSH wrapper for simple commands
-.ssh_script_template: &ssh_script
-  extends: .base_deploy
-  script:
-    - 'echo "Running command: $COMMAND"'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "$COMMAND"'
-
 pre_deploy:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: pre_deploy
   variables:
     COMMAND: "${PRE_DEPLOY_CMD}"
 
-# File‐system steps, implemented in shared scripts
 prepare_release_dir:
   extends: .prepare_release_dir_template
   stage: deploy
@@ -55,11 +47,11 @@ extract_and_link:
   extends: .extract_and_link_template
   stage: deploy
   needs:
+    - prepare_release_dir
     - upload_code
 
-# App‐specific commands still inline
 backup_current:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: deploy
   variables:
     COMMAND: "${BACKUP_CMD}"
@@ -67,7 +59,7 @@ backup_current:
     - extract_and_link
 
 stop_app:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: deploy
   variables:
     COMMAND: "${STOP_CMD}"
@@ -75,7 +67,7 @@ stop_app:
     - backup_current
 
 start_app:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: deploy
   variables:
     COMMAND: "${START_CMD}"
@@ -83,7 +75,7 @@ start_app:
     - stop_app
 
 verify_health:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${VERIFY_CMD}"
@@ -91,7 +83,7 @@ verify_health:
     - start_app
 
 smoke_tests:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${SMOKE_CMD}"
@@ -99,7 +91,7 @@ smoke_tests:
     - verify_health
 
 cleanup:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${CLEANUP_CMD}"
@@ -107,7 +99,7 @@ cleanup:
     - smoke_tests
 
 notify:
-  <<: *ssh_script
+  extends: .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${NOTIFY_CMD}"
