@@ -15,22 +15,20 @@ variables:
   STOP_CMD: "cd ${DEPLOY_PATH} && bash bin/manage.sh stop ${ENV_NAME}"
   START_CMD: "cd ${DEPLOY_PATH} && bash bin/manage.sh start ${ENV_NAME}"
   VERIFY_CMD: "curl -sSf http://localhost:8050/health"
-  SMOKE_CMD: "cd ${DEPLOY_PATH} && bash bin/manage.sh smoke ${ENV_NAME}"
-  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
+  SMOKE_CMD: "curl -sf http://localhost:8050/overview > /dev/null || (echo 'Smoke test failed: /overview did not respond with 200' && exit 1)"
+  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; [ -d ${DEPLOY_PATH}/tmp ] && find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
 
 stages:
   - pre_deploy
   - deploy
   - post_deploy
 
-# SSH job template
 .ssh_script_template: &ssh_script
   extends: .base_deploy
   script:
     - 'echo "Running command: $COMMAND"'
     - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "$COMMAND"'
 
-# Jobs
 pre_deploy:
   <<: *ssh_script
   stage: pre_deploy
@@ -88,7 +86,3 @@ cleanup:
   variables:
     COMMAND: "${CLEANUP_CMD}"
   needs: [smoke_tests]
-  
-  
-  
-  
