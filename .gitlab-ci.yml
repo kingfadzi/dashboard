@@ -18,7 +18,7 @@ variables:
   START_CMD: "cd ${CURRENT_LINK} && bash bin/manage.sh start ${ENV_NAME}"
   VERIFY_CMD: "curl -sSf http://localhost:8050/overview"
   SMOKE_CMD: "cd ${CURRENT_LINK} && bash bin/manage.sh smoke ${ENV_NAME}"
-  CLEANUP_CMD: "rm -f ${CURRENT_LINK}/*.log; [ -d ${CURRENT_LINK}/tmp ] && find ${CURRENT_LINK}/tmp -mtime +7 -delete"
+  CLEANUP_CMD: '[ -d ${LINK_PATH}/tmp ] && find ${LINK_PATH}/tmp -mtime +7 -delete || true'
   NOTIFY_CMD: "echo 'Notify: deployment completed for ${APP_NAME}'"
 
 stages:
