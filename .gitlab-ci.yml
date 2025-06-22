@@ -28,30 +28,35 @@ stages:
   - post_deploy
 
 pre_deploy:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: pre_deploy
   variables:
     COMMAND: "${PRE_DEPLOY_CMD}"
 
 prepare_release_dir:
-  extends: .prepare_release_dir_template
+  extends:
+    - .prepare_release_dir_template
   stage: deploy
 
 upload_code:
-  extends: .upload_code_template
+  extends:
+    - .upload_code_template
   stage: deploy
   needs:
     - prepare_release_dir
 
 extract_and_link:
-  extends: .extract_and_link_template
+  extends:
+    - .extract_and_link_template
   stage: deploy
   needs:
     - prepare_release_dir
     - upload_code
 
 backup_current:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: deploy
   variables:
     COMMAND: "${BACKUP_CMD}"
@@ -59,7 +64,8 @@ backup_current:
     - extract_and_link
 
 stop_app:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: deploy
   variables:
     COMMAND: "${STOP_CMD}"
@@ -67,7 +73,8 @@ stop_app:
     - backup_current
 
 start_app:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: deploy
   variables:
     COMMAND: "${START_CMD}"
@@ -75,7 +82,8 @@ start_app:
     - stop_app
 
 verify_health:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${VERIFY_CMD}"
@@ -83,7 +91,8 @@ verify_health:
     - start_app
 
 smoke_tests:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${SMOKE_CMD}"
@@ -91,7 +100,8 @@ smoke_tests:
     - verify_health
 
 cleanup:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${CLEANUP_CMD}"
@@ -99,7 +109,8 @@ cleanup:
     - smoke_tests
 
 notify:
-  extends: .ssh_script_template
+  extends:
+    - .ssh_script_template
   stage: post_deploy
   variables:
     COMMAND: "${NOTIFY_CMD}"
