@@ -116,4 +116,3 @@ notify:
     COMMAND: "${NOTIFY_CMD}"
   needs:
     - cleanup
-    
