@@ -1,5 +1,5 @@
 include:
-  - project: 'experiments/ci-templates'
+  - project: 'experiments/cd-templates'
     ref: 'development'
     file: 'templates/cd-templates.yml'
 
