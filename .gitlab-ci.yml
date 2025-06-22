@@ -9,18 +9,17 @@ variables:
   DEPLOY_USER: "deploy_sa"
   ENV_NAME: "mars"
   DEPLOY_BASE_PATH: "/apps/data/${APP_NAME}"
-  DEPLOY_TIMESTAMP: "$(date +%Y%m%d_%H%M%S)"
-  RELEASE_PATH: "${DEPLOY_BASE_PATH}/releases/${DEPLOY_TIMESTAMP}"
-  LINK_PATH: "${DEPLOY_BASE_PATH}/current"
+  RELEASES_DIR: "${DEPLOY_BASE_PATH}/releases"
+  CURRENT_LINK: "${DEPLOY_BASE_PATH}/current"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
-  BACKUP_CMD: "mkdir -p ${DEPLOY_BASE_PATH}/backups && tar --ignore-failed-read -czf ${DEPLOY_BASE_PATH}/backups/backup-$(date +%s).tgz -C ${LINK_PATH} . || [ $? -eq 1 ]"
-  STOP_CMD: "cd ${LINK_PATH} && bash bin/manage.sh stop ${ENV_NAME}"
-  START_CMD: "cd ${LINK_PATH} && bash bin/manage.sh start ${ENV_NAME}"
+  BACKUP_CMD: "mkdir -p ${DEPLOY_BASE_PATH}/backups && tar --ignore-failed-read -czf ${DEPLOY_BASE_PATH}/backups/${APP_NAME}-backup-$(date +%Y%m%d_%H%M%S).tgz -C ${CURRENT_LINK} . || [ $? -eq 1 ]"
+  STOP_CMD: "cd ${CURRENT_LINK} && bash bin/manage.sh stop ${ENV_NAME}"
+  START_CMD: "cd ${CURRENT_LINK} && bash bin/manage.sh start ${ENV_NAME}"
   VERIFY_CMD: "curl -sSf http://localhost:8050/overview"
-  SMOKE_CMD: "cd ${LINK_PATH} && bash bin/manage.sh smoke ${ENV_NAME}"
-  CLEANUP_CMD: "rm -f ${LINK_PATH}/*.log; [ -d ${LINK_PATH}/tmp ] && find ${LINK_PATH}/tmp -mtime +7 -delete"
-  NOTIFY_CMD: "echo 'Notify: deployment completed for ${APP_NAME} @ ${DEPLOY_TIMESTAMP}'"
+  SMOKE_CMD: "cd ${CURRENT_LINK} && bash bin/manage.sh smoke ${ENV_NAME}"
+  CLEANUP_CMD: "rm -f ${CURRENT_LINK}/*.log; [ -d ${CURRENT_LINK}/tmp ] && find ${CURRENT_LINK}/tmp -mtime +7 -delete"
+  NOTIFY_CMD: "echo 'Notify: deployment completed for ${APP_NAME}'"
 
 stages:
   - pre_deploy
@@ -43,12 +42,13 @@ transfer_code:
   extends: .base_deploy
   stage: deploy
   script:
+    - 'export RELEASE_TIMESTAMP=$(date +%Y%m%d_%H%M%S)'
+    - 'export RELEASE_PATH="${RELEASES_DIR}/${RELEASE_TIMESTAMP}"'
     - 'echo "Transferring code to ${DEPLOY_SERVER}:${RELEASE_PATH}"'
     - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${RELEASE_PATH}"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${RELEASE_PATH} ${RELEASES_DIR}"'
     - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${RELEASE_PATH}/'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${RELEASE_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "ln -sfn ${RELEASE_PATH} ${LINK_PATH}"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${RELEASE_PATH} && tar xzf code.tar.gz && rm code.tar.gz && ln -sfn ${RELEASE_PATH} ${CURRENT_LINK}"'
 
 backup_current:
   <<: *ssh_script
