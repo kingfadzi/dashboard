@@ -27,6 +27,7 @@ stages:
   - deploy
   - post_deploy
 
+# SSH wrapper for simple commands
 .ssh_script_template: &ssh_script
   extends: .base_deploy
   script:
@@ -39,87 +40,76 @@ pre_deploy:
   variables:
     COMMAND: "${PRE_DEPLOY_CMD}"
 
+# File‐system steps, implemented in shared scripts
 prepare_release_dir:
-  extends: .base_deploy
+  extends: .prepare_release_dir_template
   stage: deploy
-  script:
-    - 'export RELEASE_TIMESTAMP=$(date +%Y%m%d_%H%M%S)'
-    - 'echo "$RELEASE_TIMESTAMP" > release_timestamp.txt'
-    - 'export RELEASE_PATH="${RELEASES_DIR}/${RELEASE_TIMESTAMP}"'
-    - 'echo "Creating release directory: ${RELEASE_PATH}"'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${RELEASE_PATH} ${RELEASES_DIR}"'
-  artifacts:
-    paths:
-      - release_timestamp.txt
 
 upload_code:
-  extends: .base_deploy
+  extends: .upload_code_template
   stage: deploy
-  dependencies:
+  needs:
     - prepare_release_dir
-  script:
-    - 'export RELEASE_TIMESTAMP=$(cat release_timestamp.txt)'
-    - 'export RELEASE_PATH="${RELEASES_DIR}/${RELEASE_TIMESTAMP}"'
-    - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
-    - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${RELEASE_PATH}/'
 
 extract_and_link:
-  extends: .base_deploy
+  extends: .extract_and_link_template
   stage: deploy
-  dependencies:
-    - prepare_release_dir
+  needs:
     - upload_code
-  script:
-    - 'export RELEASE_TIMESTAMP=$(cat release_timestamp.txt)'
-    - 'export RELEASE_PATH="${RELEASES_DIR}/${RELEASE_TIMESTAMP}"'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${RELEASE_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "ln -sfn ${RELEASE_PATH} ${CURRENT_LINK}"'
 
+# App‐specific commands still inline
 backup_current:
   <<: *ssh_script
   stage: deploy
   variables:
     COMMAND: "${BACKUP_CMD}"
-  needs: [extract_and_link]
+  needs:
+    - extract_and_link
 
 stop_app:
   <<: *ssh_script
   stage: deploy
   variables:
     COMMAND: "${STOP_CMD}"
-  needs: [backup_current]
+  needs:
+    - backup_current
 
 start_app:
   <<: *ssh_script
   stage: deploy
   variables:
     COMMAND: "${START_CMD}"
-  needs: [stop_app]
+  needs:
+    - stop_app
 
 verify_health:
   <<: *ssh_script
   stage: post_deploy
   variables:
     COMMAND: "${VERIFY_CMD}"
-  needs: [start_app]
+  needs:
+    - start_app
 
 smoke_tests:
   <<: *ssh_script
   stage: post_deploy
   variables:
     COMMAND: "${SMOKE_CMD}"
-  needs: [verify_health]
+  needs:
+    - verify_health
 
 cleanup:
   <<: *ssh_script
   stage: post_deploy
   variables:
     COMMAND: "${CLEANUP_CMD}"
-  needs: [smoke_tests]
+  needs:
+    - smoke_tests
 
 notify:
   <<: *ssh_script
   stage: post_deploy
   variables:
     COMMAND: "${NOTIFY_CMD}"
-  needs: [cleanup]
+  needs:
+    - cleanup
