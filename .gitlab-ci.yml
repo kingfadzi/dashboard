@@ -98,3 +98,4 @@ notify:
   variables:
     COMMAND: "${NOTIFY_CMD}"
   needs: [cleanup]
+  
