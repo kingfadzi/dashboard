@@ -8,15 +8,19 @@ variables:
   DEPLOY_SERVER: "mars.butterflycluster.com"
   DEPLOY_USER: "deploy_sa"
   ENV_NAME: "mars"
-  DEPLOY_PATH: "/apps/data/${APP_NAME}"
+  DEPLOY_BASE_PATH: "/apps/data/${APP_NAME}"
+  DEPLOY_TIMESTAMP: "$(date +%Y%m%d_%H%M%S)"
+  RELEASE_PATH: "${DEPLOY_BASE_PATH}/releases/${DEPLOY_TIMESTAMP}"
+  LINK_PATH: "${DEPLOY_BASE_PATH}/current"
 
   PRE_DEPLOY_CMD: "df -h; free -m"
-  BACKUP_CMD: "mkdir -p /apps/data/backups && tar --ignore-failed-read -czf /apps/data/backups/${APP_NAME}-snapshot-$(date +%s).tgz -C ${DEPLOY_PATH} ."
-  STOP_CMD: "cd ${DEPLOY_PATH} && bash bin/manage.sh stop ${ENV_NAME}"
-  START_CMD: "cd ${DEPLOY_PATH} && bash bin/manage.sh start ${ENV_NAME}"
-  VERIFY_CMD: "curl -sSf http://localhost:8050/health"
-  SMOKE_CMD: "curl -sf http://localhost:8050/overview > /dev/null || (echo 'Smoke test failed: /overview did not respond with 200' && exit 1)"
-  CLEANUP_CMD: "rm -f ${DEPLOY_PATH}/*.log; [ -d ${DEPLOY_PATH}/tmp ] && find ${DEPLOY_PATH}/tmp -mtime +7 -delete"
+  BACKUP_CMD: "mkdir -p ${DEPLOY_BASE_PATH}/backups && tar --ignore-failed-read -czf ${DEPLOY_BASE_PATH}/backups/backup-$(date +%s).tgz -C ${LINK_PATH} . || [ $? -eq 1 ]"
+  STOP_CMD: "cd ${LINK_PATH} && bash bin/manage.sh stop ${ENV_NAME}"
+  START_CMD: "cd ${LINK_PATH} && bash bin/manage.sh start ${ENV_NAME}"
+  VERIFY_CMD: "curl -sSf http://localhost:8050/overview"
+  SMOKE_CMD: "cd ${LINK_PATH} && bash bin/manage.sh smoke ${ENV_NAME}"
+  CLEANUP_CMD: "rm -f ${LINK_PATH}/*.log; [ -d ${LINK_PATH}/tmp ] && find ${LINK_PATH}/tmp -mtime +7 -delete"
+  NOTIFY_CMD: "echo 'Notify: deployment completed for ${APP_NAME} @ ${DEPLOY_TIMESTAMP}'"
 
 stages:
   - pre_deploy
@@ -39,11 +43,12 @@ transfer_code:
   extends: .base_deploy
   stage: deploy
   script:
-    - 'echo "Transferring code to ${DEPLOY_SERVER}:${DEPLOY_PATH}"'
+    - 'echo "Transferring code to ${DEPLOY_SERVER}:${RELEASE_PATH}"'
     - 'git archive --format=tar.gz ${CI_COMMIT_SHA} -o code.tar.gz'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${DEPLOY_PATH}"'
-    - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${DEPLOY_PATH}/'
-    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${DEPLOY_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "mkdir -p ${RELEASE_PATH}"'
+    - 'sshpass -e scp ${SSH_OPTS} code.tar.gz ${DEPLOY_USER}@${DEPLOY_SERVER}:${RELEASE_PATH}/'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "cd ${RELEASE_PATH} && tar xzf code.tar.gz && rm code.tar.gz"'
+    - 'sshpass -e ssh ${SSH_OPTS} ${DEPLOY_USER}@${DEPLOY_SERVER} "ln -sfn ${RELEASE_PATH} ${LINK_PATH}"'
 
 backup_current:
   <<: *ssh_script
@@ -86,3 +91,10 @@ cleanup:
   variables:
     COMMAND: "${CLEANUP_CMD}"
   needs: [smoke_tests]
+
+notify:
+  <<: *ssh_script
+  stage: post_deploy
+  variables:
+    COMMAND: "${NOTIFY_CMD}"
+  needs: [cleanup]
